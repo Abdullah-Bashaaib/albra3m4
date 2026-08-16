@@ -1,4 +1,6 @@
 import 'package:albra3m4/core/constants/app_colors.dart';
+import 'package:albra3m4/core/utils/widgets/custom_button.dart';
+import 'package:albra3m4/core/utils/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_font.dart';
@@ -75,8 +77,24 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24.0),
-                        TextFormField(),
-                        TextFormField(),
+                        CustomTextFormField(
+                            textInputAction: TextInputAction.next,
+                            label: 'بريدك الالكتروني',
+                            obscureText: false,
+                            autoFocus: true,
+                            enabled: true,
+                            keyboardType: TextInputType.emailAddress),
+                        const SizedBox(height: 16.0),
+                        CustomTextFormField(
+                            textInputAction: TextInputAction.none,
+                            label: 'كلمة المرور',
+                            obscureText: true,
+                            autoFocus: true,
+                            enabled: true,
+                            keyboardType: TextInputType.visiblePassword
+                        ),
+                        const SizedBox(height: 16.0),
+                        CustomButton(label: 'تسجيل الدخول', onPressed: () {})
                       ],
                     ),
                   ],
