@@ -22,8 +22,12 @@ dependencies:
   get_it:
   # State management
   equatable:
-  bloc:
-
+  bloc: 
+  flutter_bloc: 
+  qr_flutter: 
+  mobile_scanner: 
+  intl: 
+  
 
 dev_dependencies:
   flutter_test:

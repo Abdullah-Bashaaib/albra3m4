@@ -1,3 +1,5 @@
+import 'package:albra3m4/feature/attendance/data/source/attendance_remote.dart';
+import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -16,6 +18,9 @@ final sl = GetIt.instance;
 
 class Injection {
   static Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    sl.registerLazySingleton<SharedPreferences>(() => prefs);
     // Firebase
     sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 
@@ -51,6 +56,20 @@ class Injection {
         remoteDataSource: sl<AuthRemoteDataSource>(),
         localDataSource: sl<AuthLocalDataSource>(),
       ),
+    );
+
+    /// ===================== [ Attendance ] ====================
+    // Remote
+      sl.registerLazySingleton<AttendanceRemote>(
+      () => AttendanceRemoteImp(firestore: sl<FirebaseFirestore>())
+    );
+    // Local
+
+    // Repo
+
+    // Cubit
+    sl.registerLazySingleton<AttendanceCubit>(
+      () => AttendanceCubit(pref: sl<SharedPreferences>()),
     );
   }
 }
