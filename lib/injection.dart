@@ -5,12 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'core/database/database_helper.dart';
-import 'feature/Data/datasource/local/auth_local_data_source.dart';
-import 'feature/Data/datasource/local/auth_local_data_source_impl.dart';
-import 'feature/Data/datasource/remote/auth_remote_data_source_impl.dart';
-import 'feature/Data/datasource/remote/authentication_remote_data_source.dart';
-import 'feature/Data/repositories/authentication_repository_impl.dart';
-import 'feature/domain/repositories/authentication_repository.dart';
+import 'feature/auth/Data/datasource/local/auth_local_data_source.dart';
+import 'feature/auth/Data/datasource/local/auth_local_data_source_impl.dart';
+import 'feature/auth/Data/datasource/remote/auth_remote_data_source_impl.dart';
+import 'feature/auth/Data/datasource/remote/authentication_remote_data_source.dart';
+import 'feature/auth/Data/repositories/authentication_repository_impl.dart';
+import 'feature/auth/domain/repositories/authentication_repository.dart';
 
 final sl = GetIt.instance;
 

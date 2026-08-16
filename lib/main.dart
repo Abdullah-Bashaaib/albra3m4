@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'feature/presentation/screens/login_screen.dart';
+import 'feature/auth/presentation/screens/login_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,7 +18,14 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      ),
+      home: Directionality(
+        textDirection: TextDirection.rtl,
+        child: const LoginScreen(),
+      ),
     );
   }
 }
