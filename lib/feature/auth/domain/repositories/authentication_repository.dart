@@ -9,6 +9,9 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// تسجيل الدخول عبر Google — ينشئ حساب جديد تلقائياً عند أول استخدام.
+  Future<Either<Failure, UserEntity>> loginWithGoogle();
+
   Future<Either<Failure, UserEntity>> register({
     required String fullName,
     required String email,

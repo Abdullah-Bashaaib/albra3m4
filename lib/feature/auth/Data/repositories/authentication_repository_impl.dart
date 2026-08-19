@@ -261,6 +261,9 @@ class AuthRepositoryImpl implements AuthRepository {
         case 'account-inactive':
           return const AccountInactiveFailure();
 
+        case 'sign-in-cancelled':
+          return const GoogleSignInCancelledFailure();
+          
         default:
           return const FirebaseUnknownFailure();
       }
@@ -280,5 +283,31 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return const FirebaseUnknownFailure();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Login with Google
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<Either<Failure, UserEntity>> loginWithGoogle() async {
+    try {
+      final userModel = await remoteDataSource.loginWithGoogle();
+
+      await localDataSource.cacheUser(userModel);
+
+      await localDataSource.cacheLoginSession(uid: userModel.uid);
+
+      return Right(userModel);
+    } on FirebaseAppException catch (e) {
+      // ملاحظة: حالة "sign-in-cancelled" (إلغاء المستخدم للعملية) تقع حالياً
+      // ضمن default -> FirebaseUnknownFailure()، لأنه لا يوجد Failure مخصص
+      // لها بعد في firebase_failure.dart. لو حبيت لاحقاً تفرّق بينها وبين
+      // خطأ حقيقي، أضف class GoogleSignInCancelledFailure هناك وأضف
+      // case 'sign-in-cancelled' في _mapFirebaseExceptionToFailure أدناه.
+      return Left(_mapFirebaseExceptionToFailure(e));
+    } catch (_) {
+      return const Left(FirebaseUnknownFailure());
+    }
   }
 }
