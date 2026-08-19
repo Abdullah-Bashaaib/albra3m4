@@ -7,14 +7,15 @@ class AttendanceState extends Equatable {
   final List<Map<String, dynamic>> students;
   final Map<String, bool> attendanceStatus;
   final Map<String, String> absenceReasons;
-  final String attendanceCode;
+  final QREntity? attendanceQR;
   final String schoolId;
   final String schoolName;
-  final String lastUpdated;
+  //تحضير المعلمات
   final bool attendanceDone;
   final String teacherName;
   final String? currentAttendanceCode;
   final String? attendanceTStatus;
+  final bool isLoadingQ;
 
   const AttendanceState({
     this.isLoading = false,
@@ -58,14 +59,14 @@ class AttendanceState extends Equatable {
     ],
     this.attendanceStatus = const {},
     this.absenceReasons = const {},
-    this.attendanceCode = '',
+    this.attendanceQR,
     this.schoolId = '',
-    this.schoolName = '',
-    this.lastUpdated = '',
+    this.schoolName = 'البراعم',
     this.attendanceDone = false,
-    this.teacherName = '',
+    this.teacherName = 'Abdullah',
     this.currentAttendanceCode,
     this.attendanceTStatus,
+    this.isLoadingQ = false,
   });
 
   @override
@@ -77,12 +78,12 @@ class AttendanceState extends Equatable {
     absenceReasons,
     schoolId,
     schoolName,
-    lastUpdated,
-    attendanceCode,
+    attendanceQR,
     attendanceDone,
     teacherName,
     currentAttendanceCode,
     attendanceTStatus,
+    isLoadingQ,
   ];
 
   AttendanceState copyWith({
@@ -92,14 +93,14 @@ class AttendanceState extends Equatable {
     List<Map<String, dynamic>>? students,
     Map<String, bool>? attendanceStatus,
     Map<String, String>? absenceReasons,
-    String? attendanceCode,
+    QREntity? attendanceQR,
     String? schoolId,
     String? schoolName,
-    String? lastUpdated,
     bool? attendanceDone,
     String? teacherName,
     String? currentAttendanceCode,
     String? attendanceTStatus,
+    bool? isLoadingQ,
   }) {
     return AttendanceState(
       isLoading: isLoading ?? this.isLoading,
@@ -107,16 +108,16 @@ class AttendanceState extends Equatable {
       error: error,
       students: students ?? this.students,
       attendanceStatus: attendanceStatus ?? this.attendanceStatus,
-      attendanceCode: attendanceCode ?? this.attendanceCode,
+      attendanceQR: attendanceQR ?? this.attendanceQR,
       absenceReasons: absenceReasons ?? this.absenceReasons,
       schoolId: schoolId ?? this.schoolId,
       schoolName: schoolName ?? this.schoolName,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
       attendanceDone: attendanceDone ?? this.attendanceDone,
       teacherName: teacherName ?? this.teacherName,
       currentAttendanceCode:
           currentAttendanceCode ?? this.currentAttendanceCode,
       attendanceTStatus: attendanceTStatus ?? this.attendanceTStatus,
+      isLoadingQ: isLoadingQ ?? this.isLoadingQ,
     );
   }
 }

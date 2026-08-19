@@ -1,3 +1,4 @@
+import 'package:albra3m4/core/utils/snake_bar_helper.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +18,10 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
   void initState() {
     super.initState();
 
-    context.read<AttendanceCubit>().initialize();
+    // تحميل كود الحضور والتحقق من حالة تحضير المعلم
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AttendanceCubit>().initializeScanning();
+    });
   }
 
   // =========================================================
@@ -40,59 +44,42 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
     await context.read<AttendanceCubit>().handleScan(scannedCode);
   }
 
-  // =========================================================
-  // Dialog
-  // =========================================================
-
-  void _showDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-
-              context.read<AttendanceCubit>().resetScanning();
-
-              _controller.start();
-            },
-            child: const Text("موافق"),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocListener<AttendanceCubit, AttendanceState>(
       listener: (context, state) {
         if (state.error != null) {
-          _showDialog( 'خطا',state.error!);
+          SnackBarHelper.error(context, state.error!);
+        }
 
-          context.read<AttendanceCubit>().clearError();
+        if (state.success != null) {
+          SnackBarHelper.success(context, state.success!);
         }
       },
-      child:
-         BlocBuilder<AttendanceCubit, AttendanceState>(
-           builder: (context, state) {
-             return Scaffold(
-                   appBar: AppBar(
-                     title: const Text('تحضير المعلمين', style: TextStyle(color: Colors.white),),
-                     backgroundColor: const Color.fromARGB(255, 1, 117, 70),
-                     elevation: 0,
-                   ),
-         
-                   body: state.attendanceDone
-                       ? _buildSuccessView(state)
-                       : _buildScannerView(),
-                 );
-           },
-         ),
-      
+      child: BlocBuilder<AttendanceCubit, AttendanceState>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text(
+                'تحضير المعلمين',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: const Color.fromARGB(255, 1, 117, 70),
+              elevation: 0,
+            ),
+            body: Stack(
+              children: [
+                state.attendanceDone
+                    ? _buildSuccessView(state)
+                    : _buildScannerView(),
+
+                if (state.isLoading)
+                  const Center(child: CircularProgressIndicator()),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -101,7 +88,7 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
   // =========================================================
 
   Widget _buildSuccessView(AttendanceState state) {
-    final bool isLate = state.attendanceStatus == "متأخر";
+    final bool isLate = state.attendanceTStatus == "متأخر";
 
     return Center(
       child: Padding(
@@ -114,9 +101,7 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
               size: 100,
               color: isLate ? Colors.orange : Colors.blueAccent,
             ),
-
             const SizedBox(height: 20),
-
             Text(
               isLate
                   ? "تم تسجيل حضورك بنجاح (متأخر) ⏰"
@@ -128,9 +113,7 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
               ),
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(height: 10),
-
             Text(
               state.teacherName,
               style: const TextStyle(
@@ -139,24 +122,22 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
                 color: Colors.black54,
               ),
             ),
-
             const SizedBox(height: 30),
-
-            ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text("رجوع", style: TextStyle(fontSize: 18)),
-            ),
+            // ElevatedButton.icon(
+            //   onPressed: () => Navigator.of(context).pop(),
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.blueAccent,
+            //     padding: const EdgeInsets.symmetric(
+            //       horizontal: 30,
+            //       vertical: 14,
+            //     ),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(15),
+            //     ),
+            //   ),
+            //   icon: const Icon(Icons.arrow_back),
+            //   label: const Text("رجوع", style: TextStyle(fontSize: 18)),
+            // ),
           ],
         ),
       ),
@@ -171,14 +152,11 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
     return Column(
       children: <Widget>[
         const SizedBox(height: 20),
-
         const Text(
           '📷 امسح رمز QR لتسجيل الحضور ',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-
         const SizedBox(height: 16),
-
         Expanded(
           child: Container(
             margin: const EdgeInsets.all(16),

@@ -1,3 +1,4 @@
+import 'package:albra3m4/core/utils/snake_bar_helper.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,15 +20,12 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
     super.dispose();
   }
 
-  String _formatDate(String isoDate) {
-    try {
-      final parsedDate = DateTime.parse(isoDate);
-
-      return '${parsedDate.year}/${parsedDate.month}/${parsedDate.day}'
-          ' - ${parsedDate.hour}:${parsedDate.minute}';
-    } catch (e) {
-      return 'تاريخ غير معروف';
-    }
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AttendanceCubit>().loadAttendanceCode();
+    });
+    super.initState();
   }
 
   @override
@@ -37,11 +35,10 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
       child: BlocListener<AttendanceCubit, AttendanceState>(
         listener: (context, state) {
           if (state.error != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.error!)));
-
-            context.read<AttendanceCubit>().clearError();
+            SnackBarHelper.error(context, state.error!);
+          }
+          if (state.success != null) {
+            SnackBarHelper.success(context, state.success!);
           }
         },
 
@@ -84,12 +81,8 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
   }
 
   Widget _buildBody(BuildContext context, AttendanceState state) {
-    if (state.attendanceCode.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    _controller.text = state.attendanceCode;
-
+    final code = state.attendanceQR?.code ?? '';
+    _controller.text = state.attendanceQR?.code ?? '';
     return Padding(
       padding: const EdgeInsets.all(20),
       child: SingleChildScrollView(
@@ -134,48 +127,58 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
 
             const SizedBox(height: 30),
 
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.2),
-                      blurRadius: 15,
-                      spreadRadius: 3,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    QrImageView(
-                      data: '${state.attendanceCode}:${state.schoolId}',
-                      version: QrVersions.auto,
-                      size: 250.0,
-                    ),
+            code.isNotEmpty
+                ? Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withOpacity(0.2),
+                            blurRadius: 15,
+                            spreadRadius: 3,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.1),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          QrImageView(
+                            data:
+                                '${state.attendanceQR!.code}:${state.schoolId}',
+                            version: QrVersions.auto,
+                            size: 250.0,
+                          ),
 
-                    const SizedBox(height: 10),
+                          const SizedBox(height: 10),
 
-                    Text(
-                      'اسم المدرسة: ${state.schoolName}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          Text(
+                            'اسم المدرسة: ${state.schoolName}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  )
+                : Text('لا يوجد QR حاليا قم بانشاءه'),
 
             const SizedBox(height: 20),
 
             Text(
-              'آخر تحديث: ${_formatDate(state.lastUpdated)}',
+              'آخر تحديث: ${_formatDate(state.attendanceQR?.date)}',
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
 
@@ -196,25 +199,28 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      context.read<AttendanceCubit>().saveAttendanceCode(
-                        _controller.text,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    icon: const Icon(Icons.save),
-                    label: const Text(
-                      'حفظ الكود الجديد',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                  child: state.isLoadingQ
+                      ? Center(child: CircularProgressIndicator())
+                      : ElevatedButton.icon(
+                          onPressed: () {
+                            context.read<AttendanceCubit>().saveAttendanceCode(
+                              _controller.text,
+                            );
+                            context.read<AttendanceCubit>().clearMessage();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.save),
+                          label: const Text(
+                            'حفظ الكود الجديد',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                 ),
 
                 const SizedBox(width: 12),
@@ -246,5 +252,19 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime? isoDate) {
+    try {
+      final parsedDate = isoDate;
+      if (parsedDate == null) {
+        return '';
+      }
+
+      return '${parsedDate.year}/${parsedDate.month}/${parsedDate.day}'
+          ' - ${parsedDate.hour}:${parsedDate.minute}';
+    } catch (e) {
+      return 'تاريخ غير معروف';
+    }
   }
 }

@@ -1,17 +1,35 @@
 import 'dart:math';
 
 import 'package:albra3m4/core/messages.dart';
+import 'package:albra3m4/core/utils/perf_keys.dart';
+import 'package:albra3m4/feature/attendance/domain/entities/q_r_entity.dart';
+import 'package:albra3m4/feature/attendance/domain/entities/teacher_attendance_entity.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_attendance_teacher_usecase.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_q_r_usecase.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 part 'attendance_state.dart';
 
 class AttendanceCubit extends Cubit<AttendanceState> {
-  final SharedPreferences pref;
+  final GetQRUsecase getQRUsecase;
+  final AddQRUsecase addQRUsecase;
+  final CheckCodeUsecase checkCodeUsecase;
+  final AddAttendanceTeacherUsecase addAttendanceTeacherUsecase;
+  final GetQRTeacherUsecase getQRTeacherUsecase;
 
-  AttendanceCubit({required this.pref}) : super(AttendanceState());
+  AttendanceCubit({
+    required this.getQRUsecase,
+    required this.addQRUsecase,
+    required this.checkCodeUsecase,
+    required this.addAttendanceTeacherUsecase,
+    required this.getQRTeacherUsecase,
+  }) : super(AttendanceState());
 
   attendanceTrue() {
     for (final student in state.students) {
@@ -25,74 +43,73 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   // تحميل بيانات الشاشة
   Future<void> loadAttendanceCode() async {
     emit(state.copyWith(isLoading: true, error: null));
-
-    try {
-      // بيانات افتراضية مؤقتة
-      const schoolId = '1';
-      const schoolName = 'روضة البراعم';
-
-      final code = _generateRandomCode();
-      final now = DateTime.now().toIso8601String();
-
-      emit(
-        state.copyWith(
-          isLoading: false,
-          schoolId: schoolId,
-          schoolName: schoolName,
-          attendanceCode: code,
-          lastUpdated: now,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          isLoading: false,
-          error: 'حدث خطأ أثناء تحميل كود الحضور',
-        ),
-      );
-    }
+    final qr = await getQRUsecase('1');
+    qr.fold(
+      (l) {
+        emit(state.copyWith(isLoading: false, error: l));
+      },
+      (r) {
+        emit(state.copyWith(isLoading: false, attendanceQR: r));
+      },
+    );
   }
 
   // حفظ كود جديد
   Future<void> saveAttendanceCode(String code) async {
-    if (code.trim().isEmpty) {
-      emit(state.copyWith(error: 'يرجى إدخال كود الحضور'));
+    if (code.isEmpty) {
+      emit(state.copyWith(error: 'ادخل الباركورد اولا'));
       return;
     }
-
-    emit(state.copyWith(isLoading: true, error: null));
-
-    try {
-      // مؤقتًا لا يوجد Backend
-      // لاحقًا هنا سيكون استدعاء الـ API
-
-      final now = DateTime.now().toIso8601String();
-
-      emit(
-        state.copyWith(
-          isLoading: false,
-          success: addSuccess,
-          attendanceCode: code.trim(),
-          lastUpdated: now,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(isLoading: false, error: 'حدث خطأ أثناء حفظ كود الحضور'),
-      );
-    }
+    emit(state.copyWith(isLoadingQ: true, error: null, success: null));
+    final Uuid uuid = Uuid();
+    final id = uuid.v4();
+    final qr = QREntity(
+      id: id,
+      schoolId: '1',
+      schoolName: 'روضة البراعم',
+      code: state.attendanceQR?.code ?? '',
+      date: state.attendanceQR?.date ?? DateTime.now(),
+      startTime: '8:00Am',
+      endTime: '11:00AM',
+      createdBy: '1',
+    );
+    final result = await addQRUsecase(qr);
+    result.fold(
+      (l) {
+        emit(state.copyWith(isLoadingQ: false, error: l));
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            isLoadingQ: false,
+            success: addSuccess,
+            attendanceQR: qr,
+          ),
+        );
+      },
+    );
   }
 
   // إنشاء كود عشوائي
   String generateNewCode() {
     final newCode = _generateRandomCode();
+    final currentQR = state.attendanceQR;
+    final Uuid uuid = Uuid();
+    final id = uuid.v4();
 
-    emit(
-      state.copyWith(
-        attendanceCode: newCode,
-        lastUpdated: DateTime.now().toIso8601String(),
-      ),
-    );
+    final qr = currentQR != null
+        ? currentQR.copyWith(code: newCode, date: DateTime.now())
+        : QREntity(
+            id: id,
+            schoolId: '1',
+            schoolName: 'روضة البراعم',
+            code: newCode,
+            date: DateTime.now(),
+            startTime: '8:00Am',
+            endTime: '11:00AM',
+            createdBy: '1',
+          );
+    emit(state.copyWith(attendanceQR: qr));
 
     return newCode;
   }
@@ -110,97 +127,87 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     );
   }
 
-  void clearError() {
-    emit(state.copyWith(error: null));
-  }
-
   // وقت بداية التحضير
-  final int allowedStartHour = 18;
+  final int allowedStartHour = 7;
 
   // وقت نهاية التحضير
-  final int allowedEndHour = 18;
+  final int allowedEndHour = 9;
 
   // بعد كم دقيقة يصبح المعلم متأخرًا
   final int lateMinuteThreshold = 30;
 
-  // =========================================================
-  // تحميل الصفحة
-  // =========================================================
-
-  Future<void> initialize() async {
-    emit(state.copyWith(isLoading: true, error: null));
-
-    await _fetchCurrentAttendanceCode();
-    await trySubmitPendingAttendance();
-    await checkIfAlreadyMarked();
-
-    emit(state.copyWith(isLoading: false));
+  Future<String> getQR() async {
+    emit(state.copyWith(isLoading: true, error: null, success: null));
+    final result = await getQRUsecase('1');
+    return result.fold(
+      (l) {
+        emit(state.copyWith(isLoading: false, error: l));
+        return '';
+      },
+      (r) {
+        emit(state.copyWith(isLoading: true, attendanceQR: r));
+        return r.code;
+      },
+    );
   }
 
-  // =========================================================
-  // جلب كود الحضور
-  // =========================================================
+  Future<void> initializeScanning() async {
+    await getQRTeacher();
 
-  Future<void> _fetchCurrentAttendanceCode() async {
-    try {
-      final int? schoolId = pref.getInt('schoolId');
-
-      if (schoolId == null) {
-        _setError('خطأ', 'لم يتم العثور على معرف المدرسة.');
-        return;
-      }
-
-      // final snapshot = await firestore
-      //     .collection('attendanceCodes')
-      //     .doc(schoolId.toString())
-      //     .get();
-
-      // if (snapshot.exists) {
-      //   final code = snapshot['code'];
-
-      //   emit(state.copyWith(currentAttendanceCode: code));
-      // } else {
-      //   _setError('خطأ', '⚠️ لم يتم العثور على كود الحضور.');
-      // }
-    } catch (e) {
-      _setError('خطأ', '❌ حدث خطأ أثناء جلب كود الحضور: $e');
-    }
+    await checkAttendanceDone();
   }
 
-  // =========================================================
-  // معالجة QR
-  // =========================================================
+  Future<void> getQRTeacher() async {
+    emit(state.copyWith(isLoading: true, error: null, success: null));
+    final result = await getQRTeacherUsecase('1');
+    return result.fold(
+      (l) {
+        emit(state.copyWith(isLoading: false, error: l));
+      },
+      (r) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            attendanceQR: r,
+            currentAttendanceCode: r.code,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> checkAttendanceDone() async {
+    // emit(state.copyWith(isLoading: true, error: null));
+    final result = await checkCodeUsecase();
+
+    result.fold(
+      (error) {
+        emit(state.copyWith(error: error));
+      },
+      (done) {
+        emit(state.copyWith(attendanceDone: done));
+      },
+    );
+  }
 
   Future<void> handleScan(String scannedCode) async {
-    // if (state.status != AttendanceScannerStatus.scanning) {
-    //   return;
-    // }
-
-    if (scannedCode.isEmpty) {
-      return;
-    }
-
     emit(state.copyWith(isLoading: true, error: null));
-
-    // ---------------------------------------------------------
-    // التحقق من الوقت
-    // ---------------------------------------------------------
-
-    final now = DateTime.now();
-
-    if (now.hour < allowedStartHour || now.hour > allowedEndHour) {
-      _setError(
-        'خارج الوقت المسموح',
-        'يمكنك تسجيل الحضور من الساعة '
-            '$allowedStartHour إلى الساعة $allowedEndHour',
+    if (state.attendanceDone) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          error: 'لقد قمت بتسجيل حضورك اليوم بالفعل.',
+        ),
       );
-
       return;
     }
 
-    // ---------------------------------------------------------
-    // استخراج الكود
-    // ---------------------------------------------------------
+    if (state.currentAttendanceCode == null) {
+      emit(
+        state.copyWith(isLoading: false, error: 'كود الحضور غير متوفر حاليًا.'),
+      );
+      return;
+    }
 
     String extractedCode = scannedCode;
 
@@ -208,75 +215,15 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       extractedCode = scannedCode.split(':')[0];
     }
 
-    // ---------------------------------------------------------
-    // التأكد من وجود الكود
-    // ---------------------------------------------------------
-
-    final currentCode = state.currentAttendanceCode;
-
-    if (currentCode == null) {
-      _setError('خطأ', '⚠️ كود الحضور غير متوفر حاليًا. حاول لاحقًا.');
-
+    if (extractedCode != state.currentAttendanceCode) {
+      emit(state.copyWith(isLoading: false, error: '❌ رمز QR غير صحيح.'));
       return;
     }
-
-    // ---------------------------------------------------------
-    // مقارنة الكود
-    // ---------------------------------------------------------
-
-    if (extractedCode != currentCode) {
-      _setError('رمز غير صحيح', '❌ الرجاء التأكد من أنك تمسح الرمز الصحيح.');
-
-      return;
-    }
-
-    // ---------------------------------------------------------
-    // جلب بيانات المعلم
-    // ---------------------------------------------------------
-
-    final String? teacherName = pref.getString('user_name');
-
-    if (teacherName == null || teacherName.isEmpty) {
-      _setError('خطأ', 'لم يتم العثور على بيانات المعلم.');
-
-      return;
-    }
-
-    // ---------------------------------------------------------
-    // التحقق من أنه سجل اليوم
-    // ---------------------------------------------------------
-
-    final today = _today();
-
-    final lastDate = pref.getString('last_attendance_date');
-
-    if (lastDate == today) {
-      _setError(
-        'تم تسجيل الحضور مسبقًا',
-        'لقد قمت بتسجيل حضورك بالفعل اليوم! 👍',
-      );
-
-      return;
-    }
-
-    // ---------------------------------------------------------
-    // تحديد حالة الحضور
-    // ---------------------------------------------------------
 
     final attendanceStatus = _calculateAttendanceStatus();
 
-    emit(state.copyWith(attendanceTStatus: attendanceStatus));
-
-    // ---------------------------------------------------------
-    // تسجيل الحضور
-    // ---------------------------------------------------------
-
-    await markAttendance(
-      teacherName: teacherName,
-      attendanceStatus: attendanceStatus,
-    );
+    await addAttendanceTeacher(attendanceStatus: attendanceStatus);
   }
-
   // =========================================================
   // تحديد حالة الحضور
   // =========================================================
@@ -291,237 +238,200 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
     return 'حاضر';
   }
-
   // =========================================================
   // تسجيل الحضور
   // =========================================================
 
-  Future<void> markAttendance({
-    required String teacherName,
-    required String attendanceStatus,
-  }) async {
-    try {
-      final int? teacherId = pref.getInt('user_id');
+  Future<void> addAttendanceTeacher({required String attendanceStatus}) async {
+    emit(state.copyWith(isLoading: true, error: null, success: null));
 
-      final int? schoolId = pref.getInt('schoolId');
+    final attendance = TeacherAttendanceEntity(
+      id: const Uuid().v4(),
+      userId: '1',
+      role: 'T',
+      schoolId: state.schoolId,
+      name: state.teacherName,
+      status: attendanceStatus,
+      date: DateTime.now(),
+      timeOfArrival: '0',
+      departureTime: '0',
+    );
 
-      final date = _today();
+    final result = await addAttendanceTeacherUsecase(attendance);
 
-      // -------------------------------------------------------
-      // التحقق من وجود تسجيل سابق
-      // -------------------------------------------------------
-
-      // final snapshot = await firestore
-      //     .collection('attendance')
-      //     .doc(date)
-      //     .collection('teachers')
-      //     .where('teacherId', isEqualTo: teacherId)
-      //     .get();
-
-      // -------------------------------------------------------
-      // إضافة التسجيل
-      // -------------------------------------------------------
-
-      // if (snapshot.docs.isEmpty) {
-      //   await firestore
-      //       .collection('attendance')
-      //       .doc(date)
-      //       .collection('teachers')
-      //       .doc(teacherId?.toString() ?? teacherName)
-      //       .set({
-      //         'teacherId': teacherId,
-      //         'schoolId': schoolId,
-      //         'name': teacherName,
-      //         'status': attendanceStatus,
-      //         'timestamp': FieldValue.serverTimestamp(),
-      //       });
-      // }
-
-      // -------------------------------------------------------
-      // حفظ تاريخ آخر حضور
-      // -------------------------------------------------------
-
-      await pref.setString('last_attendance_date', date);
-
-      emit(
-        state.copyWith(
-          isLoading: false,
-          success: scanningSuccess,
-          attendanceDone: true,
-          teacherName: teacherName,
-          attendanceTStatus: attendanceStatus,
-        ),
-      );
-    } catch (e) {
-      // إذا لم يوجد اتصال
-      await savePendingAttendance(
-        teacherName: teacherName,
-        attendanceStatus: attendanceStatus,
-      );
-    }
+    result.fold(
+      (error) {
+        emit(state.copyWith(isLoading: false, error: error));
+      },
+      (_) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            success: 'تم تسجيل حضورك بنجاح',
+            attendanceDone: true,
+            attendanceTStatus: attendanceStatus,
+          ),
+        );
+      },
+    );
   }
 
   // =========================================================
   // حفظ التحضير مؤقتًا
   // =========================================================
 
-  Future<void> savePendingAttendance({
-    required String teacherName,
-    required String attendanceStatus,
-  }) async {
-    final int? teacherId = pref.getInt('user_id');
+  // Future<void> savePendingAttendance({
+  //   required String teacherName,
+  //   required String attendanceStatus,
+  // }) async {
+  //   final int? teacherId = pref.getInt('user_id');
 
-    final int? schoolId = pref.getInt('schoolId');
+  //   final int? schoolId = pref.getInt('schoolId');
 
-    final date = _today();
+  //   final date = _today();
 
-    // حفظ محلي
-    await pref.setString('pending_attendance', teacherName);
+  //   // حفظ محلي
+  //   await pref.setString('pending_attendance', teacherName);
 
-    await pref.setString('pending_attendance_date', date);
+  //   await pref.setString('pending_attendance_date', date);
 
-    await pref.setString('pending_attendance_status', attendanceStatus);
+  //   await pref.setString('pending_attendance_status', attendanceStatus);
 
-    await pref.setInt('pending_teacher_id', teacherId ?? 0);
+  //   await pref.setInt('pending_teacher_id', teacherId ?? 0);
 
-    await pref.setInt('pending_school_id', schoolId ?? 0);
+  //   await pref.setInt('pending_school_id', schoolId ?? 0);
 
-    try {
-      // محاولة الرفع مباشرة
-      // await firestore
-      //     .collection('attendance')
-      //     .doc(date)
-      //     .collection('teachers')
-      //     .doc(teacherId?.toString() ?? teacherName)
-      //     .set({
-      //       'teacherId': teacherId,
-      //       'schoolId': schoolId,
-      //       'name': teacherName,
-      //       'status': attendanceStatus,
-      //       'timestamp': FieldValue.serverTimestamp(),
-      //     });
+  //   try {
+  //     // محاولة الرفع مباشرة
+  //     // await firestore
+  //     //     .collection('attendance')
+  //     //     .doc(date)
+  //     //     .collection('teachers')
+  //     //     .doc(teacherId?.toString() ?? teacherName)
+  //     //     .set({
+  //     //       'teacherId': teacherId,
+  //     //       'schoolId': schoolId,
+  //     //       'name': teacherName,
+  //     //       'status': attendanceStatus,
+  //     //       'timestamp': FieldValue.serverTimestamp(),
+  //     //     });
 
-      await _clearPendingAttendance();
+  //     await _clearPendingAttendance();
 
-      await pref.setString('last_attendance_date', date);
+  //     await pref.setString('last_attendance_date', date);
 
-      emit(
-        state.copyWith(
-          isLoading: false,
-          success: scanningSuccess,
-          attendanceDone: true,
-          teacherName: teacherName,
-          attendanceTStatus: attendanceStatus,
-        ),
-      );
-    } catch (e) {
-      _setError(
-        'لا يوجد اتصال',
-        '❌ تم حفظ حضورك مؤقتًا وسيتم رفعه تلقائيًا عند توفر الإنترنت.',
-      );
-    }
-  }
+  //     emit(
+  //       state.copyWith(
+  //         isLoading: false,
+  //         success: scanningSuccess,
+  //         attendanceDone: true,
+  //         teacherName: teacherName,
+  //         attendanceTStatus: attendanceStatus,
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     _setError(
+  //       'لا يوجد اتصال',
+  //       '❌ تم حفظ حضورك مؤقتًا وسيتم رفعه تلقائيًا عند توفر الإنترنت.',
+  //     );
+  //   }
+  // }
 
-  // =========================================================
-  // رفع التحضير المعلق
-  // =========================================================
+  // // =========================================================
+  // // رفع التحضير المعلق
+  // // =========================================================
 
-  Future<void> trySubmitPendingAttendance() async {
-    try {
-      final pendingTeacherName = pref.getString('pending_attendance');
+  // Future<void> trySubmitPendingAttendance() async {
+  //   try {
+  //     final pendingTeacherName = pref.getString('pending_attendance');
 
-      final pendingDate = pref.getString('pending_attendance_date');
+  //     final pendingDate = pref.getString('pending_attendance_date');
 
-      final pendingStatus = pref.getString('pending_attendance_status');
+  //     final pendingStatus = pref.getString('pending_attendance_status');
 
-      final teacherId = pref.getInt('pending_teacher_id');
+  //     final teacherId = pref.getInt('pending_teacher_id');
 
-      final schoolId = pref.getInt('pending_school_id');
+  //     final schoolId = pref.getInt('pending_school_id');
 
-      if (pendingTeacherName == null || pendingDate == null) {
-        return;
-      }
+  //     if (pendingTeacherName == null || pendingDate == null) {
+  //       return;
+  //     }
 
-      final today = _today();
+  //     final today = _today();
 
-      // إذا كان التحضير لليوم
-      if (pendingDate == today) {
-        // await firestore
-        //     .collection('attendance')
-        //     .doc(pendingDate)
-        //     .collection('teachers')
-        //     .doc(teacherId?.toString() ?? pendingTeacherName)
-        //     .set({
-        //       'teacherId': teacherId,
-        //       'schoolId': schoolId,
-        //       'name': pendingTeacherName,
-        //       'status': pendingStatus ?? 'حاضر',
-        //       'timestamp': FieldValue.serverTimestamp(),
-        //     });
+  //     // إذا كان التحضير لليوم
+  //     if (pendingDate == today) {
+  //       // await firestore
+  //       //     .collection('attendance')
+  //       //     .doc(pendingDate)
+  //       //     .collection('teachers')
+  //       //     .doc(teacherId?.toString() ?? pendingTeacherName)
+  //       //     .set({
+  //       //       'teacherId': teacherId,
+  //       //       'schoolId': schoolId,
+  //       //       'name': pendingTeacherName,
+  //       //       'status': pendingStatus ?? 'حاضر',
+  //       //       'timestamp': FieldValue.serverTimestamp(),
+  //       //     });
 
-        await _clearPendingAttendance();
+  //       await _clearPendingAttendance();
 
-        await pref.setString('last_attendance_date', today);
-      } else {
-        // حذف التحضير القديم
-        await _clearPendingAttendance();
-      }
-    } catch (e) {
-      // لا نعرض خطأ للمستخدم هنا
-      // سيتم المحاولة لاحقًا
-    }
-  }
+  //       await pref.setString('last_attendance_date', today);
+  //     } else {
+  //       // حذف التحضير القديم
+  //       await _clearPendingAttendance();
+  //     }
+  //   } catch (e) {
+  //     // لا نعرض خطأ للمستخدم هنا
+  //     // سيتم المحاولة لاحقًا
+  //   }
+  // }
 
-  // =========================================================
-  // التحقق من تسجيل اليوم
-  // =========================================================
+  // // =========================================================
+  // // التحقق من تسجيل اليوم
+  // // =========================================================
 
-  Future<void> checkIfAlreadyMarked() async {
-    final today = _today();
+  // Future<void> checkIfAlreadyMarked() async {
+  //   final today = _today();
 
-    final lastMarkedDate = pref.getString('last_attendance_date');
+  //   final lastMarkedDate = pref.getString('last_attendance_date');
 
-    if (lastMarkedDate == today) {
-      emit(state.copyWith(attendanceDone: true, success: scanningSuccess));
-    }
-  }
+  //   if (lastMarkedDate == today) {
+  //     emit(state.copyWith(attendanceDone: true, success: scanningSuccess));
+  //   }
+  // }
 
-  // =========================================================
-  // حذف التحضير المعلق
-  // =========================================================
+  // // =========================================================
+  // // حذف التحضير المعلق
+  // // =========================================================
 
-  Future<void> _clearPendingAttendance() async {
-    await pref.remove('pending_attendance');
-    await pref.remove('pending_attendance_date');
-    await pref.remove('pending_attendance_status');
-    await pref.remove('pending_teacher_id');
-    await pref.remove('pending_school_id');
-  }
+  // Future<void> _clearPendingAttendance() async {
+  //   await pref.remove('pending_attendance');
+  //   await pref.remove('pending_attendance_date');
+  //   await pref.remove('pending_attendance_status');
+  //   await pref.remove('pending_teacher_id');
+  //   await pref.remove('pending_school_id');
+  // }
 
-  // =========================================================
-  // إعادة تشغيل الماسح بعد Dialog
-  // =========================================================
+  // // =========================================================
+  // // إعادة تشغيل الماسح بعد Dialog
+  // // =========================================================
 
-  void resetScanning() {
-    emit(state.copyWith());
-  }
+  // void resetScanning() {
+  //   emit(state.copyWith());
+  // }
 
-  // =========================================================
-  // Error
-  // =========================================================
+  // // =========================================================
+  // // Error
+  // // =========================================================
 
   void _setError(String title, String message) {
     emit(state.copyWith(isLoading: false, error: message));
   }
 
-  // void clearError() {
-  //   emit(
-  //     state.copyWith(
-  //       status: AttendanceScannerStatus.scanning,
-  //       clearError: true,
-  //     ),
-  //   );
-  // }
+  void clearMessage() {
+    emit(state.copyWith(success: null, error: null));
+  }
 
   String _today() {
     return DateFormat('yyyy-MM-dd').format(DateTime.now());

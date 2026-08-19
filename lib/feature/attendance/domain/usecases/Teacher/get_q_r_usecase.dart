@@ -6,8 +6,8 @@ class GetQRUsecase {
   final AttendanceRepo repo;
 
   GetQRUsecase(this.repo);
-  
-  Future<Either<String, QREntity>> call() async {
-    return await repo.getQR();
+
+  Future<Either<String, QREntity>> call(String schoolId) async {
+    return await repo.getQR(schoolId);
   }
 }

@@ -9,6 +9,8 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
     required super.timeOfArrival,
     required super.departureTime,
     required super.date,
+    required super.schoolId,
+    required super.status,
   });
 
   factory TeacherAttendanceModel.fromJson(Map<String, dynamic> json) {
@@ -19,7 +21,9 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
       name: json['name'],
       timeOfArrival: json['time_of_arrival'],
       departureTime: json['departure_time'],
-      date: json['date'],
+      date: DateTime.parse(json['date']),
+      schoolId: json['school_id'],
+      status: json['status'],
     );
   }
 
@@ -31,7 +35,9 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
       'name': name,
       'time_of_arrival': timeOfArrival,
       'departure_time': departureTime,
-      'date': date,
+      'date': date.toIso8601String(),
+      'school_id': schoolId,
+      'status': status,
     };
   }
 
@@ -44,6 +50,8 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
       timeOfArrival: t.timeOfArrival,
       departureTime: t.departureTime,
       date: t.date,
+      schoolId: t.schoolId,
+      status: t.status,
     );
   }
 }

@@ -27,6 +27,8 @@ dependencies:
   qr_flutter: 
   mobile_scanner: 
   intl: 
+  internet_connection_checker: 
+  uuid: 
   
 
 dev_dependencies:
