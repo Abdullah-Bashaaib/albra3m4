@@ -66,6 +66,10 @@ class FirestorePermissionDeniedFailure extends FirebaseFailure {
     : super('ليس لديك صلاحية للوصول إلى بيانات المستخدم.');
 }
 
+class GoogleSignInCancelledFailure extends FirebaseFailure {
+  const GoogleSignInCancelledFailure() : super('إلغاء المستخدم');
+}
+
 class FirebaseUnknownFailure extends FirebaseFailure {
   const FirebaseUnknownFailure() : super('حدث خطأ غير متوقع. حاول مرة أخرى.');
 }

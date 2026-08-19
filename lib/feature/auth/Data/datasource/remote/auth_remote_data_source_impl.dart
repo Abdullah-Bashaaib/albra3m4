@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../domain/entities/user.dart';
 import '../../mappers/firebase_exception_mapper.dart';
@@ -9,11 +10,13 @@ import 'authentication_remote_data_source.dart';
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
+  final GoogleSignIn googleSignIn;
 
   AuthRemoteDataSourceImpl({
     required this.firebaseAuth,
     required this.firestore,
-  });
+    GoogleSignIn? googleSignIn,
+  }) : googleSignIn = googleSignIn ?? GoogleSignIn();
 
   @override
   Future<UserModel> login({
@@ -63,6 +66,88 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       return userModel.copyWith(isVerified: currentUser.emailVerified);
+    } on FirebaseAuthException catch (e) {
+      throw FirebaseExceptionMapper.mapAuthException(e);
+    } on FirebaseException catch (e) {
+      throw FirebaseExceptionMapper.mapFirestoreException(e);
+    }
+  }
+
+  @override
+  Future<UserModel> loginWithGoogle() async {
+    try {
+      // 1) فتح شاشة اختيار حساب Google
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // المستخدم ألغى العملية — ليست حالة خطأ من Firebase، نبنيها يدوياً
+        throw FirebaseAuthException(
+          code: 'sign-in-cancelled',
+          message: 'تم إلغاء تسجيل الدخول عبر Google.',
+        );
+      }
+
+      // 2) الحصول على tokens المصادقة من Google
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // 3) تسجيل الدخول إلى Firebase بواسطة الـ credential
+      final userCredential = await firebaseAuth.signInWithCredential(
+        credential,
+      );
+
+      final firebaseUser = userCredential.user;
+
+      if (firebaseUser == null) {
+        throw FirebaseAuthException(
+          code: 'google-sign-in-failed',
+          message: 'تعذر تسجيل الدخول عبر Google.',
+        );
+      }
+
+      // 4) هل المستخدم موجود مسبقاً في Firestore؟
+      final document = await firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+
+      UserModel userModel;
+
+      if (document.exists && document.data() != null) {
+        // مستخدم حالي — نجلب بياناته كما هي
+        userModel = UserModel.fromFirestore(document.data()!);
+
+        if (!userModel.isActive) {
+          throw FirebaseAuthException(
+            code: 'account-inactive',
+            message: 'حسابك غير نشط حاليًا.',
+          );
+        }
+      } else {
+        // أول تسجيل دخول عبر Google — إنشاء وثيقة جديدة
+        // ملاحظة: الدور الافتراضي parent، ويمكن لاحقاً لمشرف النظام
+        // تغييره حسب واقع الروضة (UC-007).
+        userModel = UserModel(
+          uid: firebaseUser.uid,
+          fullName: firebaseUser.displayName ?? googleUser.displayName ?? '',
+          email: firebaseUser.email ?? googleUser.email,
+          phone: firebaseUser.phoneNumber,
+          role: UserRole.parent,
+          isVerified: true,
+          // بريد Google موثوق مسبقاً
+          isActive: true,
+          createdAt: DateTime.now(),
+        );
+
+        await createUserInFirestore(user: userModel);
+      }
+
+      return userModel.copyWith(isVerified: true);
     } on FirebaseAuthException catch (e) {
       throw FirebaseExceptionMapper.mapAuthException(e);
     } on FirebaseException catch (e) {
@@ -257,6 +342,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     try {
+      // نسجّل الخروج من Google أيضاً إن كان تسجيل الدخول تم عبرها،
+      // وإلا فهذا الاستدعاء لا يفعل شيئاً بأمان.
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.signOut();
+      }
       await firebaseAuth.signOut();
     } on FirebaseAuthException catch (e) {
       throw FirebaseExceptionMapper.mapAuthException(e);
