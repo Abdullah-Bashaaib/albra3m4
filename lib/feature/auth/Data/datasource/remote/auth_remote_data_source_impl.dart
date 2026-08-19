@@ -74,7 +74,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithGoogle() async {
+  Future<({UserModel user, bool isNewUser})> loginWithGoogle() async {
     try {
       // 1) فتح شاشة اختيار حساب Google
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -116,9 +116,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .doc(firebaseUser.uid)
           .get();
 
+      final bool isNewUser = !document.exists || document.data() == null;
+
       UserModel userModel;
 
-      if (document.exists && document.data() != null) {
+      if (!isNewUser) {
         // مستخدم حالي — نجلب بياناته كما هي
         userModel = UserModel.fromFirestore(document.data()!);
 
@@ -129,17 +131,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           );
         }
       } else {
-        // أول تسجيل دخول عبر Google — إنشاء وثيقة جديدة
-        // ملاحظة: الدور الافتراضي parent، ويمكن لاحقاً لمشرف النظام
-        // تغييره حسب واقع الروضة (UC-007).
+        // أول تسجيل دخول عبر Google — إنشاء وثيقة جديدة بدور افتراضي.
+        // الدور الحقيقي (Teacher/Parent) والهاتف يُستكملان لاحقاً من
+        // شاشة "إكمال الملف الشخصي" في التطبيق.
         userModel = UserModel(
           uid: firebaseUser.uid,
           fullName: firebaseUser.displayName ?? googleUser.displayName ?? '',
           email: firebaseUser.email ?? googleUser.email,
           phone: firebaseUser.phoneNumber,
           role: UserRole.parent,
-          isVerified: true,
-          // بريد Google موثوق مسبقاً
+          isVerified: true, // بريد Google موثوق مسبقاً
           isActive: true,
           createdAt: DateTime.now(),
         );
@@ -147,7 +148,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         await createUserInFirestore(user: userModel);
       }
 
-      return userModel.copyWith(isVerified: true);
+      return (user: userModel.copyWith(isVerified: true), isNewUser: isNewUser);
     } on FirebaseAuthException catch (e) {
       throw FirebaseExceptionMapper.mapAuthException(e);
     } on FirebaseException catch (e) {
@@ -342,8 +343,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     try {
-      // نسجّل الخروج من Google أيضاً إن كان تسجيل الدخول تم عبرها،
-      // وإلا فهذا الاستدعاء لا يفعل شيئاً بأمان.
       if (await googleSignIn.isSignedIn()) {
         await googleSignIn.signOut();
       }

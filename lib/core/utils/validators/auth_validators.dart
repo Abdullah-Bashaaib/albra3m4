@@ -5,14 +5,15 @@ class AuthValidators {
 
   // نمط بريد إلكتروني قياسي: user@domain.com
   static final RegExp _emailRegex = RegExp(
-    r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@gmail+(?:\.[a-zA-Z0-9-]+)+$',
+    r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
   );
 
   // اسم لا يحتوي أرقاماً (يدعم الحروف العربية والإنجليزية والمسافات)
   static final RegExp _nameRegex = RegExp(r'^[\p{L}\s]+$', unicode: true);
 
+  static final RegExp _phoneRegex = RegExp(r'^[0-9+\s-]{7,15}$');
+
   /// التحقق من البريد الإلكتروني.
-  /// يُستخدم في شاشتي تسجيل الدخول والتسجيل (UC-001, UC-003).
   static String? validateEmail(String? value) {
     final trimmed = value?.trim() ?? '';
 
@@ -27,10 +28,7 @@ class AuthValidators {
     return null;
   }
 
-  /// التحقق من كلمة المرور عند التسجيل (UC-001 — E2).
-  /// 8 أحرف على الأقل. لا يفرض حرف كبير/رقم/رمز إلزامياً حالياً
-  /// (الوثيقة تذكرها كـ"يُفضّل" لا "إلزامي") — عدّل الشرط أدناه لو حبيت
-  /// تشديد القاعدة لاحقاً.
+  /// التحقق من كلمة المرور عند التسجيل (UC-001 — E2). 8 أحرف على الأقل.
   static String? validatePassword(String? value) {
     final password = value ?? '';
 
@@ -45,9 +43,7 @@ class AuthValidators {
     return null;
   }
 
-  /// التحقق من كلمة المرور عند تسجيل الدخول فقط — بدون فرض طول معيّن،
-  /// لأن حساباً قديماً قد يملك كلمة مرور لا تطابق القواعد الحالية.
-  /// الخطأ الفعلي (بيانات خاطئة) يُترك لـ Firebase (UC-003 — E1).
+  /// التحقق من كلمة المرور عند تسجيل الدخول فقط — بدون فرض طول معيّن.
   static String? validateLoginPassword(String? value) {
     if ((value ?? '').isEmpty) {
       return 'يرجى إدخال كلمة المرور';
@@ -91,8 +87,7 @@ class AuthValidators {
     return null;
   }
 
-  /// التحقق من رقم الهاتف — اختياري في المرحلة الأولى (UC-001)،
-  /// فيُقبل فارغاً. إن أُدخل، يُتحقق من كونه أرقاماً فقط بطول معقول.
+  /// التحقق من رقم الهاتف — اختياري (UC-001، شاشة التسجيل العادي).
   static String? validatePhone(String? value) {
     final phone = value?.trim() ?? '';
 
@@ -100,9 +95,22 @@ class AuthValidators {
       return null; // حقل اختياري
     }
 
-    final digitsOnly = RegExp(r'^[0-9+\s-]{7,15}$');
+    if (!_phoneRegex.hasMatch(phone)) {
+      return 'رقم الهاتف غير صحيح';
+    }
 
-    if (!digitsOnly.hasMatch(phone)) {
+    return null;
+  }
+
+  /// التحقق من رقم الهاتف — إلزامي (شاشة إكمال الملف الشخصي بعد Google).
+  static String? validateRequiredPhone(String? value) {
+    final phone = value?.trim() ?? '';
+
+    if (phone.isEmpty) {
+      return 'رقم الهاتف مطلوب';
+    }
+
+    if (!_phoneRegex.hasMatch(phone)) {
       return 'رقم الهاتف غير صحيح';
     }
 

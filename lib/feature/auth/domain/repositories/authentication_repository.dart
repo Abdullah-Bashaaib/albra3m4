@@ -9,8 +9,19 @@ abstract class AuthRepository {
     required String password,
   });
 
-  /// تسجيل الدخول عبر Google — ينشئ حساب جديد تلقائياً عند أول استخدام.
-  Future<Either<Failure, UserEntity>> loginWithGoogle();
+  /// تسجيل الدخول عبر Google.
+  /// الجزء الثاني من الـ Record (`isNewUser`) يخبر الطبقات الأعلى إن كان
+  /// يجب توجيه المستخدم لشاشة إكمال الملف الشخصي (اختيار الدور + الهاتف).
+  Future<Either<Failure, ({UserEntity user, bool isNewUser})>>
+  loginWithGoogle();
+
+  /// يُستدعى بعد Google Sign-In الأول لإكمال البيانات الناقصة من UserModel:
+  /// الدور الحقيقي (Teacher/Parent فقط) ورقم الهاتف الإلزامي.
+  Future<Either<Failure, UserEntity>> completeGoogleProfile({
+    required UserEntity currentUser,
+    required UserRole role,
+    required String phone,
+  });
 
   Future<Either<Failure, UserEntity>> register({
     required String fullName,

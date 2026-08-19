@@ -11,7 +11,7 @@ class GoogleLoginUseCase {
 
   const GoogleLoginUseCase(this.repository);
 
-  Future<Either<Failure, UserEntity>> call() {
+  Future<Either<Failure, ({UserEntity user, bool isNewUser})>> call() {
     return repository.loginWithGoogle();
   }
 }

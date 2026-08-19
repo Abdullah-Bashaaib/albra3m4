@@ -3,11 +3,12 @@ import '../../models/user_model.dart';
 abstract class AuthRemoteDataSource {
   Future<UserModel> login({required String email, required String password});
 
-  /// تسجيل الدخول عبر Google.
-  /// يفتح Google Sign-In، يربط الحساب بـ Firebase Auth، وإذا كانت هذه
-  /// أول مرة يسجّل بها المستخدم عبر Google يتم إنشاء وثيقة جديدة له
-  /// في Firestore بدور افتراضي (parent) قابل للتعديل لاحقاً من الإدارة.
-  Future<UserModel> loginWithGoogle();
+  /// يرجع Record يحتوي على:
+  /// - `user`: بيانات المستخدم (موجودة مسبقاً أو أُنشئت للتو بدور افتراضي parent)
+  /// - `isNewUser`: true إذا كانت هذه أول مرة يسجّل بها هذا الحساب — تُستخدم
+  ///   في الطبقات الأعلى لتوجيهه لشاشة إكمال الملف الشخصي (اختيار الدور
+  ///   الحقيقي + رقم الهاتف) بدل الذهاب مباشرة للـ Dashboard.
+  Future<({UserModel user, bool isNewUser})> loginWithGoogle();
 
   Future<UserModel> register({
     required String fullName,

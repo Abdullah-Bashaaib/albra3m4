@@ -30,6 +30,9 @@ dependencies:
   flutter_bloc:
   google_sign_in: ^6.2.2
 
+  # Routing
+  go_router:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
