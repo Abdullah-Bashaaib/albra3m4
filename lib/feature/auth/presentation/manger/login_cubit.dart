@@ -1,9 +1,9 @@
-import 'package:albra3m4/feature/domain/usecases/get_current_user.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/get_cached_user.dart';
+import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/login_use_case.dart';
 import '../../domain/usecases/register_user_usecase.dart';
 import '../../domain/usecases/send_email_verification.dart';

@@ -1,4 +1,4 @@
-import '../../../core/errors/exceptions.dart';
+import '../../../../core/errors/exceptions.dart';
 
 abstract class FirebaseAppException extends AppException {
   const FirebaseAppException(super.message);

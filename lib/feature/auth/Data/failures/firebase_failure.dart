@@ -1,4 +1,4 @@
-import '../../../core/errors/failure.dart';
+import '../../../../core/errors/failure.dart';
 
 abstract class FirebaseFailure extends Failure {
   const FirebaseFailure(super.message);
