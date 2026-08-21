@@ -9,17 +9,22 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   dartz: ^0.10.1
+
   # Remote Database
   firebase_auth:
   firebase_core:
   cloud_firestore:
+
   # Local Database
   sqflite:
   path_provider:
   shared_preferences:
+
   # Injection
   get_it:
+
   # State management
   equatable:
   bloc: 
@@ -29,6 +34,8 @@ dependencies:
   intl: 
   internet_connection_checker: 
   uuid: 
+  google_sign_in: ^6.2.2
+
   
 
 dev_dependencies:
@@ -38,3 +45,24 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: Somar
+      fonts:
+        - asset: assets/fonts/SomarRounded-Light.ttf
+          weight: 300
+
+        - asset: assets/fonts/SomarRounded-Regular.ttf
+          weight: 400
+
+        - asset: assets/fonts/SomarRounded-Medium.ttf
+          weight: 500
+
+        - asset: assets/fonts/SomarRounded-Bold.ttf
+          weight: 700
+
+        - asset: assets/fonts/SomarRounded-Black.ttf
+          weight: 900
