@@ -10,61 +10,61 @@ class FirebaseExceptionMapper {
   ) {
     switch (exception.code) {
       case 'invalid-email':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'invalid-email',
           message: 'البريد الإلكتروني غير صالح.',
         );
 
       case 'user-not-found':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'user-not-found',
           message: 'لا يوجد حساب مرتبط بهذا البريد الإلكتروني.',
         );
 
       case 'wrong-password':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'wrong-password',
           message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
         );
 
       case 'invalid-credential':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'invalid-credential',
           message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
         );
 
       case 'email-already-in-use':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'email-already-in-use',
           message: 'البريد الإلكتروني مستخدم بالفعل.',
         );
 
       case 'weak-password':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'weak-password',
           message: 'كلمة المرور ضعيفة.',
         );
 
       case 'user-disabled':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'user-disabled',
           message: 'تم تعطيل هذا الحساب.',
         );
 
       case 'too-many-requests':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'too-many-requests',
           message: 'تم تجاوز عدد المحاولات المسموح بها.',
         );
 
       case 'operation-not-allowed':
-        return const FirebaseAuthAppException(
+        return FirebaseAuthAppException(
           code: 'operation-not-allowed',
           message: 'هذه العملية غير مسموح بها.',
         );
 
       case 'network-request-failed':
-        return const FirebaseNetworkAppException('تعذر الاتصال بالإنترنت.');
+        return FirebaseNetworkAppException('تعذر الاتصال بالإنترنت.');
 
       default:
         return FirebaseAuthAppException(
@@ -79,19 +79,17 @@ class FirebaseExceptionMapper {
   ) {
     switch (exception.code) {
       case 'permission-denied':
-        return const FirebaseFirestoreAppException(
+        return FirebaseFirestoreAppException(
           code: 'permission-denied',
           message: 'ليس لديك صلاحية للوصول إلى البيانات.',
         );
 
       case 'unavailable':
       case 'network-request-failed':
-        return const FirebaseNetworkAppException(
-          'تعذر الاتصال بخدمة Firebase.',
-        );
+        return FirebaseNetworkAppException('تعذر الاتصال بخدمة Firebase.');
 
       case 'not-found':
-        return const FirebaseFirestoreAppException(
+        return FirebaseFirestoreAppException(
           code: 'not-found',
           message: 'بيانات المستخدم غير موجودة.',
         );

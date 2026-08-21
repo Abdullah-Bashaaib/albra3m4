@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.example.albra3m4"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
     compileOptions {
