@@ -27,7 +27,13 @@ dependencies:
 
   # State management
   equatable:
-  flutter_bloc:
+  bloc: 
+  flutter_bloc: 
+  qr_flutter: 
+  mobile_scanner: 
+  intl: 
+  internet_connection_checker: 
+  uuid: 
   google_sign_in: ^6.2.2
 
   # Routing

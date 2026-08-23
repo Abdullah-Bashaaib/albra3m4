@@ -1,6 +1,8 @@
 import 'package:albra3m4/core/constants/app_font.dart';
 import 'package:albra3m4/core/routing/app_router.dart';
 import 'package:albra3m4/core/utils/observers/app_bloc_observer.dart';
+import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:albra3m4/injection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/constants/app_colors.dart';
 import 'feature/auth/presentation/manger/login_cubit.dart';
 import 'firebase_options.dart';
-import 'injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +25,10 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>())],
+      providers: [
+        BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()),
+        BlocProvider<AttendanceCubit>(create: (_) => sl<AttendanceCubit>()),
+      ],
       child: MaterialApp.router(
         routerConfig: AppRouter.router,
         debugShowCheckedModeBanner: false,
