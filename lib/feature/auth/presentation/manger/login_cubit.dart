@@ -76,6 +76,7 @@ class LoginCubit extends Cubit<LoginState> {
   /// في CompleteGoogleProfileScreen.
   Future<void> completeGoogleProfile({
     required UserEntity currentUser,
+    required String fullName,
     required UserRole role,
     required String phone,
   }) async {
@@ -84,6 +85,7 @@ class LoginCubit extends Cubit<LoginState> {
       currentUser: currentUser,
       role: role,
       phone: phone,
+      fullName: fullName,
     );
     result.fold(
       (failure) => emit(LoginFailure(failure.message)),

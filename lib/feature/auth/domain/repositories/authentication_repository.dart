@@ -21,6 +21,7 @@ abstract class AuthRepository {
     required UserEntity currentUser,
     required UserRole role,
     required String phone,
+    required String fullName,
   });
 
   Future<Either<Failure, UserEntity>> register({

@@ -1,6 +1,7 @@
 import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:albra3m4/core/utils/validators/auth_validators.dart';
 import 'package:albra3m4/core/utils/widgets/custom_button.dart';
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:albra3m4/core/utils/widgets/custom_text_form_field.dart';
 import 'package:albra3m4/feature/auth/presentation/widgets/google_sign_in_button.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_font.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/utils/widgets/app_background.dart';
 import '../manger/login_cubit.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -48,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: BlocListener<LoginCubit, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
+            CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح!');
             context.go(AppRoutes.home);
           }
 
@@ -55,23 +58,18 @@ class _LoginScreenState extends State<LoginScreen> {
             // أول تسجيل دخول عبر Google — لازم يكمّل بياناته أولاً.
             // push() وليس go() — عشان زر الرجوع يرجّعه لشاشة الدخول
             // لو غيّر رأيه قبل إكمال البيانات.
+            CustomSnackBar.showInfo(
+              context,
+              'يرجى إكمال بياناتك الشخصية أولاً.',
+            );
             context.push(AppRoutes.completeGoogleProfile, extra: state.user);
           }
 
           if (state is LoginFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            CustomSnackBar.showError(context, state.message);
           }
         },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.surface],
-            ),
-          ),
+        child: AppBackground(
           child: SafeArea(
             bottom: true,
             child: SingleChildScrollView(
@@ -183,8 +181,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             Expanded(
                               child: Divider(
-                                color: AppColors.textSecondary
-                                    .withValues(alpha: 0.3),
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.3,
+                                ),
                                 thickness: 1,
                               ),
                             ),
@@ -204,8 +203,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Expanded(
                               child: Divider(
-                                color: AppColors.textSecondary
-                                    .withValues(alpha: 0.3),
+                                color: AppColors.textSecondary.withValues(
+                                  alpha: 0.3,
+                                ),
                                 thickness: 1,
                               ),
                             ),
@@ -217,9 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           builder: (context, isLoading) {
                             return GoogleSignInButton(
                               isLoading: isLoading,
-                              onPressed: () => context
-                                  .read<LoginCubit>()
-                                  .loginWithGoogle(),
+                              onPressed: () =>
+                                  context.read<LoginCubit>().loginWithGoogle(),
                             );
                           },
                         ),
@@ -229,6 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {},
                           variant: ButtonVariant.outlined,
                         ),
+                        const SizedBox(height: 50.0),
                       ],
                     ),
                   ),

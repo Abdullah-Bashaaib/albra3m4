@@ -1,3 +1,5 @@
+import 'package:albra3m4/feature/auth/presentation/widgets/read_only_field.dart';
+import 'package:albra3m4/feature/auth/presentation/widgets/role_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +29,8 @@ class CompleteGoogleProfileScreen extends StatefulWidget {
 class _CompleteGoogleProfileScreenState
     extends State<CompleteGoogleProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _phoneController;
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   UserRole? _selectedRole;
   bool _roleTouched = false;
@@ -40,7 +43,6 @@ class _CompleteGoogleProfileScreenState
   @override
   void initState() {
     super.initState();
-    _phoneController = TextEditingController(text: widget.user.phone ?? '');
   }
 
   @override
@@ -62,6 +64,7 @@ class _CompleteGoogleProfileScreenState
       currentUser: widget.user,
       role: _selectedRole!,
       phone: _phoneController.text.trim(),
+      fullName: _nameController.text.trim()
     );
   }
 
@@ -135,15 +138,34 @@ class _CompleteGoogleProfileScreenState
                     const SizedBox(height: 32),
 
                     // الاسم — من Google، للقراءة فقط
-                    _ReadOnlyField(
+                    CustomTextFormField(
+                      controller: _nameController,
                       label: 'الاسم',
-                      value: widget.user.fullName,
-                      icon: Icons.person_outline,
+                      obscureText: false,
+                      autoFocus: false,
+                      enabled: true,
+                      keyboardType: TextInputType.name,
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'يرجى إدخال الاسم';
+                        }
+
+                        if (value.trim().length < 3) {
+                          return 'الاسم يجب أن يكون 3 أحرف على الأقل';
+                        }
+
+                        return null;
+                      },
+                      suffixIcon: Icon(
+                        Icons.person_outline,
+                        color: AppColors.primary,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
                     // البريد — من Google، للقراءة فقط
-                    _ReadOnlyField(
+                    ReadOnlyField(
                       label: 'البريد الإلكتروني',
                       value: widget.user.email,
                       icon: Icons.email_outlined,
@@ -151,7 +173,7 @@ class _CompleteGoogleProfileScreenState
                     const SizedBox(height: 16),
 
                     // الدور — إلزامي، Teacher أو Parent فقط
-                    _RoleDropdown(
+                    RoleDropdown(
                       selectedRole: _selectedRole,
                       showError: _roleTouched && _selectedRole == null,
                       roles: _availableRoles,
@@ -199,155 +221,6 @@ class _CompleteGoogleProfileScreenState
           ),
         ),
       ),
-    );
-  }
-}
-
-/// حقل للعرض فقط (بيانات جاهزة من Google) — بنفس الشكل البصري لباقي
-/// الحقول، لكن غير قابل للتعديل، ليبقى للمستخدم واضح أن هذه بياناته
-/// الحقيقية من حساب Google الذي سجّل به للتو.
-class _ReadOnlyField extends StatelessWidget {
-  const _ReadOnlyField({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(
-          color: AppColors.textSecondary.withValues(alpha: 0.25),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.textSecondary, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: AppFont.primary,
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontFamily: AppFont.primary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.lock_outline, color: AppColors.textSecondary, size: 16),
-        ],
-      ),
-    );
-  }
-}
-
-/// Dropdown مخصص لاختيار الدور، بنفس نمط تصميم CustomTextFormField
-/// (حدود دائرية، خلفية معبأة، رسالة خطأ تحت الحقل عند عدم الاختيار).
-class _RoleDropdown extends StatelessWidget {
-  const _RoleDropdown({
-    required this.selectedRole,
-    required this.showError,
-    required this.roles,
-    required this.onChanged,
-  });
-
-  final UserRole? selectedRole;
-  final bool showError;
-  final Map<UserRole, String> roles;
-  final ValueChanged<UserRole?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<UserRole>(
-          value: selectedRole,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: AppColors.primary,
-          ),
-          decoration: InputDecoration(
-            labelText: 'أنا',
-            labelStyle: TextStyle(
-              fontFamily: AppFont.primary,
-              color: AppColors.textSecondary,
-            ),
-            filled: true,
-            fillColor: AppColors.surface.withValues(alpha: 0.6),
-            prefixIcon: Icon(Icons.badge_outlined, color: AppColors.primary),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.0),
-              borderSide: BorderSide(
-                color: AppColors.textSecondary.withValues(alpha: 0.25),
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.0),
-              borderSide: BorderSide(
-                color: showError
-                    ? Colors.redAccent
-                    : AppColors.textSecondary.withValues(alpha: 0.25),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.0),
-              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-            ),
-          ),
-          items: roles.entries
-              .map(
-                (entry) => DropdownMenuItem<UserRole>(
-                  value: entry.key,
-                  child: Text(
-                    entry.value,
-                    style: TextStyle(
-                      fontFamily: AppFont.primary,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-        ),
-        if (showError)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, right: 4),
-            child: Text(
-              'يرجى اختيار دورك',
-              style: TextStyle(
-                fontFamily: AppFont.primary,
-                fontSize: 12,
-                color: Colors.redAccent,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

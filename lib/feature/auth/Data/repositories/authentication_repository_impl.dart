@@ -78,11 +78,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required UserEntity currentUser,
     required UserRole role,
     required String phone,
+    required String fullName,
   }) async {
     try {
       final updatedModel = UserModel.fromEntity(currentUser).copyWith(
         role: role,
         phone: phone,
+        fullName: fullName,
       );
 
       await remoteDataSource.updateUserInFirestore(user: updatedModel);

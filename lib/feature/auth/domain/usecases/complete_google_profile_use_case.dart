@@ -15,11 +15,12 @@ class CompleteGoogleProfileUseCase {
     required UserEntity currentUser,
     required UserRole role,
     required String phone,
+    required String fullName,
   }) {
     return repository.completeGoogleProfile(
       currentUser: currentUser,
       role: role,
-      phone: phone,
+      phone: phone, fullName: fullName,
     );
   }
 }
