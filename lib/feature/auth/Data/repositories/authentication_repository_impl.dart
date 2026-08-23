@@ -7,6 +7,7 @@ import '../datasource/local/auth_local_data_source.dart';
 import '../datasource/remote/authentication_remote_data_source.dart';
 import '../exceptions/firebase_app_exception.dart';
 import '../failures/firebase_failure.dart' hide NetworkFailure;
+import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -37,6 +38,60 @@ class AuthRepositoryImpl implements AuthRepository {
       await localDataSource.cacheLoginSession(uid: userModel.uid);
 
       return Right(userModel);
+    } on FirebaseAppException catch (e) {
+      return Left(_mapFirebaseExceptionToFailure(e));
+    } catch (_) {
+      return const Left(FirebaseUnknownFailure());
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Login with Google
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<Either<Failure, ({UserEntity user, bool isNewUser})>>
+  loginWithGoogle() async {
+    try {
+      final result = await remoteDataSource.loginWithGoogle();
+
+      await localDataSource.cacheUser(result.user);
+
+      await localDataSource.cacheLoginSession(uid: result.user.uid);
+
+      return Right((user: result.user, isNewUser: result.isNewUser));
+    } on FirebaseAppException catch (e) {
+      // ملاحظة: "sign-in-cancelled" يقع حالياً ضمن default -> FirebaseUnknownFailure()
+      // (لا يوجد Failure مخصص للإلغاء بعد في firebase_failure.dart).
+      return Left(_mapFirebaseExceptionToFailure(e));
+    } catch (_) {
+      return const Left(FirebaseUnknownFailure());
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Complete Google Profile
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<Either<Failure, UserEntity>> completeGoogleProfile({
+    required UserEntity currentUser,
+    required UserRole role,
+    required String phone,
+    required String fullName,
+  }) async {
+    try {
+      final updatedModel = UserModel.fromEntity(currentUser).copyWith(
+        role: role,
+        phone: phone,
+        fullName: fullName,
+      );
+
+      await remoteDataSource.updateUserInFirestore(user: updatedModel);
+
+      await localDataSource.cacheUser(updatedModel);
+
+      return Right(updatedModel);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
     } catch (_) {
@@ -261,9 +316,9 @@ class AuthRepositoryImpl implements AuthRepository {
         case 'account-inactive':
           return const AccountInactiveFailure();
 
-        case 'sign-in-cancelled':
-          return const GoogleSignInCancelledFailure();
-          
+        // TODO: أضف case 'sign-in-cancelled' هنا بعد إضافة
+        // GoogleSignInCancelledFailure إلى firebase_failure.dart.
+
         default:
           return const FirebaseUnknownFailure();
       }
@@ -283,31 +338,5 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return const FirebaseUnknownFailure();
-  }
-
-  // ---------------------------------------------------------------------------
-  // Login with Google
-  // ---------------------------------------------------------------------------
-
-  @override
-  Future<Either<Failure, UserEntity>> loginWithGoogle() async {
-    try {
-      final userModel = await remoteDataSource.loginWithGoogle();
-
-      await localDataSource.cacheUser(userModel);
-
-      await localDataSource.cacheLoginSession(uid: userModel.uid);
-
-      return Right(userModel);
-    } on FirebaseAppException catch (e) {
-      // ملاحظة: حالة "sign-in-cancelled" (إلغاء المستخدم للعملية) تقع حالياً
-      // ضمن default -> FirebaseUnknownFailure()، لأنه لا يوجد Failure مخصص
-      // لها بعد في firebase_failure.dart. لو حبيت لاحقاً تفرّق بينها وبين
-      // خطأ حقيقي، أضف class GoogleSignInCancelledFailure هناك وأضف
-      // case 'sign-in-cancelled' في _mapFirebaseExceptionToFailure أدناه.
-      return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
-      return const Left(FirebaseUnknownFailure());
-    }
   }
 }

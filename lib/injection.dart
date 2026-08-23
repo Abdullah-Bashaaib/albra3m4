@@ -1,3 +1,4 @@
+import 'package:albra3m4/feature/auth/domain/usecases/complete_google_profile_use_case.dart';
 import 'package:albra3m4/feature/attendance/data/repo/attendance_repo_imp.dart';
 import 'package:albra3m4/feature/attendance/data/source/attendance_local.dart';
 import 'package:albra3m4/feature/attendance/data/source/attendance_remote.dart';
@@ -42,81 +43,110 @@ class Injection {
     );
 
     // Firebase
+    // =========================
+
     sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 
     sl.registerLazySingleton<FirebaseFirestore>(
       () => FirebaseFirestore.instance,
     );
 
+    
+
+    // =========================
     // Database
+    // =========================
+
     sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper.instance);
 
     sl.registerSingletonAsync<Database>(() => sl<DatabaseHelper>().database);
 
-    // Remote
+    // =========================
+    // Remote Data Source
+    // =========================
+
     sl.registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(
         firebaseAuth: sl<FirebaseAuth>(),
         firestore: sl<FirebaseFirestore>(),
       ),
     );
-    sl.registerLazySingleton(() =>
-        AuthLocalDataSourceImpl(
-          database: sl<Database>(),
-          sharedPreferences: sl<SharedPreferences>(),
-        ),);
 
-    // Local
+    // =========================
+    // Local Data Source
+    // =========================
+
     sl.registerSingletonWithDependencies<AuthLocalDataSource>(
       () => AuthLocalDataSourceImpl(
-        sharedPreferences: sl<SharedPreferences>(),
         database: sl<Database>(),
+        sharedPreferences: sl<SharedPreferences>(),
       ),
       dependsOn: [Database],
     );
 
+    // =========================
     // Repository
+    // =========================
+
     sl.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(
         remoteDataSource: sl<AuthRemoteDataSource>(),
         localDataSource: sl<AuthLocalDataSource>(),
       ),
     );
-    
+
+    // =========================
     // Use Cases
+    // =========================
+
     sl.registerLazySingleton<LoginUseCase>(
-          () => LoginUseCase(sl<AuthRepository>()),
-    );
-    sl.registerLazySingleton<RegisterUserUseCase>(
-          () => RegisterUserUseCase(sl<AuthRepository>()),
-    );
-    sl.registerLazySingleton<SendEmailVerificationUseCase>(
-          () => SendEmailVerificationUseCase(sl<AuthRepository>()),
-    );
-    sl.registerLazySingleton<SendPasswordResetEmail>(
-          () => SendPasswordResetEmail(sl<AuthRepository>()),
-    );
-    sl.registerLazySingleton<GetCachedUserUseCase>(
-          () => GetCachedUserUseCase(sl<AuthRepository>()),
-    );
-    sl.registerLazySingleton<GetCurrentUserUseCase>(
-          () => GetCurrentUserUseCase(sl<AuthRepository>()),
-    );
-    sl.registerLazySingleton<GoogleLoginUseCase>(
-          () => GoogleLoginUseCase(sl<AuthRepository>()),
+      () => LoginUseCase(sl<AuthRepository>()),
     );
 
+    sl.registerLazySingleton<RegisterUserUseCase>(
+      () => RegisterUserUseCase(sl<AuthRepository>()),
+    );
+
+    sl.registerLazySingleton<SendEmailVerificationUseCase>(
+      () => SendEmailVerificationUseCase(sl<AuthRepository>()),
+    );
+
+    sl.registerLazySingleton<SendPasswordResetEmail>(
+      () => SendPasswordResetEmail(sl<AuthRepository>()),
+    );
+
+    sl.registerLazySingleton<GetCachedUserUseCase>(
+      () => GetCachedUserUseCase(sl<AuthRepository>()),
+    );
+
+    sl.registerLazySingleton<GetCurrentUserUseCase>(
+      () => GetCurrentUserUseCase(sl<AuthRepository>()),
+    );
+
+    sl.registerLazySingleton<GoogleLoginUseCase>(
+      () => GoogleLoginUseCase(sl<AuthRepository>()),
+    );
+
+    sl.registerLazySingleton(
+      () => CompleteGoogleProfileUseCase(sl<AuthRepository>()),
+    );
+
+    // =========================
     // Cubit
-    sl.registerLazySingleton<LoginCubit>(() =>
-        LoginCubit(
-          sl<LoginUseCase>(),
-          sl<RegisterUserUseCase>(),
-          sl<SendEmailVerificationUseCase>(),
-          sl<SendPasswordResetEmail>(),
-          sl<GetCachedUserUseCase>(),
-          sl<GetCurrentUserUseCase>(),
-          sl<GoogleLoginUseCase>(),
-        ));
+    // =========================
+
+    sl.registerFactory<LoginCubit>(
+      () => LoginCubit(
+        sl<LoginUseCase>(),
+        sl<RegisterUserUseCase>(),
+        sl<SendEmailVerificationUseCase>(),
+        sl<SendPasswordResetEmail>(),
+        sl<GetCachedUserUseCase>(),
+        sl<GetCurrentUserUseCase>(),
+        sl<GoogleLoginUseCase>(),
+        sl<CompleteGoogleProfileUseCase>(),
+      ),
+    );
 
     /// ===================== [ Attendance ] ====================
     // Remote
