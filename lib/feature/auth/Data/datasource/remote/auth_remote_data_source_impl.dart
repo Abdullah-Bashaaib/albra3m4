@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -232,17 +234,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel?> getCurrentUser() async {
+    log(
+      '--------------------> message: getCurrentUser() called in DataSourceRemote',
+    );
     try {
       final user = firebaseAuth.currentUser;
-
+      log(
+        '--------------------> message: currentUser :: ${user.toString()} , isNull :: ${user == null}',
+      );
       if (user == null) {
+        log(
+          '------------------------> message : currentUser is ${user.toString()}',
+        );
         return null;
       }
 
       await user.reload();
-
+      log(
+        '--------------------> message: currentUser reloaded :: ${user.email}',
+      );
       final currentUser = firebaseAuth.currentUser;
-
+      log(
+        '--------------------> message: currentUser after reload :: ${currentUser?.email ?? 'null'}',
+      );
       if (currentUser == null) {
         return null;
       }
@@ -252,7 +266,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       final userModel = await getUserFromFirestore(uid: currentUser.uid);
-
+      log(
+        '--------------------> message: userModel from Firestore :: ${userModel.toString()}',
+      );
       if (!userModel.isActive) {
         return null;
       }

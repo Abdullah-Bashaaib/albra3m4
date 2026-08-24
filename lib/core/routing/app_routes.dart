@@ -2,7 +2,7 @@
 /// عند استخدام context.go() / context.push() في أي مكان بالتطبيق.
 abstract class AppRoutes {
   const AppRoutes._();
-
+static const String authCheck='/auth-check';
   static const String login = '/login';
   static const String completeGoogleProfile = '/complete-google-profile';
   static const String home = '/home';

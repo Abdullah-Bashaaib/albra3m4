@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../domain/entities/user.dart';
@@ -12,10 +15,12 @@ import '../models/user_model.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
+  final InternetConnectionChecker con;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.con,
   });
 
   // ---------------------------------------------------------------------------
@@ -81,11 +86,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
   }) async {
     try {
-      final updatedModel = UserModel.fromEntity(currentUser).copyWith(
-        role: role,
-        phone: phone,
-        fullName: fullName,
-      );
+      final updatedModel = UserModel.fromEntity(
+        currentUser,
+      ).copyWith(role: role, phone: phone, fullName: fullName);
 
       await remoteDataSource.updateUserInFirestore(user: updatedModel);
 
@@ -177,28 +180,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
+    log('--------------------> message: getCurrentUser() called');
     try {
-      final userModel = await remoteDataSource.getCurrentUser();
+      if (await con.hasConnection) {
+        log('--------------------> message: has internet connection');
+        final userModel = await remoteDataSource.getCurrentUser();
+        log('----------> user :: ${userModel.toString()}');
+        if (userModel == null) {
+          await localDataSource.clearLoginSession();
+          await localDataSource
+              .deleteCachedUser(); // حذف أي نسخة قديمة من المستخدم المخزن محليًا
 
-      if (userModel == null) {
-        final cachedUser = await localDataSource.getCachedUser();
-
-        if (cachedUser != null &&
-            cachedUser.isVerified &&
-            cachedUser.isActive) {
-          return Right(cachedUser);
+          return const Left(UserNotFoundFailure());
+        } else {
+          log('--------> user is ${userModel.toString()}');
+          await localDataSource.cacheUser(userModel);
+          await localDataSource.cacheLoginSession(uid: userModel.uid);
+          return Right(userModel);
         }
-
-        return const Left(UserNotFoundFailure());
       }
-
-      final updatedUser = userModel;
-
-      await localDataSource.cacheUser(updatedUser);
-
-      await localDataSource.cacheLoginSession(uid: updatedUser.uid);
-
-      return Right(updatedUser);
+      log('--------------------> message: no internet connection');
+      final cachedUser = await localDataSource.getCachedUser();
+      if (cachedUser != null && cachedUser.isVerified && cachedUser.isActive) {
+        await localDataSource.cacheLoginSession(uid: cachedUser.uid);
+        log(
+          '--------------------> message: returning cached user :: ${cachedUser.toString()}',
+        );
+        return Right(cachedUser);
+      }
+      return Left(AuthFailure('no internet connection'));
     } on FirebaseAppException catch (e) {
       /*
        * في حالة عدم توفر الإنترنت أو Firebase:

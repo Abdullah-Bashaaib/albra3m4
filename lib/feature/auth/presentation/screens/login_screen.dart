@@ -222,12 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             );
                           },
                         ),
-                        const SizedBox(height: 16),
-                        CustomButton(
-                          label: 'إنشاء حساب',
-                          onPressed: () {},
-                          variant: ButtonVariant.outlined,
-                        ),
+
                         const SizedBox(height: 50.0),
                       ],
                     ),

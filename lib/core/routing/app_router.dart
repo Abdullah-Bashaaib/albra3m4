@@ -1,3 +1,4 @@
+import 'package:albra3m4/feature/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:albra3m4/feature/auth/presentation/screens/home_screen_temp.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,8 +15,13 @@ class AppRouter {
   const AppRouter._();
 
   static final GoRouter router = GoRouter(
-    initialLocation: AppRoutes.login,
+    initialLocation: AppRoutes.authCheck,
     routes: [
+      GoRoute(
+        path: AppRoutes.authCheck,
+        name: AppRoutes.authCheck,
+        builder: (context, state) => const AuthGateScreen(),
+      ),
       GoRoute(
         path: AppRoutes.login,
         name: AppRoutes.login,

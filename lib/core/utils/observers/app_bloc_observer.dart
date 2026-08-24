@@ -1,77 +1,47 @@
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// مراقب عام لجميع الـ Cubits/Blocs في التطبيق.
-///
-/// يُسجَّل مرة واحدة في main() قبل runApp():
-/// ```dart
-/// Bloc.observer = AppBlocObserver();
-/// ```
-///
-/// يطبع في الـ console:
-/// - إنشاء/إغلاق كل Cubit/Bloc
-/// - كل تغيّر في الحالة (من → إلى)
-/// - أي خطأ يحدث داخل أي Cubit/Bloc، مع الـ StackTrace
-///
-/// لا يطبع شيئاً في وضع الإصدار (Release) — فقط أثناء التطوير (Debug/Profile).
 class AppBlocObserver extends BlocObserver {
   @override
-  void onCreate(BlocBase<dynamic> bloc) {
+  void onCreate(BlocBase bloc) {
     super.onCreate(bloc);
-    _log('🟢 تم إنشاء', bloc);
+    log('🌀 Bloc تم إنشاؤه: ${bloc.runtimeType}');
+  }
+
+  @override
+  void onEvent(Bloc bloc, Object? event) {
+    super.onEvent(bloc, event);
+    log('📨 حدث في ${bloc.runtimeType}: $event');
+  }
+
+  @override
+  void onChange(BlocBase bloc, Change change) {
+    super.onChange(bloc, change);
+    log('🔄 تغيير في ${bloc.runtimeType}:');
+    log('   من: ${change.currentState}');
+    log('   إلى: ${change.nextState}');
   }
 
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
-    _log(
-      '🔄 انتقال',
-      bloc,
-      details:
-          'من: ${transition.currentState.runtimeType}\n'
-          '   إلى: ${transition.nextState.runtimeType}\n'
-          '   الحدث: ${transition.event.runtimeType}',
-    );
+    log('🚀 انتقال في ${bloc.runtimeType}:');
+    log('   حدث: ${transition.event}');
+    log('   من: ${transition.currentState}');
+    log('   إلى: ${transition.nextState}');
   }
 
   @override
-  void onChange(BlocBase<dynamic> bloc, Change<dynamic> change) {
-    super.onChange(bloc, change);
-    _log(
-      '🔄 تغيّرت الحالة',
-      bloc,
-      details:
-          'من: ${change.currentState.runtimeType}\n'
-          '   إلى: ${change.nextState.runtimeType}',
-    );
-  }
-
-  @override
-  void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
-    _log('🔴 خطأ', bloc, details: error.toString());
-    if (kDebugMode) {
-      debugPrintStack(stackTrace: stackTrace, label: '${bloc.runtimeType}');
-    }
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    log('❌ خطأ في ${bloc.runtimeType}: $error');
+    log('📍 StackTrace: $stackTrace');
     super.onError(bloc, error, stackTrace);
   }
 
   @override
-  void onClose(BlocBase<dynamic> bloc) {
+  void onClose(BlocBase bloc) {
     super.onClose(bloc);
-    _log('⚪ تم إغلاق', bloc);
-  }
-
-  void _log(String action, BlocBase<dynamic> bloc, {String? details}) {
-    if (!kDebugMode) return;
-
-    final buffer = StringBuffer('[${bloc.runtimeType}] $action');
-
-    if (details != null) {
-      buffer.write('\n   $details');
-    }
-
-    log(buffer.toString());
+    log('🔒 Bloc تم إغلاقه: ${bloc.runtimeType}');
   }
 }

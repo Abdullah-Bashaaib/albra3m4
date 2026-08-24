@@ -26,7 +26,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()),
+        BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()..checkAuthStatus()),
         BlocProvider<AttendanceCubit>(create: (_) => sl<AttendanceCubit>()),
       ],
       child: MaterialApp.router(
