@@ -51,8 +51,11 @@ final class LoginLoading extends LoginState {
 }
 
 final class LoginSuccess extends LoginState {
+  final UserEntity user;
+
+  const LoginSuccess(this.user);
   @override
-  List<Object> get props => [];
+  List<Object> get props => [user];
 }
 
 /// تُطلق بعد أول تسجيل دخول عبر Google (حساب جديد لم يُكمل بياناته بعد).

@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_font.dart';
-import '../../../../core/routing/app_routes.dart';
+import '../../../../core/routing/role_route_mapper.dart';
 import '../../../../core/utils/validators/auth_validators.dart';
 import '../../../../core/utils/widgets/custom_button.dart';
 import '../../../../core/utils/widgets/custom_text_form_field.dart';
@@ -83,8 +83,8 @@ class _CompleteGoogleProfileScreenState
             );
           }
           if (state is LoginSuccess) {
-           CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح');
-            context.go(AppRoutes.home);
+            CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح');
+            context.go(state.user.role.dashboardRoute);
           }
 
           if (state is LoginFailure) {

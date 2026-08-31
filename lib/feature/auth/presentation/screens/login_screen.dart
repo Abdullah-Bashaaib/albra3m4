@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_font.dart';
 import '../../../../core/routing/app_routes.dart';
+import '../../../../core/routing/role_route_mapper.dart';
 import '../../../../core/utils/widgets/app_background.dart';
 import '../manger/login_cubit.dart';
 
@@ -51,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         listener: (context, state) {
           if (state is LoginSuccess) {
             CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح!');
-            context.go(AppRoutes.home);
+            context.go(state.user.role.dashboardRoute);
           }
 
           if (state is LoginGoogleProfileIncomplete) {

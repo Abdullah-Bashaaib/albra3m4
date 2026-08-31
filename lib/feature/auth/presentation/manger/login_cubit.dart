@@ -64,7 +64,7 @@ class LoginCubit extends Cubit<LoginState> {
       },
       (userLogged) {
         user = userLogged;
-        emit(LoginSuccess());
+        emit(LoginSuccess(user!));
       },
     );
   }
@@ -83,7 +83,7 @@ class LoginCubit extends Cubit<LoginState> {
       if (data.isNewUser) {
         emit(LoginGoogleProfileIncomplete(data.user));
       } else {
-        emit(LoginSuccess());
+        emit(LoginSuccess(user!));
       }
     });
   }
@@ -105,7 +105,7 @@ class LoginCubit extends Cubit<LoginState> {
     );
     result.fold((failure) => emit(LoginFailure(failure.message)), (userLogged) {
       user = userLogged;
-      emit(LoginSuccess());
+      emit(LoginSuccess(user!));
     });
   }
 
@@ -130,7 +130,7 @@ class LoginCubit extends Cubit<LoginState> {
       },
       (userLogged) {
         user = userLogged;
-        emit(LoginSuccess());
+        emit(LoginSuccess(user!));
       },
     );
   }
