@@ -1,5 +1,4 @@
 import 'package:albra3m4/core/utils/widgets/app_background.dart';
-import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -57,16 +56,10 @@ class AuthGateScreen extends StatelessWidget {
     }
 
     if (state is LoginGoogleProfileIncomplete) {
-      // ملاحظة: هنا go() مقصودة (مش push()) — عكس اللي بيحصل في
-      // LoginScreen، لأن دي أول شاشة تظهر عند فتح التطبيق، فمفيش
-      // شاشة "دخول" قبلها في الـ stack يرجع لها المستخدم بزر الرجوع.
       context.go(AppRoutes.completeGoogleProfile, extra: state.user);
       return;
     }
 
-    if (state is AuthUnauthenticated) {
-      CustomSnackBar.showError(context, 'User Unauthenticated');
-    }
     // AuthUnauthenticated / LoginFailure / أي حالة غير متوقعة أخرى
     context.go(AppRoutes.login);
   }

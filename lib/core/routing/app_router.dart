@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../feature/auth/domain/entities/user.dart';
 import '../../feature/auth/presentation/screens/complete_google_profile_screen.dart';
 import '../../feature/auth/presentation/screens/login_screen.dart';
+import '../../feature/users/presentation/screens/admin_dashboard_screen.dart';
 import 'app_routes.dart';
 
 /// إعداد go_router للتطبيق.
@@ -51,7 +52,7 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.adminDashboard,
         name: AppRoutes.adminDashboard,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const AdminDashboardScreen(),
       ),
       GoRoute(
         path: AppRoutes.managerDashboard,
