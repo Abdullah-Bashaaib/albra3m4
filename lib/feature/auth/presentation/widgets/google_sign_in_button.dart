@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/app_colors.dart';
 import '../../../../core/constants/app_font.dart';
 
 /// زر تسجيل الدخول / إنشاء حساب عبر Google.

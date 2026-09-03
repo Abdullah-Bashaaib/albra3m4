@@ -9,6 +9,15 @@ import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teac
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/teachers_management/data/repo/teacher_repo_imp.dart';
+import 'package:albra3m4/feature/teachers_management/data/source/teacher_local.dart';
+import 'package:albra3m4/feature/teachers_management/data/source/teacher_remote.dart';
+import 'package:albra3m4/feature/teachers_management/domain/repo/teacher_repo.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/add_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/delete_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/get_teachers_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/update_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -60,11 +69,12 @@ class Injection {
         firestore: sl<FirebaseFirestore>(),
       ),
     );
-    sl.registerLazySingleton(() =>
-        AuthLocalDataSourceImpl(
-          database: sl<Database>(),
-          sharedPreferences: sl<SharedPreferences>(),
-        ),);
+    sl.registerLazySingleton(
+      () => AuthLocalDataSourceImpl(
+        database: sl<Database>(),
+        sharedPreferences: sl<SharedPreferences>(),
+      ),
+    );
 
     // Local
     sl.registerSingletonWithDependencies<AuthLocalDataSource>(
@@ -82,41 +92,42 @@ class Injection {
         localDataSource: sl<AuthLocalDataSource>(),
       ),
     );
-    
+
     // Use Cases
     sl.registerLazySingleton<LoginUseCase>(
-          () => LoginUseCase(sl<AuthRepository>()),
+      () => LoginUseCase(sl<AuthRepository>()),
     );
     sl.registerLazySingleton<RegisterUserUseCase>(
-          () => RegisterUserUseCase(sl<AuthRepository>()),
+      () => RegisterUserUseCase(sl<AuthRepository>()),
     );
     sl.registerLazySingleton<SendEmailVerificationUseCase>(
-          () => SendEmailVerificationUseCase(sl<AuthRepository>()),
+      () => SendEmailVerificationUseCase(sl<AuthRepository>()),
     );
     sl.registerLazySingleton<SendPasswordResetEmail>(
-          () => SendPasswordResetEmail(sl<AuthRepository>()),
+      () => SendPasswordResetEmail(sl<AuthRepository>()),
     );
     sl.registerLazySingleton<GetCachedUserUseCase>(
-          () => GetCachedUserUseCase(sl<AuthRepository>()),
+      () => GetCachedUserUseCase(sl<AuthRepository>()),
     );
     sl.registerLazySingleton<GetCurrentUserUseCase>(
-          () => GetCurrentUserUseCase(sl<AuthRepository>()),
+      () => GetCurrentUserUseCase(sl<AuthRepository>()),
     );
     sl.registerLazySingleton<GoogleLoginUseCase>(
-          () => GoogleLoginUseCase(sl<AuthRepository>()),
+      () => GoogleLoginUseCase(sl<AuthRepository>()),
     );
 
     // Cubit
-    sl.registerLazySingleton<LoginCubit>(() =>
-        LoginCubit(
-          sl<LoginUseCase>(),
-          sl<RegisterUserUseCase>(),
-          sl<SendEmailVerificationUseCase>(),
-          sl<SendPasswordResetEmail>(),
-          sl<GetCachedUserUseCase>(),
-          sl<GetCurrentUserUseCase>(),
-          sl<GoogleLoginUseCase>(),
-        ));
+    sl.registerLazySingleton<LoginCubit>(
+      () => LoginCubit(
+        sl<LoginUseCase>(),
+        sl<RegisterUserUseCase>(),
+        sl<SendEmailVerificationUseCase>(),
+        sl<SendPasswordResetEmail>(),
+        sl<GetCachedUserUseCase>(),
+        sl<GetCurrentUserUseCase>(),
+        sl<GoogleLoginUseCase>(),
+      ),
+    );
 
     /// ===================== [ Attendance ] ====================
     // Remote
@@ -163,5 +174,44 @@ class Injection {
       ),
     );
 
+    /// ====================== [ Teacher Management ] ==================
+    // source
+    sl.registerLazySingleton<TeacherLocal>(
+      () => TeacherLocalImp(sl<DatabaseHelper>()),
+    );
+    sl.registerLazySingleton<TeacherRemote>(
+      () => TeacherRemoteImp(sl<FirebaseFirestore>()),
+    );
+    // repo
+    sl.registerLazySingleton<TeacherRepo>(
+      () => TeacherRepoImp(
+        sl<InternetConnectionChecker>(),
+        sl<TeacherLocal>(),
+        sl<TeacherRemote>(),
+      ),
+    );
+
+    // Usecase
+    sl.registerLazySingleton<GetTeachersUsecase>(
+      () => GetTeachersUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<AddTeacherUsecase>(
+      () => AddTeacherUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<UpdateTeacherUsecase>(
+      () => UpdateTeacherUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<DeleteTeacherUsecase>(
+      () => DeleteTeacherUsecase(sl<TeacherRepo>()),
+    );
+    // cubit
+    sl.registerLazySingleton<TeacherCubit>(
+      () => TeacherCubit(
+        getTeachersUsecase: sl<GetTeachersUsecase>(),
+        addTeacherUsecase: sl<AddTeacherUsecase>(),
+        updateTeacherUsecase: sl<UpdateTeacherUsecase>(),
+        deleteTeacherUsecase: sl<DeleteTeacherUsecase>(),
+      ),
+    );
   }
 }

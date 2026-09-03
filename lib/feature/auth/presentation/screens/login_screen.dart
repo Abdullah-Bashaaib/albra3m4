@@ -1,4 +1,4 @@
-import 'package:albra3m4/core/constants/app_colors.dart';
+import 'package:albra3m4/core/app_colors.dart';
 import 'package:albra3m4/core/utils/validators/auth_validators.dart';
 import 'package:albra3m4/core/utils/widgets/custom_button.dart';
 import 'package:albra3m4/core/utils/widgets/custom_text_form_field.dart';

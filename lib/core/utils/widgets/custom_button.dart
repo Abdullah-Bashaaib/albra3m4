@@ -1,7 +1,7 @@
 import 'package:albra3m4/core/constants/app_font.dart';
 import 'package:flutter/material.dart';
 
-import '../../constants/app_colors.dart';
+import '../../app_colors.dart';
 
 enum ButtonVariant { filled, outlined, text }
 
