@@ -1,5 +1,6 @@
 import 'package:albra3m4/feature/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:albra3m4/feature/auth/presentation/screens/home_screen_temp.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/pages/admin_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../feature/auth/domain/entities/user.dart';
@@ -52,12 +53,18 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.adminDashboard,
         name: AppRoutes.adminDashboard,
-        builder: (context, state) => const AdminDashboardScreen(),
+        builder: (context, state) {
+          final user = state.extra as UserEntity;
+          return AdminDashboardScreen(user: user);
+        },
       ),
       GoRoute(
         path: AppRoutes.managerDashboard,
         name: AppRoutes.managerDashboard,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) {
+          final user = state.extra as UserEntity;
+          return ManagerDashboardScreen(user: user);
+        },
       ),
       GoRoute(
         path: AppRoutes.teacherDashboard,
