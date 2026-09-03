@@ -64,9 +64,4 @@ class AttendanceRemoteImp implements AttendanceRemote {
     }
   }
 
-  @override
-  Future<QRModel> getQRTeacher(String schoolId) {
-    // TODO: implement getQRTeacher
-    throw UnimplementedError();
-  }
 }

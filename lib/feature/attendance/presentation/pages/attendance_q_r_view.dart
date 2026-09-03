@@ -30,52 +30,49 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: BlocListener<AttendanceCubit, AttendanceState>(
-        listener: (context, state) {
-          if (state.error != null) {
-            SnackBarHelper.error(context, state.error!);
-          }
-          if (state.success != null) {
-            SnackBarHelper.success(context, state.success!);
-          }
-        },
-
-        child: BlocBuilder<AttendanceCubit, AttendanceState>(
-          builder: (context, state) {
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text(
-                  'QR Code لتحضير المعلمين',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                elevation: 2,
-                actions: [
-                  // IconButton(
-                  //   icon: const Icon(Icons.refresh),
-                  //   onPressed: () {
-                  //     context.read<AttendanceCubit>().loadAttendanceCode();
-                  //   },
-                  //   tooltip: 'تحديث الكود',
-                  // ),
-                  // IconButton(
-                  //   icon: const Icon(Icons.print),
-                  //   onPressed: () {
-                  //     // _generatePdf(state);
-                  //   },
-                  //   tooltip: 'طباعة الكود',
-                  // ),
-                ],
+    return BlocListener<AttendanceCubit, AttendanceState>(
+      listener: (context, state) {
+        if (state.error != null) {
+          SnackBarHelper.error(context, state.error!);
+        }
+        if (state.success != null) {
+          SnackBarHelper.success(context, state.success!);
+        }
+      },
+    
+      child: BlocBuilder<AttendanceCubit, AttendanceState>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text(
+                'QR Code لتحضير المعلمين',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              body: state.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _buildBody(context, state),
-            );
-          },
-        ),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 2,
+              actions: [
+                // IconButton(
+                //   icon: const Icon(Icons.refresh),
+                //   onPressed: () {
+                //     context.read<AttendanceCubit>().loadAttendanceCode();
+                //   },
+                //   tooltip: 'تحديث الكود',
+                // ),
+                // IconButton(
+                //   icon: const Icon(Icons.print),
+                //   onPressed: () {
+                //     // _generatePdf(state);
+                //   },
+                //   tooltip: 'طباعة الكود',
+                // ),
+              ],
+            ),
+            body: state.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _buildBody(context, state),
+          );
+        },
       ),
     );
   }

@@ -113,7 +113,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       // 3) تسجيل الدخول إلى Firebase بواسطة الـ credential
-      final userCredential = await firebaseAuth.signInWithCredential(
+      final   userCredential = await firebaseAuth.signInWithCredential(
         credential,
       );
 

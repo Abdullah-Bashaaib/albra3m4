@@ -10,6 +10,15 @@ import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usec
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/auth/domain/usecases/complete_google_profile_use_case.dart';
 import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/teachers_management/data/repo/teacher_repo_imp.dart';
+import 'package:albra3m4/feature/teachers_management/data/source/teacher_local.dart';
+import 'package:albra3m4/feature/teachers_management/data/source/teacher_remote.dart';
+import 'package:albra3m4/feature/teachers_management/domain/repo/teacher_repo.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/add_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/delete_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/get_teachers_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/update_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,7 +26,6 @@ import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'core/database/database_helper.dart';
 import 'feature/auth/Data/datasource/local/auth_local_data_source.dart';
 import 'feature/auth/Data/datasource/local/auth_local_data_source_impl.dart';
@@ -74,6 +82,12 @@ class Injection {
       () => AuthRemoteDataSourceImpl(
         firebaseAuth: sl<FirebaseAuth>(),
         firestore: sl<FirebaseFirestore>(),
+      ),
+    );
+    sl.registerLazySingleton(
+      () => AuthLocalDataSourceImpl(
+        database: sl<Database>(),
+        sharedPreferences: sl<SharedPreferences>(),
       ),
     );
 
@@ -139,6 +153,7 @@ class Injection {
 
     // =========================
     // Cubit
+    sl.registerLazySingleton<LoginCubit>(
     // =========================
 
     sl.registerFactory<LoginCubit>(
@@ -198,7 +213,45 @@ class Injection {
         getQRTeacherUsecase: sl<GetQRTeacherUsecase>(),
       ),
     );
+    /// ====================== [ Teacher Management ] ==================
+    // source
+    sl.registerLazySingleton<TeacherLocal>(
+      () => TeacherLocalImp(sl<DatabaseHelper>()),
+    );
+    sl.registerLazySingleton<TeacherRemote>(
+      () => TeacherRemoteImp(sl<FirebaseFirestore>()),
+    );
+    // repo
+    sl.registerLazySingleton<TeacherRepo>(
+      () => TeacherRepoImp(
+        sl<InternetConnectionChecker>(),
+        sl<TeacherLocal>(),
+        sl<TeacherRemote>(),
+      ),
+    );
 
+    // Usecase
+    sl.registerLazySingleton<GetTeachersUsecase>(
+      () => GetTeachersUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<AddTeacherUsecase>(
+      () => AddTeacherUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<UpdateTeacherUsecase>(
+      () => UpdateTeacherUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<DeleteTeacherUsecase>(
+      () => DeleteTeacherUsecase(sl<TeacherRepo>()),
+    );
+    // cubit
+    sl.registerLazySingleton<TeacherCubit>(
+      () => TeacherCubit(
+        getTeachersUsecase: sl<GetTeachersUsecase>(),
+        addTeacherUsecase: sl<AddTeacherUsecase>(),
+        updateTeacherUsecase: sl<UpdateTeacherUsecase>(),
+        deleteTeacherUsecase: sl<DeleteTeacherUsecase>(),
+      ),
+    );
     ///=========================[ Users Management ]========================
     // DataSource Remote
     sl.registerLazySingleton<UsersRemoteDataSourceImpl>(() =>

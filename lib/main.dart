@@ -2,10 +2,13 @@ import 'package:albra3m4/core/constants/app_font.dart';
 import 'package:albra3m4/core/routing/app_router.dart';
 import 'package:albra3m4/core/utils/observers/app_bloc_observer.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/pages/teachers_list_screen.dart';
 import 'package:albra3m4/injection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/app_colors.dart';
 
 import 'core/constants/app_colors.dart';
 import 'feature/auth/presentation/manger/login_cubit.dart';
@@ -29,6 +32,8 @@ class MainApp extends StatelessWidget {
       providers: [
         BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()..checkAuthStatus()),
         BlocProvider<AttendanceCubit>(create: (_) => sl<AttendanceCubit>()),
+        BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()),
+        BlocProvider<TeacherCubit>(create: (_) => sl<TeacherCubit>()),=======
         BlocProvider<UsersCubit>(create: (_) => sl<UsersCubit>()),
       ],
       child: MaterialApp.router(
@@ -42,6 +47,10 @@ class MainApp extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
+        ),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: const TeachersListScreen(),
         ),
         builder: (context, child) {
           return Directionality(

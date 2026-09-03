@@ -6,18 +6,21 @@ class UserModel extends UserEntity {
   const UserModel({
     required super.uid,
     required super.fullName,
+    super.schoolId,
     required super.email,
     super.phone,
     required super.role,
     required super.isVerified,
     required super.isActive,
     required super.createdAt,
+    super.tDetails,
   });
 
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       uid: entity.uid,
       fullName: entity.fullName,
+      schoolId: entity.schoolId,
       email: entity.email,
       phone: entity.phone,
       role: entity.role,
@@ -34,29 +37,31 @@ class UserModel extends UserEntity {
   Map<String, dynamic> toFirestore() {
     return {
       'uid': uid,
-      'fullName': fullName,
+      'full_name': fullName,
+      'school_id': schoolId,
       'email': email,
       'phone': phone,
       'role': role.name,
-      'isVerified': isVerified,
-      'isActive': isActive,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'is_verified': isVerified,
+      'is_active': isActive,
+      'created_at': Timestamp.fromDate(createdAt),
     };
   }
 
   factory UserModel.fromFirestore(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] as String,
-      fullName: map['fullName'] as String? ?? '',
+      fullName: map['full_name'] as String? ?? '',
+      schoolId: map['school_id'],
       email: map['email'] as String? ?? '',
       phone: map['phone'] as String?,
       role: UserRole.values.firstWhere(
         (role) => role.name == map['role'],
         orElse: () => UserRole.parent,
       ),
-      isVerified: map['isVerified'] as bool? ?? false,
-      isActive: map['isActive'] as bool? ?? true,
-      createdAt: _parseFirestoreDate(map['createdAt']),
+      isVerified: map['is_verified'] as bool? ?? false,
+      isActive: map['is_active'] as bool? ?? true,
+      createdAt: _parseFirestoreDate(map['created_at']),
     );
   }
 
@@ -68,6 +73,7 @@ class UserModel extends UserEntity {
     return {
       'uid': uid,
       'full_name': fullName,
+      'school_id': schoolId,
       'email': email,
       'phone': phone,
       'role': role.name,
@@ -81,6 +87,7 @@ class UserModel extends UserEntity {
     return UserModel(
       uid: map['uid'] as String,
       fullName: map['full_name'] as String? ?? '',
+      schoolId: map['school_id'],
       email: map['email'] as String? ?? '',
       phone: map['phone'] as String?,
       role: UserRole.values.firstWhere(
@@ -100,6 +107,7 @@ class UserModel extends UserEntity {
   UserModel copyWith({
     String? uid,
     String? fullName,
+    String? schoolId,
     String? email,
     String? phone,
     UserRole? role,
@@ -110,6 +118,7 @@ class UserModel extends UserEntity {
     return UserModel(
       uid: uid ?? this.uid,
       fullName: fullName ?? this.fullName,
+      schoolId: schoolId ?? this.schoolId,
       email: email ?? this.email,
       phone: phone ?? this.phone,
       role: role ?? this.role,
