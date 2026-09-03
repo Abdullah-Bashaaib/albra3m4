@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -38,6 +40,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE users (
         uid TEXT PRIMARY KEY,
+        school_id TEXT NOT NULL,
         full_name TEXT NOT NULL,
         email TEXT NOT NULL,
         phone TEXT,
@@ -70,31 +73,31 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (_databaseVersion < 3) {
-      await db.execute(
-        ''''''
-        '',
-      );
+    if (oldVersion < 3) {
       await db.execute('''
-  CREATE TABLE teachers (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    school_id TEXT NOT NULL,
-    birth_date TEXT NOT NULL,
-    birth_place TEXT NOT NULL,
-    academic_qualification TEXT NOT NULL,
-    qualification_date TEXT NOT NULL,
-    specialization TEXT NOT NULL,
-    social_status TEXT NOT NULL,
-    children_count INTEGER NOT NULL DEFAULT 0,
-    home_phone TEXT NOT NULL,
-    mobile_phone TEXT NOT NULL,
+        CREATE TABLE teachers (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          school_id TEXT NOT NULL,
+          birth_date TEXT NOT NULL,
+          birth_place TEXT NOT NULL,
+          academic_qualification TEXT NOT NULL,
+          qualification_date TEXT NOT NULL,
+          specialization TEXT NOT NULL,
+          social_status TEXT NOT NULL,
+          children_count INTEGER NOT NULL DEFAULT 0,
+          home_phone TEXT NOT NULL,
+          mobile_phone TEXT NOT NULL,
+          FOREIGN KEY (user_id) REFERENCES users(uid)
+        )
+      ''');
 
-    FOREIGN KEY (user_id) REFERENCES users(uid)
-  )
-''');
+      await db.execute('''
+        ALTER TABLE users
+        ADD school_id TEXT NOT NULL DEFAULT ''
+      ''');
     }
-    print('==================database Upgraded ====================');
+    log('================== database Upgraded ====================');
   }
 
   Future<void> close() async {

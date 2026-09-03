@@ -68,37 +68,30 @@ class _AdminDashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final section = context.watch<AdminDashboardCubit>().state.selectedSection;
 
-    // ScrollConfiguration يطبّق _AdminScrollBehavior على كل الشجرة تحته —
-    // يعني أي ListView/SingleChildScrollView جوّه الشاشة (قائمة المستخدمين،
-    // صف الإحصائيات الأفقي، وحتى قائمة الـ Drawer) ياخذ نفس فيزياء
-    // التمرير وشكل الـ Scrollbar تلقائياً، بدون تكرار الإعداد بكل widget.
-    return ScrollConfiguration(
-      behavior: _AdminScrollBehavior(),
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          elevation: 0,
-          flexibleSpace: ClipRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.transparent),
-            ),
-          ),
-          backgroundColor: Colors.transparent,
-          foregroundColor: const Color(0xFF2D2D3A),
-          centerTitle: true,
-          title: Text(
-            _titleFor(section),
-            style: const TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 17,
-              fontFamily: AppFont.primary,
-            ),
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(color: Colors.transparent),
           ),
         ),
-        drawer: AdminDashboardDrawer(onLogout: () => _handleLogout(context)),
-        body: AppBackground(child: SafeArea(child: _bodyFor(section))),
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF2D2D3A),
+        centerTitle: true,
+        title: Text(
+          _titleFor(section),
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 17,
+            fontFamily: AppFont.primary,
+          ),
+        ),
       ),
+      drawer: AdminDashboardDrawer(onLogout: () => _handleLogout(context)),
+      body: AppBackground(child: SafeArea(child: _bodyFor(section))),
     );
   }
 
@@ -124,42 +117,6 @@ class _AdminDashboardView extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// ScrollBehavior مخصص للوحة تحكم المشرف:
-/// - فيزياء Bouncing تعطي إحساس تمرير أكثر انسيابية (زي iOS) بدل القطع الافتراضي.
-/// - Scrollbar دائم الظهور (thumbVisibility) وأسمك وبحواف دائرية، ليكون
-///   واضح للعين إن فيه محتوى إضافي تحت/فوق بدل ما يعتمد المستخدم على
-///   السحب العشوائي ليكتشف إن القائمة قابلة للتمرير.
-/// - يدعم سحب الماوس/التراك باد أيضاً (مفيد لو التطبيق يشتغل على الويب/ديسكتوب).
-class _AdminScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.trackpad,
-  };
-
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
-    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
-  }
-
-  @override
-  Widget buildScrollbar(
-    BuildContext context,
-    Widget child,
-    ScrollableDetails details,
-  ) {
-    return Scrollbar(
-      controller: details.controller,
-      thumbVisibility: true,
-      trackVisibility: true,
-      thickness: 5,
-      radius: const Radius.circular(12),
-      child: child,
     );
   }
 }
