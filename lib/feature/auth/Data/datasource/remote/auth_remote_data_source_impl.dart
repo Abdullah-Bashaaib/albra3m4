@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -38,7 +40,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      await firebaseUser.reload(); //
+      await firebaseUser.reload();
 
       final currentUser = firebaseAuth.currentUser;
 
@@ -49,14 +51,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      if (!currentUser.emailVerified) {
+      // ⚠️ ملاحظة مهمة: لا نتحقق هنا من currentUser.emailVerified
+      // (فلاج Firebase Auth الأصلي). التطبيق يستخدم نظام تحقق مخصص
+      // عبر OTP/EmailJS (UC-002) يحدّث حقل isVerified في Firestore،
+      // ومفيش علاقة بينه وبين نظام Firebase المدمج (اللي يحتاج
+      // المستخدم يضغط لينك تحقق مُرسَل من Firebase نفسه). الاعتماد
+      // على currentUser.emailVerified هنا كان يرجّع دايماً false
+      // لأي مستخدم اتحقق عبر OTP بس، حتى لو حسابه فعلاً verified.
+      final userModel = await getUserFromFirestore(uid: currentUser.uid);
+
+      if (!userModel.isVerified) {
         throw FirebaseAuthException(
           code: 'email-not-verified',
           message: 'يجب تأكيد البريد الإلكتروني أولاً.',
         );
       }
-
-      final userModel = await getUserFromFirestore(uid: currentUser.uid);
 
       if (!userModel.isActive) {
         throw FirebaseAuthException(
@@ -65,7 +74,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      return userModel.copyWith(isVerified: currentUser.emailVerified);
+      // لا نستخدم .copyWith(isVerified: currentUser.emailVerified) هنا —
+      // ده كان بيكتب فوق قيمة isVerified الصحيحة (من Firestore/OTP)
+      // بقيمة Firebase الأصلي (غالباً false)، وده كان بيتخزّن محلياً
+      // كمان عبر localDataSource.cacheUser ويبوّظ مسار الـ offline.
+      return userModel;
     } on FirebaseAuthException catch (e) {
       throw FirebaseExceptionMapper.mapAuthException(e);
     } on FirebaseException catch (e) {
@@ -74,13 +87,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> loginWithGoogle() async {
+  Future<({UserModel user, bool isNewUser})> loginWithGoogle() async {
+    log(
+        '----------> message: START loginWithGoogle method at remote data source');
     try {
       // 1) فتح شاشة اختيار حساب Google
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
         // المستخدم ألغى العملية — ليست حالة خطأ من Firebase، نبنيها يدوياً
+        log('message: user canceled login with google');
         throw FirebaseAuthException(
           code: 'sign-in-cancelled',
           message: 'تم إلغاء تسجيل الدخول عبر Google.',
@@ -89,7 +105,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // 2) الحصول على tokens المصادقة من Google
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -102,7 +118,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       final firebaseUser = userCredential.user;
-
+      log('message: firebaseUser is ${firebaseUser.toString()}');
       if (firebaseUser == null) {
         throw FirebaseAuthException(
           code: 'google-sign-in-failed',
@@ -116,9 +132,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .doc(firebaseUser.uid)
           .get();
 
+      final bool isNewUser = !document.exists || document.data() == null;
+
       UserModel userModel;
 
-      if (document.exists && document.data() != null) {
+      if (!isNewUser) {
         // مستخدم حالي — نجلب بياناته كما هي
         userModel = UserModel.fromFirestore(document.data()!);
 
@@ -129,25 +147,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           );
         }
       } else {
-        // أول تسجيل دخول عبر Google — إنشاء وثيقة جديدة
-        // ملاحظة: الدور الافتراضي parent، ويمكن لاحقاً لمشرف النظام
-        // تغييره حسب واقع الروضة (UC-007).
+        // أول تسجيل دخول عبر Google — إنشاء وثيقة جديدة بدور افتراضي.
+        // الدور الحقيقي (Teacher/Parent) والهاتف يُستكملان لاحقاً من
+        // شاشة "إكمال الملف الشخصي" في التطبيق.
         userModel = UserModel(
           uid: firebaseUser.uid,
           fullName: firebaseUser.displayName ?? googleUser.displayName ?? '',
           email: firebaseUser.email ?? googleUser.email,
           phone: firebaseUser.phoneNumber,
           role: UserRole.parent,
-          isVerified: true,
-          // بريد Google موثوق مسبقاً
-          isActive: true,
+          isVerified: true, // بريد Google موثوق مسبقاً
+          isActive: false,
           createdAt: DateTime.now(),
         );
 
         await createUserInFirestore(user: userModel);
       }
 
-      return userModel.copyWith(isVerified: true);
+      // بريد Google موثوق أصلاً — isVerified: true ثابتة، بدون أي
+      // اعتماد على Firebase Auth's native emailVerified flag.
+      return (user: userModel.copyWith(isVerified: true), isNewUser: isNewUser);
     } on FirebaseAuthException catch (e) {
       throw FirebaseExceptionMapper.mapAuthException(e);
     } on FirebaseException catch (e) {
@@ -185,13 +204,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         email: firebaseUser.email ?? email,
         phone: phone,
         role: UserRole.parent,
-        isVerified: firebaseUser.emailVerified,
+        isVerified: false,
         isActive: true,
         createdAt: DateTime.now(),
       );
 
       await createUserInFirestore(user: userModel);
 
+      // ⚠️ TODO: هذا يرسل إيميل تحقق أصلي من Firebase (منفصل تماماً
+      // عن رسالة الـ OTP التي يرسلها EmailJS في UC-002). بما إن
+      // التطبيق أصبح يعتمد كلياً على isVerified في Firestore (وليس
+      // على currentUser.emailVerified)، هذا الاستدعاء لم يعد له أثر
+      // فعلي على منطق التحقق — فقط سيرسل للمستخدم إيميل إضافي مربك
+      // (رابط Firebase لن يحدّث isVerified في Firestore). يُنصح
+      // بإزالته أو استبداله بإرسال الـ OTP مباشرة من هنا.
       await firebaseUser.sendEmailVerification();
 
       return userModel;
@@ -231,32 +257,55 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel?> getCurrentUser() async {
+    log(
+      '--------------------> message: getCurrentUser() called in DataSourceRemote',
+    );
     try {
       final user = firebaseAuth.currentUser;
-
+      log(
+        '--------------------> message: currentUser :: ${user.toString()} , isNull :: ${user == null}',
+      );
       if (user == null) {
+        log(
+          '------------------------> message : currentUser is ${user.toString()}',
+        );
         return null;
       }
 
       await user.reload();
-
+      log(
+        '--------------------> message: currentUser reloaded :: ${user.email}',
+      );
       final currentUser = firebaseAuth.currentUser;
-
+      log(
+        '--------------------> message: currentUser after reload :: ${currentUser?.email ?? 'null'}',
+      );
       if (currentUser == null) {
         return null;
       }
 
-      if (!currentUser.emailVerified) {
-        return null;
-      }
+      // ⚠️ تم حذف الشرط `if (!currentUser.emailVerified) return null;`
+      // من هنا — هذا كان السبب الفعلي وراء رجوع null دايماً حتى مع
+      // حساب verified وactive. راجع التعليق في login() لتفاصيل أكثر.
 
       final userModel = await getUserFromFirestore(uid: currentUser.uid);
+      log(
+        '--------------------> message: userModel from Firestore :: ${userModel.toString()}',
+      );
 
-      if (!userModel.isActive) {
+      if (!userModel.isVerified) {
+        log('--------------------> message: user not verified (Firestore)');
         return null;
       }
 
-      return userModel.copyWith(isVerified: currentUser.emailVerified);
+      if (!userModel.isActive) {
+        log('--------------------> message: user not active (Firestore)');
+        return null;
+      }
+
+      // لا copyWith هنا — نرجّع الموديل زي ما جه من Firestore، بدون
+      // الكتابة فوق isVerified بقيمة Firebase الأصلي.
+      return userModel;
     } on FirebaseAuthException catch (e) {
       throw FirebaseExceptionMapper.mapAuthException(e);
     } on FirebaseException catch (e) {
@@ -342,8 +391,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> logout() async {
     try {
-      // نسجّل الخروج من Google أيضاً إن كان تسجيل الدخول تم عبرها،
-      // وإلا فهذا الاستدعاء لا يفعل شيئاً بأمان.
       if (await googleSignIn.isSignedIn()) {
         await googleSignIn.signOut();
       }

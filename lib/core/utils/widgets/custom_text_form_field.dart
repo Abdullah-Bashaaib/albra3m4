@@ -56,6 +56,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     final bool isPasswordField = widget.obscureText;
 
     return TextFormField(
+      
       controller: widget.controller,
       focusNode: widget.focusNode,
       textDirection: TextDirection.rtl,
@@ -75,6 +76,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         fontFamily: AppFont.primary,
       ),
       decoration: InputDecoration(
+        
         labelText: widget.label,
         hintText: widget.hintText,
         labelStyle: TextStyle(

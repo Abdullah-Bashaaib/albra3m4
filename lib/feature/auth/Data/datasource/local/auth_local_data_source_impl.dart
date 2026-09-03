@@ -1,3 +1,4 @@
+import 'package:albra3m4/core/utils/perf_keys.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -7,9 +8,6 @@ import 'auth_local_data_source.dart';
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences sharedPreferences;
   final Database database;
-
-  static const String _isLoggedInKey = 'is_logged_in';
-  static const String _userIdKey = 'user_id';
 
   static const String usersTable = 'users';
 
@@ -24,26 +22,26 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> cacheLoginSession({required String uid}) async {
-    await sharedPreferences.setBool(_isLoggedInKey, true);
+    await sharedPreferences.setBool(PerfKeys.isLoggedInKey, true);
 
-    await sharedPreferences.setString(_userIdKey, uid);
+    await sharedPreferences.setString(PerfKeys.userIdKey, uid);
   }
 
   @override
   Future<bool> isLoggedIn() async {
-    return sharedPreferences.getBool(_isLoggedInKey) ?? false;
+    return sharedPreferences.getBool(PerfKeys.isLoggedInKey) ?? false;
   }
 
   @override
   Future<String?> getCachedUserId() async {
-    return sharedPreferences.getString(_userIdKey);
+    return sharedPreferences.getString(PerfKeys.userIdKey);
   }
 
   @override
   Future<void> clearLoginSession() async {
-    await sharedPreferences.remove(_isLoggedInKey);
+    await sharedPreferences.remove(PerfKeys.isLoggedInKey);
 
-    await sharedPreferences.remove(_userIdKey);
+    await sharedPreferences.remove(PerfKeys.userIdKey);
   }
 
   // ---------------------------------------------------------------------------

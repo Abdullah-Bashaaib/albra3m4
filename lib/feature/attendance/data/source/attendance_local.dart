@@ -26,8 +26,8 @@ class AttendanceLocalImp implements AttendanceLocal {
   @override
   Future<void> addAttendanceTeacher(TeacherAttendanceModel attendance) async {
     try {
-      await perf.setString(attendanceDateKey, DateTime.now().toIso8601String());
-      await perf.setString(attendanceStatus, attendance.status);
+      await perf.setString(PerfKeys.attendanceDateKey, DateTime.now().toIso8601String());
+      await perf.setString(PerfKeys.attendanceStatus, attendance.status);
     } catch (e) {
       throw LocalException(e.toString());
     }
@@ -36,14 +36,14 @@ class AttendanceLocalImp implements AttendanceLocal {
   @override
   Future<void> addQR(QRModel code) async {
     try {
-      perf.setString('idQR', code.id);
-      perf.setString('school_id', code.schoolId);
-      perf.setString('school_name', code.schoolName);
-      perf.setString(currentQRKey, code.code);
-      perf.setString('date', code.date?.toIso8601String() ?? '');
-      perf.setString('start_time', code.startTime);
-      perf.setString('end_time', code.endTime);
-      perf.setString('created_by', code.createdBy);
+      perf.setString(PerfKeys.currentQRKey, code.code);
+      perf.setString(PerfKeys.schoolIdKey, code.schoolId);
+      perf.setString(PerfKeys.schoolNameKey, code.schoolName);
+      perf.setString(PerfKeys.currentQRKey, code.code);
+      perf.setString(PerfKeys.dateKey, code.date?.toIso8601String() ?? '');
+      perf.setString(PerfKeys.startTimeKey, code.startTime);
+      perf.setString(PerfKeys.endTimeKey, code.endTime);
+      perf.setString(PerfKeys.createdByKey, code.createdBy);
     } catch (e) {
       throw LocalException(e.toString());
     }
@@ -52,14 +52,14 @@ class AttendanceLocalImp implements AttendanceLocal {
   @override
   Future<QRModel?> getQR() async {
     try {
-      final String? idQ = perf.getString('idQR');
-      final String? school = perf.getString('school_id');
-      final String? schoolName = perf.getString('school_name');
-      final String? currentQR = perf.getString(currentQRKey);
-      final String? dateQ = perf.getString('date');
-      final String? startTime = perf.getString('start_time');
-      final String? endTime = perf.getString('end_time');
-      final String? createdBy = perf.getString('created_by');
+      final String? idQ = perf.getString(PerfKeys.currentQRKey);
+      final String? school = perf.getString(PerfKeys.schoolIdKey);
+      final String? schoolName = perf.getString(PerfKeys.schoolNameKey);
+      final String? currentQR = perf.getString(PerfKeys.currentQRKey);
+      final String? dateQ = perf.getString(PerfKeys.dateKey);
+      final String? startTime = perf.getString(PerfKeys.startTimeKey);
+      final String? endTime = perf.getString(PerfKeys.endTimeKey);
+      final String? createdBy = perf.getString(PerfKeys.createdByKey);
 
       final qrModel = QRModel(
         id: idQ ?? '',
@@ -80,7 +80,7 @@ class AttendanceLocalImp implements AttendanceLocal {
   @override
   Future<bool> checkCode() async {
     try {
-      final savedDateString = perf.getString(attendanceDateKey);
+      final savedDateString = perf.getString(PerfKeys.attendanceDateKey);
       if (savedDateString == null) {
         return false;
       }

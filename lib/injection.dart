@@ -8,6 +8,7 @@ import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.d
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:albra3m4/feature/auth/domain/usecases/complete_google_profile_use_case.dart';
 import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
 import 'package:albra3m4/feature/teachers_management/data/repo/teacher_repo_imp.dart';
 import 'package:albra3m4/feature/teachers_management/data/source/teacher_local.dart';
@@ -18,6 +19,7 @@ import 'package:albra3m4/feature/teachers_management/domain/usecases/delete_teac
 import 'package:albra3m4/feature/teachers_management/domain/usecases/get_teachers_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/domain/usecases/update_teacher_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -38,6 +40,9 @@ import 'feature/auth/domain/usecases/login_use_case.dart';
 import 'feature/auth/domain/usecases/register_user_usecase.dart';
 import 'feature/auth/domain/usecases/send_email_verification.dart';
 import 'feature/auth/domain/usecases/send_password_reset_email.dart';
+import 'feature/users/data/datasource/users_remote_datasource.dart';
+import 'feature/users/data/repository/users_repository_imp.dart';
+import 'feature/users/domain/use_cases/get_all_users_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -51,18 +56,28 @@ class Injection {
     );
 
     // Firebase
+    // =========================
+
     sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 
     sl.registerLazySingleton<FirebaseFirestore>(
       () => FirebaseFirestore.instance,
     );
 
+    
+
+    // =========================
     // Database
+    // =========================
+
     sl.registerLazySingleton<DatabaseHelper>(() => DatabaseHelper.instance);
 
     sl.registerSingletonAsync<Database>(() => sl<DatabaseHelper>().database);
 
-    // Remote
+    // =========================
+    // Remote Data Source
+    // =========================
+
     sl.registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(
         firebaseAuth: sl<FirebaseAuth>(),
@@ -76,48 +91,72 @@ class Injection {
       ),
     );
 
-    // Local
+    // =========================
+    // Local Data Source
+    // =========================
+
     sl.registerSingletonWithDependencies<AuthLocalDataSource>(
       () => AuthLocalDataSourceImpl(
-        sharedPreferences: sl<SharedPreferences>(),
         database: sl<Database>(),
+        sharedPreferences: sl<SharedPreferences>(),
       ),
       dependsOn: [Database],
     );
 
+    // =========================
     // Repository
+    // =========================
+
     sl.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(
         remoteDataSource: sl<AuthRemoteDataSource>(),
         localDataSource: sl<AuthLocalDataSource>(),
+        con: sl<InternetConnectionChecker>(),
       ),
     );
 
+    // =========================
     // Use Cases
+    // =========================
+
     sl.registerLazySingleton<LoginUseCase>(
       () => LoginUseCase(sl<AuthRepository>()),
     );
+
     sl.registerLazySingleton<RegisterUserUseCase>(
       () => RegisterUserUseCase(sl<AuthRepository>()),
     );
+
     sl.registerLazySingleton<SendEmailVerificationUseCase>(
       () => SendEmailVerificationUseCase(sl<AuthRepository>()),
     );
+
     sl.registerLazySingleton<SendPasswordResetEmail>(
       () => SendPasswordResetEmail(sl<AuthRepository>()),
     );
+
     sl.registerLazySingleton<GetCachedUserUseCase>(
       () => GetCachedUserUseCase(sl<AuthRepository>()),
     );
+
     sl.registerLazySingleton<GetCurrentUserUseCase>(
       () => GetCurrentUserUseCase(sl<AuthRepository>()),
     );
+
     sl.registerLazySingleton<GoogleLoginUseCase>(
       () => GoogleLoginUseCase(sl<AuthRepository>()),
     );
 
+    sl.registerLazySingleton(
+      () => CompleteGoogleProfileUseCase(sl<AuthRepository>()),
+    );
+
+    // =========================
     // Cubit
     sl.registerLazySingleton<LoginCubit>(
+    // =========================
+
+    sl.registerFactory<LoginCubit>(
       () => LoginCubit(
         sl<LoginUseCase>(),
         sl<RegisterUserUseCase>(),
@@ -126,6 +165,7 @@ class Injection {
         sl<GetCachedUserUseCase>(),
         sl<GetCurrentUserUseCase>(),
         sl<GoogleLoginUseCase>(),
+        sl<CompleteGoogleProfileUseCase>(),
       ),
     );
 
@@ -173,7 +213,6 @@ class Injection {
         getQRTeacherUsecase: sl<GetQRTeacherUsecase>(),
       ),
     );
-
     /// ====================== [ Teacher Management ] ==================
     // source
     sl.registerLazySingleton<TeacherLocal>(
@@ -213,5 +252,23 @@ class Injection {
         deleteTeacherUsecase: sl<DeleteTeacherUsecase>(),
       ),
     );
+    ///=========================[ Users Management ]========================
+    // DataSource Remote
+    sl.registerLazySingleton<UsersRemoteDataSourceImpl>(() =>
+        UsersRemoteDataSourceImpl());
+    // repository Implement
+    sl.registerLazySingleton<UsersRepositoryImp>(() =>
+        UsersRepositoryImp(
+          sl<UsersRemoteDataSourceImpl>(),
+          sl<InternetConnectionChecker>(),
+        ),);
+    // use cases
+    sl.registerLazySingleton<GetAllUsersUseCase>(() =>
+        GetAllUsersUseCase(sl<UsersRepositoryImp>()));
+    //cubit
+    sl.registerLazySingleton<UsersCubit>(() =>
+        UsersCubit(sl<GetAllUsersUseCase>()));
   }
+
+
 }

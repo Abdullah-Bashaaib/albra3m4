@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../domain/entities/user.dart';
@@ -7,14 +10,17 @@ import '../datasource/local/auth_local_data_source.dart';
 import '../datasource/remote/authentication_remote_data_source.dart';
 import '../exceptions/firebase_app_exception.dart';
 import '../failures/firebase_failure.dart' hide NetworkFailure;
+import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
+  final InternetConnectionChecker con;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.con,
   });
 
   // ---------------------------------------------------------------------------
@@ -37,6 +43,58 @@ class AuthRepositoryImpl implements AuthRepository {
       await localDataSource.cacheLoginSession(uid: userModel.uid);
 
       return Right(userModel);
+    } on FirebaseAppException catch (e) {
+      return Left(_mapFirebaseExceptionToFailure(e));
+    } catch (_) {
+      return const Left(FirebaseUnknownFailure());
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Login with Google
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<Either<Failure, ({UserEntity user, bool isNewUser})>>
+  loginWithGoogle() async {
+    try {
+      final result = await remoteDataSource.loginWithGoogle();
+
+      await localDataSource.cacheUser(result.user);
+
+      await localDataSource.cacheLoginSession(uid: result.user.uid);
+
+      return Right((user: result.user, isNewUser: result.isNewUser));
+    } on FirebaseAppException catch (e) {
+      // ملاحظة: "sign-in-cancelled" يقع حالياً ضمن default -> FirebaseUnknownFailure()
+      // (لا يوجد Failure مخصص للإلغاء بعد في firebase_failure.dart).
+      return Left(_mapFirebaseExceptionToFailure(e));
+    } catch (_) {
+      return const Left(FirebaseUnknownFailure());
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Complete Google Profile
+  // ---------------------------------------------------------------------------
+
+  @override
+  Future<Either<Failure, UserEntity>> completeGoogleProfile({
+    required UserEntity currentUser,
+    required UserRole role,
+    required String phone,
+    required String fullName,
+  }) async {
+    try {
+      final updatedModel = UserModel.fromEntity(
+        currentUser,
+      ).copyWith(role: role, phone: phone, fullName: fullName);
+
+      await remoteDataSource.updateUserInFirestore(user: updatedModel);
+
+      await localDataSource.cacheUser(updatedModel);
+
+      return Right(updatedModel);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
     } catch (_) {
@@ -122,28 +180,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
+    log('--------------------> message: getCurrentUser() called');
     try {
-      final userModel = await remoteDataSource.getCurrentUser();
+      if (await con.hasConnection) {
+        log('--------------------> message: has internet connection');
+        final userModel = await remoteDataSource.getCurrentUser();
+        log('----------> user :: ${userModel.toString()}');
+        if (userModel == null) {
+          await localDataSource.clearLoginSession();
+          await localDataSource
+              .deleteCachedUser(); // حذف أي نسخة قديمة من المستخدم المخزن محليًا
 
-      if (userModel == null) {
-        final cachedUser = await localDataSource.getCachedUser();
-
-        if (cachedUser != null &&
-            cachedUser.isVerified &&
-            cachedUser.isActive) {
-          return Right(cachedUser);
+          return const Left(UserNotFoundFailure());
+        } else {
+          log('--------> user is ${userModel.toString()}');
+          await localDataSource.cacheUser(userModel);
+          await localDataSource.cacheLoginSession(uid: userModel.uid);
+          return Right(userModel);
         }
-
-        return const Left(UserNotFoundFailure());
       }
-
-      final updatedUser = userModel;
-
-      await localDataSource.cacheUser(updatedUser);
-
-      await localDataSource.cacheLoginSession(uid: updatedUser.uid);
-
-      return Right(updatedUser);
+      log('--------------------> message: no internet connection');
+      final cachedUser = await localDataSource.getCachedUser();
+      if (cachedUser != null && cachedUser.isVerified && cachedUser.isActive) {
+        await localDataSource.cacheLoginSession(uid: cachedUser.uid);
+        log(
+          '--------------------> message: returning cached user :: ${cachedUser.toString()}',
+        );
+        return Right(cachedUser);
+      }
+      return Left(AuthFailure('no internet connection'));
     } on FirebaseAppException catch (e) {
       /*
        * في حالة عدم توفر الإنترنت أو Firebase:
@@ -261,9 +326,9 @@ class AuthRepositoryImpl implements AuthRepository {
         case 'account-inactive':
           return const AccountInactiveFailure();
 
-        case 'sign-in-cancelled':
-          return const GoogleSignInCancelledFailure();
-          
+        // TODO: أضف case 'sign-in-cancelled' هنا بعد إضافة
+        // GoogleSignInCancelledFailure إلى firebase_failure.dart.
+
         default:
           return const FirebaseUnknownFailure();
       }
@@ -283,31 +348,5 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return const FirebaseUnknownFailure();
-  }
-
-  // ---------------------------------------------------------------------------
-  // Login with Google
-  // ---------------------------------------------------------------------------
-
-  @override
-  Future<Either<Failure, UserEntity>> loginWithGoogle() async {
-    try {
-      final userModel = await remoteDataSource.loginWithGoogle();
-
-      await localDataSource.cacheUser(userModel);
-
-      await localDataSource.cacheLoginSession(uid: userModel.uid);
-
-      return Right(userModel);
-    } on FirebaseAppException catch (e) {
-      // ملاحظة: حالة "sign-in-cancelled" (إلغاء المستخدم للعملية) تقع حالياً
-      // ضمن default -> FirebaseUnknownFailure()، لأنه لا يوجد Failure مخصص
-      // لها بعد في firebase_failure.dart. لو حبيت لاحقاً تفرّق بينها وبين
-      // خطأ حقيقي، أضف class GoogleSignInCancelledFailure هناك وأضف
-      // case 'sign-in-cancelled' في _mapFirebaseExceptionToFailure أدناه.
-      return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
-      return const Left(FirebaseUnknownFailure());
-    }
   }
 }

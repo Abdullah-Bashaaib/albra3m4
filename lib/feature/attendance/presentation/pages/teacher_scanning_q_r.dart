@@ -1,3 +1,5 @@
+import 'package:albra3m4/core/constants/app_colors.dart';
+import 'package:albra3m4/core/constants/app_font.dart';
 import 'package:albra3m4/core/utils/snake_bar_helper.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:flutter/material.dart';
@@ -60,11 +62,14 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
+              backgroundColor: AppColors.primary,
               title: const Text(
-                'تحضير المعلمين',
-                style: TextStyle(color: Colors.white),
+                'التحضير',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontFamily: AppFont.primary,
+                ),
               ),
-              backgroundColor: const Color.fromARGB(255, 1, 117, 70),
               elevation: 0,
             ),
             body: Stack(

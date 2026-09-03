@@ -143,4 +143,9 @@ class UserModel extends UserEntity {
 
     return DateTime.now();
   }
+
+  @override
+  String toString() {
+    return 'UserModel(uid: $uid, fullName: $fullName, email: $email, phone: $phone, role: $role, isVerified: $isVerified, isActive: $isActive, createdAt: $createdAt)';
+  }
 }
