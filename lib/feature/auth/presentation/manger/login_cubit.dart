@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -23,7 +25,7 @@ class LoginCubit extends Cubit<LoginState> {
     this._getCurrentUserUseCase,
     this._googleLoginUseCase,
     this._completeGoogleProfileUseCase,
-  ) : super(LoginInitial());
+  ) : super(AuthInitial());
   final LoginUseCase _loginUseCase;
   final RegisterUserUseCase _registerUserUseCase;
   final SendEmailVerificationUseCase _sendEmailVerificationUseCase;
@@ -35,6 +37,23 @@ class LoginCubit extends Cubit<LoginState> {
 
   // Global variables
   UserEntity? user;
+  Future<void> checkAuthStatus() async {
+    emit(const AuthCheckingSession());
+
+    final result = await _getCurrentUserUseCase();
+
+    result.fold(
+      (_) {
+        log('message: user is ${user?.email ?? 'null'}');
+        user = null;
+        emit(const AuthUnauthenticated());
+      },
+      (userEntity) {
+        user = userEntity;
+        emit(AuthAuthenticated(userEntity));
+      },
+    );
+  }
 
   Future<void> login({required String email, required String password}) async {
     emit(LoginLoading());
@@ -45,7 +64,7 @@ class LoginCubit extends Cubit<LoginState> {
       },
       (userLogged) {
         user = userLogged;
-        emit(LoginSuccess());
+        emit(LoginSuccess(user!));
       },
     );
   }
@@ -58,18 +77,15 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> loginWithGoogle() async {
     emit(LoginLoading());
     final result = await _googleLoginUseCase();
-    result.fold(
-      (failure) => emit(LoginFailure(failure.message)),
-      (data) {
-        user = data.user;
+    result.fold((failure) => emit(LoginFailure(failure.message)), (data) {
+      user = data.user;
 
-        if (data.isNewUser) {
-          emit(LoginGoogleProfileIncomplete(data.user));
-        } else {
-          emit(LoginSuccess());
-        }
-      },
-    );
+      if (data.isNewUser) {
+        emit(LoginGoogleProfileIncomplete(data.user));
+      } else {
+        emit(LoginSuccess(user!));
+      }
+    });
   }
 
   /// إكمال الملف الشخصي بعد Google Sign-In الأول — تُستدعى من زر الحفظ
@@ -87,13 +103,10 @@ class LoginCubit extends Cubit<LoginState> {
       phone: phone,
       fullName: fullName,
     );
-    result.fold(
-      (failure) => emit(LoginFailure(failure.message)),
-      (userLogged) {
-        user = userLogged;
-        emit(LoginSuccess());
-      },
-    );
+    result.fold((failure) => emit(LoginFailure(failure.message)), (userLogged) {
+      user = userLogged;
+      emit(LoginSuccess(user!));
+    });
   }
 
   Future<void> register({
@@ -117,7 +130,7 @@ class LoginCubit extends Cubit<LoginState> {
       },
       (userLogged) {
         user = userLogged;
-        emit(LoginSuccess());
+        emit(LoginSuccess(user!));
       },
     );
   }

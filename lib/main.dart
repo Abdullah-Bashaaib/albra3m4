@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/constants/app_colors.dart';
 import 'feature/auth/presentation/manger/login_cubit.dart';
+import 'feature/users/presentation/manager/users_cubit.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -26,8 +27,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()),
+        BlocProvider<LoginCubit>(create: (_) => sl<LoginCubit>()..checkAuthStatus()),
         BlocProvider<AttendanceCubit>(create: (_) => sl<AttendanceCubit>()),
+        BlocProvider<UsersCubit>(create: (_) => sl<UsersCubit>()),
       ],
       child: MaterialApp.router(
         routerConfig: AppRouter.router,

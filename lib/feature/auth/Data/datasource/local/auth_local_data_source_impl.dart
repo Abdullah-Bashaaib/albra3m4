@@ -22,26 +22,26 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> cacheLoginSession({required String uid}) async {
-    await sharedPreferences.setBool(isLoggedInKey, true);
+    await sharedPreferences.setBool(PerfKeys.isLoggedInKey, true);
 
-    await sharedPreferences.setString(userIdKey, uid);
+    await sharedPreferences.setString(PerfKeys.userIdKey, uid);
   }
 
   @override
   Future<bool> isLoggedIn() async {
-    return sharedPreferences.getBool(isLoggedInKey) ?? false;
+    return sharedPreferences.getBool(PerfKeys.isLoggedInKey) ?? false;
   }
 
   @override
   Future<String?> getCachedUserId() async {
-    return sharedPreferences.getString(userIdKey);
+    return sharedPreferences.getString(PerfKeys.userIdKey);
   }
 
   @override
   Future<void> clearLoginSession() async {
-    await sharedPreferences.remove(isLoggedInKey);
+    await sharedPreferences.remove(PerfKeys.isLoggedInKey);
 
-    await sharedPreferences.remove(userIdKey);
+    await sharedPreferences.remove(PerfKeys.userIdKey);
   }
 
   // ---------------------------------------------------------------------------

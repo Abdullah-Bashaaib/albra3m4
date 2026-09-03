@@ -1,3 +1,5 @@
+import 'package:albra3m4/core/utils/widgets/app_background.dart';
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:albra3m4/feature/auth/presentation/widgets/read_only_field.dart';
 import 'package:albra3m4/feature/auth/presentation/widgets/role_dropdown.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_font.dart';
-import '../../../../core/routing/app_routes.dart';
+import '../../../../core/routing/role_route_mapper.dart';
 import '../../../../core/utils/validators/auth_validators.dart';
 import '../../../../core/utils/widgets/custom_button.dart';
 import '../../../../core/utils/widgets/custom_text_form_field.dart';
@@ -64,7 +66,7 @@ class _CompleteGoogleProfileScreenState
       currentUser: widget.user,
       role: _selectedRole!,
       phone: _phoneController.text.trim(),
-      fullName: _nameController.text.trim()
+      fullName: _nameController.text.trim(),
     );
   }
 
@@ -74,28 +76,22 @@ class _CompleteGoogleProfileScreenState
       resizeToAvoidBottomInset: true,
       body: BlocListener<LoginCubit, LoginState>(
         listener: (context, state) {
+          if (state is LoginGoogleProfileIncomplete) {
+            CustomSnackBar.showInfo(
+              context,
+              'يرجى إكمال بياناتك للمتابعة إلى تطبيق البراعم',
+            );
+          }
           if (state is LoginSuccess) {
-            // TODO: استبدلها بمسار التوجيه حسب الدور (role-based navigation)
-            // مثل باقي التطبيق — UC-003.
-            // go() وليس push() — لا نريد المستخدم يرجع لشاشة إكمال البيانات
-            // بزر الرجوع بعد ما خلص.
-            context.go(AppRoutes.home);
+            CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح');
+            context.go(state.user.role.dashboardRoute);
           }
 
           if (state is LoginFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            CustomSnackBar.showError(context, state.message);
           }
         },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.surface],
-            ),
-          ),
+        child: AppBackground(
           child: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -125,7 +121,7 @@ class _CompleteGoogleProfileScreenState
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       'أكمل بياناتك للمتابعة إلى تطبيق البراعم',
                       textAlign: TextAlign.center,
                       style: TextStyle(

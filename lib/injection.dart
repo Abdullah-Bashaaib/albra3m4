@@ -1,4 +1,3 @@
-import 'package:albra3m4/feature/auth/domain/usecases/complete_google_profile_use_case.dart';
 import 'package:albra3m4/feature/attendance/data/repo/attendance_repo_imp.dart';
 import 'package:albra3m4/feature/attendance/data/source/attendance_local.dart';
 import 'package:albra3m4/feature/attendance/data/source/attendance_remote.dart';
@@ -9,13 +8,16 @@ import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.d
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:albra3m4/feature/auth/domain/usecases/complete_google_profile_use_case.dart';
 import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+
 import 'core/database/database_helper.dart';
 import 'feature/auth/Data/datasource/local/auth_local_data_source.dart';
 import 'feature/auth/Data/datasource/local/auth_local_data_source_impl.dart';
@@ -30,6 +32,9 @@ import 'feature/auth/domain/usecases/login_use_case.dart';
 import 'feature/auth/domain/usecases/register_user_usecase.dart';
 import 'feature/auth/domain/usecases/send_email_verification.dart';
 import 'feature/auth/domain/usecases/send_password_reset_email.dart';
+import 'feature/users/data/datasource/users_remote_datasource.dart';
+import 'feature/users/data/repository/users_repository_imp.dart';
+import 'feature/users/domain/use_cases/get_all_users_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -92,6 +97,7 @@ class Injection {
       () => AuthRepositoryImpl(
         remoteDataSource: sl<AuthRemoteDataSource>(),
         localDataSource: sl<AuthLocalDataSource>(),
+        con: sl<InternetConnectionChecker>(),
       ),
     );
 
@@ -193,5 +199,23 @@ class Injection {
       ),
     );
 
+    ///=========================[ Users Management ]========================
+    // DataSource Remote
+    sl.registerLazySingleton<UsersRemoteDataSourceImpl>(() =>
+        UsersRemoteDataSourceImpl());
+    // repository Implement
+    sl.registerLazySingleton<UsersRepositoryImp>(() =>
+        UsersRepositoryImp(
+          sl<UsersRemoteDataSourceImpl>(),
+          sl<InternetConnectionChecker>(),
+        ),);
+    // use cases
+    sl.registerLazySingleton<GetAllUsersUseCase>(() =>
+        GetAllUsersUseCase(sl<UsersRepositoryImp>()));
+    //cubit
+    sl.registerLazySingleton<UsersCubit>(() =>
+        UsersCubit(sl<GetAllUsersUseCase>()));
   }
+
+
 }
