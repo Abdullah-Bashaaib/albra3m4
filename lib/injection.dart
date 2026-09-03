@@ -153,7 +153,6 @@ class Injection {
 
     // =========================
     // Cubit
-    sl.registerLazySingleton<LoginCubit>(
     // =========================
 
     sl.registerFactory<LoginCubit>(

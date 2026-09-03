@@ -41,27 +41,37 @@ class UserEntity {
     );
   }
 
-  // UserEntity copyWith({
-  //   String? uid,
-  //   String? fullName,
-  //   String? email,
-  //   String? phone,
-  //   UserRole? role,
-  //   bool? isVerified,
-  //   bool? isActive,
-  //   DateTime? createdAt,
-  //   TeacherEntity? tDetails,
-  // }) {
-  //   return UserEntity(
-  //     uid: uid ?? this.uid,
-  //     fullName: fullName ?? this.fullName,
-  //     email: email ?? this.email,
-  //     role: role ?? this.role,
-  //     isVerified: isVerified ?? this.isVerified,
-  //     isActive: isActive ?? this.isActive,
-  //     createdAt: createdAt ?? this.createdAt,
-  //   );
-  // }
+  UserEntity copyWith({
+    String? uid,
+    String? fullName,
+    String? email,
+    String? phone,
+    UserRole? role,
+    bool? isVerified,
+    bool? isActive,
+    DateTime? createdAt,
+  }) {
+    return UserEntity(
+      uid: uid ?? this.uid,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      role: role ?? this.role,
+      isVerified: isVerified ?? this.isVerified,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }
 
 enum UserRole { superAdmin, manager, teacher, parent }
+
+extension UserRoleArabicLabel on UserRole {
+  String get arabicLabel => switch (this) {
+    UserRole.superAdmin => 'مشرف تقني',
+    UserRole.manager => 'مدير',
+    UserRole.teacher => 'معلمة',
+    UserRole.parent => 'ولي أمر',
+  };
+}
+

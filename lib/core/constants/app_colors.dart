@@ -22,4 +22,23 @@ class AppColors {
   static const Color dangerBg = Color(0xFFFCEAEA);
   static const Color dangerFg = Color(0xFFB23A3A);
   static const Color danger = Color(0xFFC6403F);
+
+  // Background
+  static const Color background = Color(0xFFF8F9FA);
+  static const Color surface = Colors.white;
+
+  // Text
+  static const Color textPrimary = Color(0xFF212121);
+  static const Color textSecondary = Color(0xFF757575);
+  static const Color textHint = Color(0xFF9E9E9E);
+
+  // Status
+  static const Color success = Color(0xFF2E7D32);
+  static const Color error = Color(0xFFD32F2F);
+  static const Color warning = Color(0xFFF9A825);
+  static const Color info = Color(0xFF1976D2);
+
+  // Border / Divider
+  static const Color border = Color(0xFFE0E0E0);
+  static const Color divider = Color(0xFFEEEEEE);
 }

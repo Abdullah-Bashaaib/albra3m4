@@ -121,7 +121,7 @@ class _CompleteGoogleProfileScreenState
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'أكمل بياناتك للمتابعة إلى تطبيق البراعم',
                       textAlign: TextAlign.center,
                       style: TextStyle(
