@@ -63,7 +63,7 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
           return Scaffold(
             appBar: AppBar(
               backgroundColor: AppColors.primary,
-              title: const Text(
+              title: Text(
                 'التحضير',
                 style: TextStyle(
                   color: AppColors.textPrimary,

@@ -1,6 +1,6 @@
+import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
-import '../../app_colors.dart';
 import '../../constants/app_font.dart';
 
 class CustomTextFormField extends StatefulWidget {
