@@ -104,6 +104,7 @@ class UserModel extends UserEntity {
   // Helpers
   // ---------------------------------------------------------------------------
 
+  @override
   UserModel copyWith({
     String? uid,
     String? fullName,
