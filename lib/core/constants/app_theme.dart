@@ -14,9 +14,9 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
-        surface: AppColors.cream,
+        surface: AppColors.surface,
       ),
-      scaffoldBackgroundColor: AppColors.cream,
+      scaffoldBackgroundColor: AppColors.surface,
       // textTheme: TextTheme(bodyMedium: TextStyle(fontFamily: AppFont.primary)),
       fontFamily: AppFont.primary,
     );
@@ -47,18 +47,18 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.line, width: 1.4),
+          borderSide: BorderSide(color: AppColors.surface, width: 1.4),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.line, width: 1.4),
+          borderSide: const BorderSide(color: AppColors.surface, width: 1.4),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
         ),
         labelStyle: const TextStyle(
-          color: AppColors.muted,
+          color: AppColors.surface,
           fontWeight: FontWeight.w600,
         ),
       ),
