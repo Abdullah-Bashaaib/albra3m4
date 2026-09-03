@@ -1,36 +1,31 @@
 import 'package:flutter/material.dart';
 
-/// لوحة ألوان تطبيق روضة البراعم
-class AppColors {
-  AppColors._();
+abstract final class AppColors {
+  // Primary
+  static const Color primary = Color(0xFF4FC3F7); // light blue
+  static const Color primaryLight = Color(0xFFE1F5FE); // pale blue bg
+  static const Color primaryDark = Color(0xFF0277BD); // deep blue text
 
-  static const Color primary = Color(0xFF22A718); // اللون الأساسي للتطبيق
-  static const Color primaryDark = Color(0xFF166011);
-  static const Color primaryLight = Color(0xFFEAF7E6);
+  // Accent
+  static const Color apricot = Color(0xFFFFB74D); // warm amber/apricot
 
-  static const Color apricot = Color(0xFFF2994A); // لون الإجراء الثانوي (إضافة)
-  static const Color cream = Color(0xFFFBF7EE); // خلفية عامة دافئة
-  static const Color card = Color(0xFFFFFFFF);
-  static const Color line = Color(0xFFE9E4D6);
-
-  static const Color ink = Color(0xFF1F2A1D); // نص أساسي
-  static const Color muted = Color(0xFF8A9184); // نص ثانوي
-
-  static const Color leaveBg = Color(0xFFFFF3E0);
-  static const Color leaveFg = Color(0xFFB36A1E);
-
-  static const Color dangerBg = Color(0xFFFCEAEA);
-  static const Color dangerFg = Color(0xFFB23A3A);
-  static const Color danger = Color(0xFFC6403F);
-
-  // Background
+  // Background & Surface
   static const Color background = Color(0xFFF8F9FA);
   static const Color surface = Colors.white;
+  static const Color cream = Color(0xFFFDFCF8); // warm off-white
+  static const Color card = Color(0xFFFFFFFF); // card background
 
   // Text
+  static const Color ink = Color(0xFF1A1A2E); // near-black main text
+  static const Color muted = Color(0xFF8E8E9A); // secondary/hint text
   static const Color textPrimary = Color(0xFF212121);
   static const Color textSecondary = Color(0xFF757575);
   static const Color textHint = Color(0xFF9E9E9E);
+
+  // Borders & Dividers
+  static const Color line = Color(0xFFEAEAF0); // subtle separator
+  static const Color border = Color(0xFFE0E0E0);
+  static const Color divider = Color(0xFFEEEEEE);
 
   // Status
   static const Color success = Color(0xFF2E7D32);
@@ -38,7 +33,8 @@ class AppColors {
   static const Color warning = Color(0xFFF9A825);
   static const Color info = Color(0xFF1976D2);
 
-  // Border / Divider
-  static const Color border = Color(0xFFE0E0E0);
-  static const Color divider = Color(0xFFEEEEEE);
+  // Danger (delete / destructive actions)
+  static const Color danger = Color(0xFFE53935); // solid red button
+  static const Color dangerBg = Color(0xFFFFEBEE); // light red background
+  static const Color dangerFg = Color(0xFFB71C1C); // dark red text/icon
 }
