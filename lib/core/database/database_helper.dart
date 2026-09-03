@@ -9,7 +9,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._();
 
   static const String _databaseName = 'app_database.db';
-  static const int _databaseVersion = 3;
+  static const int _databaseVersion = 4;
 
   Database? _database;
 
@@ -40,7 +40,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE users (
         uid TEXT PRIMARY KEY,
-        school_id TEXT NOT NULL,
+        school_id TEXT,
         full_name TEXT NOT NULL,
         email TEXT NOT NULL,
         phone TEXT,
@@ -55,7 +55,7 @@ class DatabaseHelper {
   CREATE TABLE teachers (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
-    school_id TEXT NOT NULL,
+    school_id TEXT,
     birth_date TEXT NOT NULL,
     birth_place TEXT NOT NULL,
     academic_qualification TEXT NOT NULL,
@@ -73,29 +73,23 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
+    if (oldVersion < 4) {
       await db.execute('''
-        CREATE TABLE teachers (
-          id TEXT PRIMARY KEY,
-          user_id TEXT NOT NULL,
-          school_id TEXT NOT NULL,
-          birth_date TEXT NOT NULL,
-          birth_place TEXT NOT NULL,
-          academic_qualification TEXT NOT NULL,
-          qualification_date TEXT NOT NULL,
-          specialization TEXT NOT NULL,
-          social_status TEXT NOT NULL,
-          children_count INTEGER NOT NULL DEFAULT 0,
-          home_phone TEXT NOT NULL,
-          mobile_phone TEXT NOT NULL,
-          FOREIGN KEY (user_id) REFERENCES users(uid)
-        )
+        DROP TABLE users;
       ''');
-
       await db.execute('''
-        ALTER TABLE users
-        ADD school_id TEXT NOT NULL DEFAULT ''
-      ''');
+      CREATE TABLE users (
+        uid TEXT PRIMARY KEY,
+        school_id TEXT,
+        full_name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT,
+        role TEXT NOT NULL,
+        is_verified INTEGER NOT NULL DEFAULT 0,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL
+      )
+    ''');
     }
     log('================== database Upgraded ====================');
   }

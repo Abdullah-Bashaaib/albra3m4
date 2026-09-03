@@ -45,7 +45,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(userModel);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e, s) {
+      log('Error in login: $e', stackTrace: s);
       return const Left(FirebaseUnknownFailure());
     }
   }
@@ -69,7 +70,8 @@ class AuthRepositoryImpl implements AuthRepository {
       // ملاحظة: "sign-in-cancelled" يقع حالياً ضمن default -> FirebaseUnknownFailure()
       // (لا يوجد Failure مخصص للإلغاء بعد في firebase_failure.dart).
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e, s) {
+      log('Error in loginWithGoogle: $e', stackTrace: s);
       return const Left(FirebaseUnknownFailure());
     }
   }
@@ -97,7 +99,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(updatedModel);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e, s) {
+      log('Error in completeGoogleProfile: $e', stackTrace: s);
       return const Left(FirebaseUnknownFailure());
     }
   }
@@ -133,7 +136,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(userModel);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e, s) {
+      log('Error in register: $e', stackTrace: s);
       return const Left(FirebaseUnknownFailure());
     }
   }
@@ -150,7 +154,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(unit);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e, s) {
+      log('Error in sendEmailVerification: $e', stackTrace: s);
       return const Left(FirebaseUnknownFailure());
     }
   }
@@ -169,7 +174,8 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(unit);
     } on FirebaseAppException catch (e) {
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e, s) {
+      log('Error in sendPasswordResetEmail: $e', stackTrace: s);
       return const Left(FirebaseUnknownFailure());
     }
   }

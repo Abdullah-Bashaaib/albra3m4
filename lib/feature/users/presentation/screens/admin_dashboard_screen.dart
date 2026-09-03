@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:albra3m4/core/utils/widgets/app_background.dart';
+import 'package:albra3m4/core/utils/widgets/app_drawer.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart'
     show AdminDashboardCubit, AdminSection;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_font.dart';
-import '../widgets/admin_dashboard_drawer.dart';
 import '../widgets/coming_soon_view.dart';
 import '../widgets/user_management/user_management_view.dart';
 
@@ -15,19 +16,23 @@ import '../widgets/user_management/user_management_view.dart';
 /// تعرض Drawer بأقسام النظام، وتبدّل المحتوى حسب القسم المختار عبر
 /// [AdminDashboardCubit] دون إعادة بناء الشاشة بالكامل.
 class AdminDashboardScreen extends StatelessWidget {
-  const AdminDashboardScreen({super.key});
+  /// المستخدم الحالي — يُمرَّر من الـ Router عبر `state.extra`
+  final UserEntity user;
+
+  const AdminDashboardScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => AdminDashboardCubit(),
-      child: const _AdminDashboardView(),
+      child: _AdminDashboardView(user: user),
     );
   }
 }
 
 class _AdminDashboardView extends StatelessWidget {
-  const _AdminDashboardView();
+  final UserEntity user;
+  const _AdminDashboardView({required this.user});
 
   String _titleFor(AdminSection section) {
     switch (section) {
@@ -90,9 +95,44 @@ class _AdminDashboardView extends StatelessWidget {
           ),
         ),
       ),
-      drawer: AdminDashboardDrawer(onLogout: () => _handleLogout(context)),
+      drawer: AppDrawer(
+        user: user,
+        onLogout: () => _handleLogout(context),
+        selectedItemKey: _sectionToKey(section),
+        onItemSelected: (key) => context
+            .read<AdminDashboardCubit>()
+            .selectSection(_keyToSection(key)),
+      ),
       body: AppBackground(child: SafeArea(child: _bodyFor(section))),
     );
+  }
+
+  String _sectionToKey(AdminSection section) {
+    switch (section) {
+      case AdminSection.userManagement:
+        return 'userManagement';
+      case AdminSection.attendanceOverview:
+        return 'attendanceOverview';
+      case AdminSection.systemSettings:
+        return 'systemSettings';
+      case AdminSection.aboutApp:
+        return 'aboutApp';
+    }
+  }
+
+  AdminSection _keyToSection(String key) {
+    switch (key) {
+      case 'userManagement':
+        return AdminSection.userManagement;
+      case 'attendanceOverview':
+        return AdminSection.attendanceOverview;
+      case 'systemSettings':
+        return AdminSection.systemSettings;
+      case 'aboutApp':
+        return AdminSection.aboutApp;
+      default:
+        return AdminSection.userManagement;
+    }
   }
 
   void _handleLogout(BuildContext context) {

@@ -222,8 +222,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       return userModel;
     } on FirebaseAuthException catch (e) {
+      log('Error in register: ${e.message}');
       throw FirebaseExceptionMapper.mapAuthException(e);
     } on FirebaseException catch (e) {
+      log('Error in register: ${e.message}');
       throw FirebaseExceptionMapper.mapFirestoreException(e);
     }
   }
