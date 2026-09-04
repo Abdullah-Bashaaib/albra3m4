@@ -9,9 +9,6 @@ abstract class AuthRepository {
     required String password,
   });
 
-  /// تسجيل الدخول عبر Google.
-  /// الجزء الثاني من الـ Record (`isNewUser`) يخبر الطبقات الأعلى إن كان
-  /// يجب توجيه المستخدم لشاشة إكمال الملف الشخصي (اختيار الدور + الهاتف).
   Future<Either<Failure, ({UserEntity user, bool isNewUser})>>
   loginWithGoogle();
 

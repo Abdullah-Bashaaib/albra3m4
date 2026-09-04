@@ -152,6 +152,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // شاشة "إكمال الملف الشخصي" في التطبيق.
         userModel = UserModel(
           uid: firebaseUser.uid,
+          schoolId: '1',
           fullName: firebaseUser.displayName ?? googleUser.displayName ?? '',
           email: firebaseUser.email ?? googleUser.email,
           phone: firebaseUser.phoneNumber,
@@ -337,13 +338,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       await firestore.collection('users').doc(user.uid).set({
         'uid': user.uid,
-        'fullName': user.fullName,
+        'full_name': user.fullName,
         'email': user.email,
         'phone': user.phone,
         'role': user.role.name,
-        'isVerified': user.isVerified,
-        'isActive': user.isActive,
-        'createdAt': FieldValue.serverTimestamp(),
+        'is_verified': user.isVerified,
+        'is_active': user.isActive,
+        'school_id': user.schoolId,
+        'created_at': FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e) {
       throw FirebaseExceptionMapper.mapFirestoreException(e);

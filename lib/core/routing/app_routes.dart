@@ -13,4 +13,8 @@ abstract class AppRoutes {
   static const String managerDashboard = '/manager/dashboard';
   static const String teacherDashboard = '/teacher/dashboard';
   static const String parentDashboard = '/parent/dashboard';
+
+  static const String attendanceQRView = '/attendance-qr-view';
+  static const String studentAttendance = '/teacher/student-attendance';
+  static const String scanningQR = '/scanning-qr';
 }

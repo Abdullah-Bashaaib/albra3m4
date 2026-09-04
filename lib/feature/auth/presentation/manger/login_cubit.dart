@@ -38,7 +38,8 @@ class LoginCubit extends Cubit<LoginState> {
   // Global variables
   UserEntity? user;
   Future<void> checkAuthStatus() async {
-    log('[message]:[Here in Cubit method checkAuthStatus start]');
+    log(
+        '[message]:-----------------------------------[Here in Cubit method checkAuthStatus start]');
     emit(const AuthCheckingSession());
 
     final result = await _getCurrentUserUseCase();
@@ -70,17 +71,13 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  /// تسجيل الدخول عبر Google — تُستدعى من زر [GoogleSignInButton].
-  ///
-  /// لو كان الحساب جديداً (أول مرة يسجّل بها عبر Google)، تُطلق
-  /// [LoginGoogleProfileIncomplete] بدل [LoginSuccess] عشان الشاشة توجّه
-  /// المستخدم لإكمال بياناته (الدور الحقيقي + الهاتف) قبل الدخول للتطبيق.
   Future<void> loginWithGoogle() async {
+    log('message: loginWithGoogle at Cubit start');
     emit(LoginLoading());
     final result = await _googleLoginUseCase();
     result.fold((failure) => emit(LoginFailure(failure.message)), (data) {
       user = data.user;
-
+      log('message: the user is new : ${data.isNewUser}');
       if (data.isNewUser) {
         emit(LoginGoogleProfileIncomplete(data.user));
       } else {
@@ -106,7 +103,13 @@ class LoginCubit extends Cubit<LoginState> {
     );
     result.fold((failure) => emit(LoginFailure(failure.message)), (userLogged) {
       user = userLogged;
-      emit(LoginSuccess(user!));
+      if (user!.isActive) {
+        emit(LoginSuccess(user!));
+      } else {
+        emit(AuthUnauthenticated());
+      }
+
+      // emit(LoginFailure('تواصل مع الإدارة لتنشيط الحساب'));
     });
   }
 

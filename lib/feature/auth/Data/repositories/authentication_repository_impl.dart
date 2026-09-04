@@ -66,10 +66,18 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right((user: result.user, isNewUser: result.isNewUser));
     } on FirebaseAppException catch (e) {
-      // ملاحظة: "sign-in-cancelled" يقع حالياً ضمن default -> FirebaseUnknownFailure()
-      // (لا يوجد Failure مخصص للإلغاء بعد في firebase_failure.dart).
+      log(
+          'message:-----------------------------------[Here in Repository start]');
+      log('message: error is ${e.message}');
+      log(
+          'message:-----------------------------------[Here in Repository end]');
       return Left(_mapFirebaseExceptionToFailure(e));
-    } catch (_) {
+    } catch (e) {
+      log(
+          'message:-----------------------------------[Here in Repository start]');
+      log('message: error is ${e.toString()}');
+      log(
+          'message:-----------------------------------[Here in Repository end]');
       return const Left(FirebaseUnknownFailure());
     }
   }
