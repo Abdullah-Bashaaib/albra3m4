@@ -1,3 +1,4 @@
+import 'package:albra3m4/core/routing/app_routes.dart';
 import 'package:albra3m4/core/utils/widgets/app_background.dart';
 import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:albra3m4/feature/auth/presentation/widgets/read_only_field.dart';
@@ -38,6 +39,7 @@ class _CompleteGoogleProfileScreenState
   bool _roleTouched = false;
 
   static const Map<UserRole, String> _availableRoles = {
+    UserRole.manager: 'مديرة',
     UserRole.teacher: 'معلمة',
     UserRole.parent: 'ولي أمر',
   };
@@ -86,7 +88,11 @@ class _CompleteGoogleProfileScreenState
             CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح');
             context.go(state.user.role.dashboardRoute);
           }
-
+          if (state is AuthUnauthenticated) {
+            CustomSnackBar.showWarning(
+                context, 'تواصل مع الإدارة لتنشيط حسابك');
+            context.go(AppRoutes.login);
+          }
           if (state is LoginFailure) {
             CustomSnackBar.showError(context, state.message);
           }
