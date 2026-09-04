@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
         listener: (context, state) {
           if (state is LoginSuccess) {
             CustomSnackBar.showSuccess(context, 'تم تسجيل الدخول بنجاح!');
-            context.go(state.user.role.dashboardRoute);
+            context.go(state.user.role.dashboardRoute, extra: state.user);
           }
 
           if (state is LoginGoogleProfileIncomplete) {

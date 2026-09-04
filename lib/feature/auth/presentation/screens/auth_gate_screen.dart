@@ -21,7 +21,8 @@ class AuthGateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log(
-        '-----------------[message]: Here AuthGateScreen Build [message]---------------');
+      '-----------------[message]: Here AuthGateScreen Build [message]---------------',
+    );
     return BlocListener<LoginCubit, LoginState>(
       listener: _handleNavigation,
       child: const Scaffold(
@@ -45,18 +46,19 @@ class AuthGateScreen extends StatelessWidget {
   void _handleNavigation(BuildContext context, LoginState state) {
     // لسه بيتحقق من الجلسة المحفوظة — يبقى المستخدم على شاشة التحميل
     log(
-        '--------------------[message]لسه بيتحقق من الجلسة المحفوظة — يبقى المستخدم على شاشة التحميل [message]------------------');
+      '--------------------[message]لسه بيتحقق من الجلسة المحفوظة — يبقى المستخدم على شاشة التحميل [message]------------------',
+    );
     if (state is AuthCheckingSession || state is AuthInitial) {
       return;
     }
 
     if (state is AuthAuthenticated) {
-      context.go(state.user.role.dashboardRoute);
+      context.go(state.user.role.dashboardRoute, extra: state.user);
       return;
     }
 
     if (state is LoginSuccess) {
-      context.go(state.user.role.dashboardRoute);
+      context.go(state.user.role.dashboardRoute, extra: state.user);
       return;
     }
 
