@@ -19,6 +19,7 @@ import 'package:albra3m4/feature/teachers_management/domain/usecases/delete_teac
 import 'package:albra3m4/feature/teachers_management/domain/usecases/get_teachers_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/domain/usecases/update_teacher_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,6 +27,7 @@ import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+
 import 'core/database/database_helper.dart';
 import 'feature/auth/Data/datasource/local/auth_local_data_source.dart';
 import 'feature/auth/Data/datasource/local/auth_local_data_source_impl.dart';
@@ -267,6 +269,7 @@ class Injection {
     //cubit
     sl.registerLazySingleton<UsersCubit>(() =>
         UsersCubit(sl<GetAllUsersUseCase>()));
+    sl.registerLazySingleton<AdminDashboardCubit>(() => AdminDashboardCubit());
   }
 
 

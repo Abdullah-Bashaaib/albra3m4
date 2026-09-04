@@ -2,26 +2,28 @@ import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../injection.dart';
 import '../../manager/users_state.dart';
 import 'user_list_item.dart';
 import 'user_search_filter_bar.dart';
 import 'user_stats_row.dart';
 
-class UserManagementView extends StatelessWidget {
+/// ⚠️ لا تُنشئ أي BlocProvider هنا — [UsersCubit] مزوَّد بالفعل عالمياً
+/// من main.dart. هذا الـ widget فقط يستهلك النسخة الموجودة بأعلى الشجرة
+/// ويطلب تحميل البيانات مرة واحدة عند دخول الشاشة (initState)، بدل ما
+/// ينشئ نسخة جديدة كل ما يدخل المستخدم لتبويب "إدارة المستخدمين".
+class UserManagementView extends StatefulWidget {
   const UserManagementView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<UsersCubit>()..getAllUsers(),
-      child: const _UserManagementBody(),
-    );
-  }
+  State<UserManagementView> createState() => _UserManagementViewState();
 }
 
-class _UserManagementBody extends StatelessWidget {
-  const _UserManagementBody();
+class _UserManagementViewState extends State<UserManagementView> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<UsersCubit>().getAllUsers();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class _UserManagementBody extends StatelessWidget {
 
         // switch شامل (exhaustive) على كل حالات UsersState —
         // لو انضافت حالة جديدة لاحقاً ونسيت تتعامل معها هنا،
-        // Dart يعطيك خطأ وقت الكتابة مباشرة بدل ما تكتشفها وقت التشغيل.
+        // Dart يعطيك خطأ وقت الكتابة مباشرة.
         return switch (state) {
           UsersInitial() ||
           UsersLoading() => const Center(child: CircularProgressIndicator()),
@@ -128,12 +130,10 @@ class _LoadedContent extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(
-    BuildContext context,
-    UsersCubit cubit,
-    String uid,
-    String name,
-  ) {
+  void _confirmDelete(BuildContext context,
+      UsersCubit cubit,
+      String uid,
+      String name,) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(

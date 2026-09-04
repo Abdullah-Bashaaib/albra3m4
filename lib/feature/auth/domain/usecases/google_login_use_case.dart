@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
@@ -12,6 +14,7 @@ class GoogleLoginUseCase {
   const GoogleLoginUseCase(this.repository);
 
   Future<Either<Failure, ({UserEntity user, bool isNewUser})>> call() {
+    log('message:-----------------------------------[Here in UseCase start]');
     return repository.loginWithGoogle();
   }
 }

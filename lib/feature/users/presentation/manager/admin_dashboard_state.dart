@@ -4,6 +4,7 @@ part of 'admin_dashboard_cubit.dart';
 /// حالياً مفعّل: userManagement فقط (UC-007) — الباقي "قريباً" حسب خارطة الطريق.
 enum AdminSection {
   userManagement,
+  printQR,
   attendanceOverview,
   systemSettings,
   aboutApp,

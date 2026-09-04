@@ -9,35 +9,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_font.dart';
+import '../../../attendance/presentation/pages/attendance_q_r_view.dart';
+import '../widgets/admin_dashboard_drawer.dart';
 import '../widgets/coming_soon_view.dart';
 import '../widgets/user_management/user_management_view.dart';
 
 /// شاشة لوحة تحكم المشرف التقني (Super Admin Dashboard).
-/// تعرض Drawer بأقسام النظام، وتبدّل المحتوى حسب القسم المختار عبر
-/// [AdminDashboardCubit] دون إعادة بناء الشاشة بالكامل.
+///
+/// ⚠️ لا تُنشئ أي BlocProvider هنا — [AdminDashboardCubit] مزوَّد بالفعل
+/// عالمياً من main.dart عبر MultiBlocProvider (نفس النسخة المسجّلة بـ get_it).
+/// إنشاء BlocProvider محلي إضافي هنا كان يعني نسختين منفصلتين من نفس
+/// الـ Cubit، فيفقد التبويب المختار حالته كل ما تدخل/تطلع من الشاشة.
 class AdminDashboardScreen extends StatelessWidget {
   /// المستخدم الحالي — يُمرَّر من الـ Router عبر `state.extra`
   final UserEntity user;
 
   const AdminDashboardScreen({super.key, required this.user});
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AdminDashboardCubit(),
-      child: _AdminDashboardView(user: user),
-    );
-  }
-}
-
-class _AdminDashboardView extends StatelessWidget {
-  final UserEntity user;
-  const _AdminDashboardView({required this.user});
-
   String _titleFor(AdminSection section) {
     switch (section) {
       case AdminSection.userManagement:
         return 'إدارة المستخدمين';
+      case AdminSection.printQR:
+        return 'طباعة رمز الـ QR';
       case AdminSection.attendanceOverview:
         return 'إحصائيات الحضور';
       case AdminSection.systemSettings:
@@ -52,10 +46,7 @@ class _AdminDashboardView extends StatelessWidget {
       case AdminSection.userManagement:
         return const UserManagementView();
       case AdminSection.attendanceOverview:
-        return const ComingSoonView(
-          title: 'إحصائيات الحضور',
-          icon: Icons.bar_chart_rounded,
-        );
+        return const AttendanceQRView();
       case AdminSection.systemSettings:
         return const ComingSoonView(
           title: 'إعدادات النظام',
@@ -66,6 +57,8 @@ class _AdminDashboardView extends StatelessWidget {
           title: 'عن التطبيق',
           icon: Icons.info_outline_rounded,
         );
+      case AdminSection.printQR:
+        return const AttendanceQRView();
     }
   }
 
@@ -150,8 +143,7 @@ class _AdminDashboardView extends StatelessWidget {
             onPressed: () {
               Navigator.pop(ctx);
               // TODO: استدعاء AuthCubit الموجود في feature الـ auth لتنفيذ signOut()
-              // ثم الانتقال عبر context.go(AppRoutes.login) — go_router هو
-              // المصدر الوحيد للتنقل حسب المبدأ المتبع في المشروع.
+              // ثم الانتقال عبر context.go(AppRoutes.login)
             },
             child: const Text('خروج', style: TextStyle(color: Colors.red)),
           ),

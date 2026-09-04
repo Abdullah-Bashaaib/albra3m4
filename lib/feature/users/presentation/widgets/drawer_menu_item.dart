@@ -25,7 +25,9 @@ class DrawerMenuItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Material(
-        color: isSelected ? _primaryColor.withOpacity(0.1) : Colors.transparent,
+        color: isSelected
+            ? _primaryColor.withValues(alpha: 0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),

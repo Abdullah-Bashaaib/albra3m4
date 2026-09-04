@@ -3,6 +3,7 @@ import 'package:albra3m4/feature/auth/presentation/screens/home_screen_temp.dart
 import 'package:albra3m4/feature/teachers_management/presentation/pages/admin_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../feature/attendance/presentation/pages/students_attendance.dart';
 import '../../feature/auth/domain/entities/user.dart';
 import '../../feature/auth/presentation/screens/complete_google_profile_screen.dart';
 import '../../feature/auth/presentation/screens/login_screen.dart';
@@ -36,7 +37,6 @@ class AppRouter {
         path: AppRoutes.completeGoogleProfile,
         name: AppRoutes.completeGoogleProfile,
         builder: (context, state) {
-          // يُمرَّر المستخدم عبر `extra` — راجع login_cubit.dart / login_state.dart.
           final user = state.extra as UserEntity;
           return CompleteGoogleProfileScreen(user: user);
         },
@@ -46,10 +46,6 @@ class AppRouter {
         name: AppRoutes.home,
         builder: (context, state) => const HomeScreen(),
       ),
-
-      // ── Role-based dashboards (UC-003) ──────────────────────────
-      // TODO: استبدل HomeScreen() بشاشة الـ Dashboard الفعلية لكل دور
-      // بمجرد بنائها. الـ path والتوجيه جاهزين ومربوطين بالفعل.
       GoRoute(
         path: AppRoutes.adminDashboard,
         name: AppRoutes.adminDashboard,
@@ -69,7 +65,7 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.teacherDashboard,
         name: AppRoutes.teacherDashboard,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const StudentsAttendance(),
       ),
       GoRoute(
         path: AppRoutes.parentDashboard,

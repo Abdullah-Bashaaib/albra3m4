@@ -65,7 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
             );
             context.push(AppRoutes.completeGoogleProfile, extra: state.user);
           }
-
           if (state is LoginFailure) {
             CustomSnackBar.showError(context, state.message);
           }

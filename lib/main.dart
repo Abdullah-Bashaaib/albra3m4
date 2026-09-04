@@ -4,6 +4,7 @@ import 'package:albra3m4/core/routing/app_router.dart';
 import 'package:albra3m4/core/utils/observers/app_bloc_observer.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart';
 import 'package:albra3m4/injection.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,8 @@ class MainApp extends StatelessWidget {
         BlocProvider<AttendanceCubit>(create: (_) => sl<AttendanceCubit>()),
         BlocProvider<TeacherCubit>(create: (_) => sl<TeacherCubit>()),
         BlocProvider<UsersCubit>(create: (_) => sl<UsersCubit>()),
+        BlocProvider<AdminDashboardCubit>(
+            create: (_) => sl<AdminDashboardCubit>()),
       ],
       child: MaterialApp.router(
         routerConfig: AppRouter.router,
