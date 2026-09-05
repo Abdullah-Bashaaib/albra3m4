@@ -11,6 +11,8 @@ abstract class AttendanceRepo {
   );
   Future<Either<String, bool>> checkCode();
   Future<Either<String, QREntity>> getQRTeacher(String schoolId);
+  Future<Either<String, List<TeacherAttendanceEntity>>>
+  getTeacherAttendanceByDate(String date);
 
   /// Students
 }

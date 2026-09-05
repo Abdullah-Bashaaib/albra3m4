@@ -16,6 +16,9 @@ class AttendanceState extends Equatable {
   final String? currentAttendanceCode;
   final String? attendanceTStatus;
   final bool isLoadingQ;
+  // قائمة تحضير المعلمات (لواجهة المديرة)
+  final List<TeacherAttendanceEntity> teacherAttendanceList;
+  final bool isLoadingAttendanceList;
 
   const AttendanceState({
     this.isLoading = false,
@@ -67,6 +70,8 @@ class AttendanceState extends Equatable {
     this.currentAttendanceCode,
     this.attendanceTStatus,
     this.isLoadingQ = false,
+    this.teacherAttendanceList = const [],
+    this.isLoadingAttendanceList = false,
   });
 
   @override
@@ -84,6 +89,8 @@ class AttendanceState extends Equatable {
     currentAttendanceCode,
     attendanceTStatus,
     isLoadingQ,
+    teacherAttendanceList,
+    isLoadingAttendanceList,
   ];
 
   AttendanceState copyWith({
@@ -101,6 +108,8 @@ class AttendanceState extends Equatable {
     String? currentAttendanceCode,
     String? attendanceTStatus,
     bool? isLoadingQ,
+    List<TeacherAttendanceEntity>? teacherAttendanceList,
+    bool? isLoadingAttendanceList,
   }) {
     return AttendanceState(
       isLoading: isLoading ?? this.isLoading,
@@ -118,6 +127,10 @@ class AttendanceState extends Equatable {
           currentAttendanceCode ?? this.currentAttendanceCode,
       attendanceTStatus: attendanceTStatus ?? this.attendanceTStatus,
       isLoadingQ: isLoadingQ ?? this.isLoadingQ,
+      teacherAttendanceList:
+          teacherAttendanceList ?? this.teacherAttendanceList,
+      isLoadingAttendanceList:
+          isLoadingAttendanceList ?? this.isLoadingAttendanceList,
     );
   }
 }
