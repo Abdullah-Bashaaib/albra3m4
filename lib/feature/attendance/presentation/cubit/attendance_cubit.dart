@@ -9,6 +9,7 @@ import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_q_r_usec
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_teacher_attendance_by_date_usecase.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +23,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   final CheckCodeUsecase checkCodeUsecase;
   final AddAttendanceTeacherUsecase addAttendanceTeacherUsecase;
   final GetQRTeacherUsecase getQRTeacherUsecase;
+  final GetTeacherAttendanceByDateUsecase getTeacherAttendanceByDateUsecase;
 
   AttendanceCubit({
     required this.getQRUsecase,
@@ -29,6 +31,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     required this.checkCodeUsecase,
     required this.addAttendanceTeacherUsecase,
     required this.getQRTeacherUsecase,
+    required this.getTeacherAttendanceByDateUsecase,
   }) : super(AttendanceState());
 
   attendanceTrue() {
@@ -39,6 +42,34 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
   updateAttendance(String studentId) {}
   removeAbsence(String studentId) {}
+
+  // =========================================================
+  // جلب تحضير المعلمات ليوم محدد (لواجهة المديرة)
+  // =========================================================
+
+  Future<void> loadTeacherAttendanceByDate(DateTime date) async {
+    final formatted =
+        '${date.year}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
+    emit(
+      state.copyWith(
+        isLoadingAttendanceList: true,
+        error: null,
+        teacherAttendanceList: [],
+      ),
+    );
+    final result = await getTeacherAttendanceByDateUsecase(formatted);
+    result.fold(
+      (l) => emit(state.copyWith(isLoadingAttendanceList: false, error: l)),
+      (r) => emit(
+        state.copyWith(
+          isLoadingAttendanceList: false,
+          teacherAttendanceList: r,
+        ),
+      ),
+    );
+  }
 
   // تحميل بيانات الشاشة
   Future<void> loadAttendanceCode() async {

@@ -108,5 +108,22 @@ class AttendanceRepoImp implements AttendanceRepo {
     }
   }
 
+  @override
+  Future<Either<String, List<TeacherAttendanceEntity>>>
+  getTeacherAttendanceByDate(String date) async {
+    try {
+      if (!await conn.hasConnection) {
+        return left('لا يوجد اتصال بالإنترنت');
+      }
+      final models = await remote.getTeacherAttendanceByDate(date);
+      final entities = models
+          .map((m) => TeacherAttendanceEntity.fromModel(m))
+          .toList();
+      return right(entities);
+    } on ServerException catch (e) {
+      return left(e.message);
+    }
+  }
+
   /// Students
 }

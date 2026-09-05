@@ -1,6 +1,6 @@
 import 'package:albra3m4/feature/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:albra3m4/feature/auth/presentation/screens/home_screen_temp.dart';
-import 'package:albra3m4/feature/teachers_management/presentation/pages/admin_dashboard_screen.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/pages/manager_dashboard_screen.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../feature/attendance/presentation/pages/students_attendance.dart';
