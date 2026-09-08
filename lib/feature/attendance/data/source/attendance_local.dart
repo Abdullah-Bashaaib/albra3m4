@@ -26,7 +26,10 @@ class AttendanceLocalImp implements AttendanceLocal {
   @override
   Future<void> addAttendanceTeacher(TeacherAttendanceModel attendance) async {
     try {
-      await perf.setString(PerfKeys.attendanceDateKey, DateTime.now().toIso8601String());
+      await perf.setString(
+        PerfKeys.attendanceDateKey,
+        DateTime.now().toIso8601String(),
+      );
       await perf.setString(PerfKeys.attendanceStatus, attendance.status);
     } catch (e) {
       throw LocalException(e.toString());
@@ -41,8 +44,8 @@ class AttendanceLocalImp implements AttendanceLocal {
       perf.setString(PerfKeys.schoolNameKey, code.schoolName);
       perf.setString(PerfKeys.currentQRKey, code.code);
       perf.setString(PerfKeys.dateKey, code.date?.toIso8601String() ?? '');
-      perf.setString(PerfKeys.startTimeKey, code.startTime);
-      perf.setString(PerfKeys.endTimeKey, code.endTime);
+      perf.setInt(PerfKeys.startTimeKey, code.startTime);
+      perf.setInt(PerfKeys.endTimeKey, code.endTime);
       perf.setString(PerfKeys.createdByKey, code.createdBy);
     } catch (e) {
       throw LocalException(e.toString());
@@ -57,8 +60,8 @@ class AttendanceLocalImp implements AttendanceLocal {
       final String? schoolName = perf.getString(PerfKeys.schoolNameKey);
       final String? currentQR = perf.getString(PerfKeys.currentQRKey);
       final String? dateQ = perf.getString(PerfKeys.dateKey);
-      final String? startTime = perf.getString(PerfKeys.startTimeKey);
-      final String? endTime = perf.getString(PerfKeys.endTimeKey);
+      final int? startTimeString = perf.getInt(PerfKeys.startTimeKey);
+      final int? endTimeString = perf.getInt(PerfKeys.endTimeKey);
       final String? createdBy = perf.getString(PerfKeys.createdByKey);
 
       final qrModel = QRModel(
@@ -67,12 +70,13 @@ class AttendanceLocalImp implements AttendanceLocal {
         schoolName: schoolName ?? '',
         code: currentQR ?? '',
         date: dateQ != null ? DateTime.parse(dateQ) : null,
-        startTime: startTime ?? '',
-        endTime: endTime ?? '',
+        startTime: startTimeString ?? 0,
+        endTime: endTimeString ?? 0,
         createdBy: createdBy ?? '',
       );
       return qrModel;
     } catch (e) {
+      print(e.toString());
       throw LocalException(e.toString());
     }
   }

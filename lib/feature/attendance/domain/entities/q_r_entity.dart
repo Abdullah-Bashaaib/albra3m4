@@ -6,8 +6,8 @@ class QREntity {
   final String schoolName;
   final String code;
   final DateTime? date;
-  final String startTime;
-  final String endTime;
+  final int startTime;
+  final int endTime;
   final String createdBy;
 
   QREntity({
@@ -27,8 +27,8 @@ class QREntity {
     String? schoolName,
     String? code,
     DateTime? date,
-    String? startTime,
-    String? endTime,
+    int? startTime,
+    int? endTime,
     String? createdBy,
   }) {
     return QREntity(

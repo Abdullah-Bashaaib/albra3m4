@@ -35,6 +35,9 @@ dependencies:
   internet_connection_checker: 
   uuid: 
   google_sign_in: ^6.2.2
+  pdf: ^3.11.1
+  printing: ^5.13.2
+  http: 
 
   # Routing
   go_router:

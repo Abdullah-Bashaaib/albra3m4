@@ -2,6 +2,7 @@ import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:albra3m4/core/utils/widgets/app_background.dart';
 import 'package:albra3m4/core/utils/widgets/app_drawer.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:albra3m4/feature/attendance/presentation/pages/attendance_q_r_view.dart';
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/pages/teacher_attendance_screen.dart';
@@ -30,7 +31,6 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // تحميل تحضير اليوم الحالي فور فتح الداشبورد
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AttendanceCubit>().loadTeacherAttendanceByDate(
         DateTime.now(),
@@ -46,6 +46,16 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
             builder: (_) => BlocProvider.value(
               value: context.read<AttendanceCubit>(),
               child: const TeacherAttendanceScreen(),
+            ),
+          ),
+        );
+        break;
+      case 'QRTeacher':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<AttendanceCubit>(),
+              child: AttendanceQRView(user: widget.user,),
             ),
           ),
         );
@@ -112,7 +122,7 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
                                   iconBgColor: Colors.white.withValues(
                                     alpha: 0.25,
                                   ),
-                                  sublabel: '$activeTeachers نشطة',
+                                  // sublabel: '$activeTeachers نشطة',
                                 ),
                               ),
                               const SizedBox(width: 14),
@@ -145,7 +155,7 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
                           const SizedBox(height: 28),
                           // ── ملخص سريع (حقيقي) ───────────────────
                           QuickSummaryCard(
-                            teacherCount: teacherCount,
+                            teacherActiveCount: activeTeachers,
                             studentCount: _demoStudentCount,
                             teacherAttendance: teacherAttendanceRatio,
                             studentAttendance: _demoStudentAttendance,

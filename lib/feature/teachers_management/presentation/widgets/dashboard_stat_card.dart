@@ -40,9 +40,11 @@ class DashboardStatCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // أيقونة دائرية
+          // أيقونة دائرية فوق
           Container(
             width: 52,
             height: 52,
@@ -53,55 +55,49 @@ class DashboardStatCard extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 28),
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(height: 12),
 
-          // العنوان والقيمة
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
-                ),
-                if (sublabel != null) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      sublabel!,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+          // القيمة
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              height: 1.1,
             ),
           ),
+          const SizedBox(height: 4),
+
+          // العنوان
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+          ),
+          if (sublabel != null) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                sublabel!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

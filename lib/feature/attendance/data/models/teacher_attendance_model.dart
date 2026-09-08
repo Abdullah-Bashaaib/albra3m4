@@ -1,4 +1,5 @@
 import 'package:albra3m4/feature/attendance/domain/entities/teacher_attendance_entity.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 
 class TeacherAttendanceModel extends TeacherAttendanceEntity {
   TeacherAttendanceModel({
@@ -14,10 +15,12 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
   });
 
   factory TeacherAttendanceModel.fromJson(Map<String, dynamic> json) {
+    // print('ROLE FROM JSON: ${json['role']}');
+    // print('ROLE TYPE: ${json['role'].runtimeType}');
     return TeacherAttendanceModel(
       id: json['id'],
       userId: json['user_id'],
-      role: json['role'],
+      role: UserRole.values.byName(json['role']),
       name: json['name'],
       timeOfArrival: json['time_of_arrival'],
       departureTime: json['departure_time'],
@@ -31,7 +34,7 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
     return {
       'id': id,
       'user_id': userId,
-      'role': role,
+      'role': role.name,
       'name': name,
       'time_of_arrival': timeOfArrival,
       'departure_time': departureTime,
