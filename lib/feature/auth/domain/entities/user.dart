@@ -68,7 +68,7 @@ enum UserRole { superAdmin, manager, teacher, parent }
 
 extension UserRoleArabicLabel on UserRole {
   String get arabicLabel => switch (this) {
-    UserRole.superAdmin => 'مشرف تقني',
+    UserRole.superAdmin => 'مشرف',
     UserRole.manager => 'مدير',
     UserRole.teacher => 'معلمة',
     UserRole.parent => 'ولي أمر',

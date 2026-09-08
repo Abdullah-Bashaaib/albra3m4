@@ -110,7 +110,7 @@ class AdminDashboardScreen extends StatelessWidget {
       case AdminSection.aboutApp:
         return 'aboutApp';
       case AdminSection.printQR:
-        throw UnimplementedError();
+        return 'printQR';
     }
   }
 
@@ -124,6 +124,8 @@ class AdminDashboardScreen extends StatelessWidget {
         return AdminSection.systemSettings;
       case 'aboutApp':
         return AdminSection.aboutApp;
+      case 'printQR':
+        return AdminSection.printQR;
       default:
         return AdminSection.userManagement;
     }

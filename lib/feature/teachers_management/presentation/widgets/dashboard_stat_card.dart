@@ -57,14 +57,51 @@ class DashboardStatCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // القيمة
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              height: 1.1,
+          // العنوان والقيمة
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+                if (sublabel != null) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      sublabel!,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           const SizedBox(height: 4),

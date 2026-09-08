@@ -1,15 +1,9 @@
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:flutter/material.dart';
 
-import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'app_drawer_header.dart';
 import 'app_drawer_menu_item.dart';
 
-/// Drawer عام للتطبيق — يعرض الصفحات الخاصة بدور المستخدم فقط.
-///
-/// استخدام:
-/// ```dart
-/// drawer: AppDrawer(user: currentUser, onLogout: _handleLogout),
-/// ```
 class AppDrawer extends StatelessWidget {
   final UserEntity user;
   final VoidCallback onLogout;
@@ -101,6 +95,12 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.bar_chart_rounded,
             label: 'إحصائيات الحضور',
             comingSoon: true,
+          ),
+          _DrawerItem(
+            key: 'printQR',
+            icon: Icons.qr_code,
+            label: 'طباعة رمز الـ QR',
+            comingSoon: false,
           ),
           _DrawerItem(
             key: 'systemSettings',
