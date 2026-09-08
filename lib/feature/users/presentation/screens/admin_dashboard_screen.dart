@@ -10,7 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_font.dart';
 import '../../../attendance/presentation/pages/attendance_q_r_view.dart';
-import '../widgets/admin_dashboard_drawer.dart';
 import '../widgets/coming_soon_view.dart';
 import '../widgets/user_management/user_management_view.dart';
 
@@ -110,6 +109,8 @@ class AdminDashboardScreen extends StatelessWidget {
         return 'systemSettings';
       case AdminSection.aboutApp:
         return 'aboutApp';
+      case AdminSection.printQR:
+        return 'printQR';
     }
   }
 
@@ -123,6 +124,8 @@ class AdminDashboardScreen extends StatelessWidget {
         return AdminSection.systemSettings;
       case 'aboutApp':
         return AdminSection.aboutApp;
+      case 'printQR':
+        return AdminSection.printQR;
       default:
         return AdminSection.userManagement;
     }

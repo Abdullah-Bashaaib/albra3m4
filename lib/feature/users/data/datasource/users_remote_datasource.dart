@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:albra3m4/core/errors/exceptions.dart';
 import 'package:albra3m4/feature/auth/Data/models/user_model.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide FirebaseException;
 
 abstract class UsersRemoteDataSource {
@@ -14,6 +15,8 @@ abstract class UsersRemoteDataSource {
   Future<UserModel> updateUser(UserModel user);
 
   Future<void> deleteUser(String id);
+
+  Future<void> updateUserRole(String uid, UserRole role);
 }
 
 class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
@@ -48,9 +51,12 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   }
 
   @override
-  Future<void> deleteUser(String id) {
-    // TODO: implement deleteUser
-    throw UnimplementedError();
+  Future<void> deleteUser(String id) async {
+    try {
+      await _usersCollection.doc(id).delete();
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
   }
 
   @override
@@ -63,5 +69,14 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   Future<UserModel> updateUser(UserModel user) {
     // TODO: implement updateUser
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateUserRole(String uid, UserRole role) async {
+    try {
+      await _usersCollection.doc(uid).update({'role': role.name});
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
   }
 }

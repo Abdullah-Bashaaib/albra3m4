@@ -42,8 +42,11 @@ import 'feature/auth/domain/usecases/login_use_case.dart';
 import 'feature/auth/domain/usecases/register_user_usecase.dart';
 import 'feature/auth/domain/usecases/send_email_verification.dart';
 import 'feature/auth/domain/usecases/send_password_reset_email.dart';
+import 'feature/users/data/datasource/users_local_datasource.dart';
 import 'feature/users/data/datasource/users_remote_datasource.dart';
 import 'feature/users/data/repository/users_repository_imp.dart';
+import 'feature/users/domain/use_cases/change_user_role_use_case.dart';
+import 'feature/users/domain/use_cases/delete_user_use_case.dart';
 import 'feature/users/domain/use_cases/get_all_users_use_case.dart';
 
 final sl = GetIt.instance;
@@ -254,21 +257,32 @@ class Injection {
       ),
     );
     ///=========================[ Users Management ]========================
-    // DataSource Remote
+    // DataSource Remote & Local
     sl.registerLazySingleton<UsersRemoteDataSourceImpl>(() =>
         UsersRemoteDataSourceImpl());
+    sl.registerLazySingleton<UsersLocalDataSource>(() =>
+        UsersLocalDataSourceImpl(sl<DatabaseHelper>()));
     // repository Implement
     sl.registerLazySingleton<UsersRepositoryImp>(() =>
         UsersRepositoryImp(
           sl<UsersRemoteDataSourceImpl>(),
+          sl<UsersLocalDataSource>(),
           sl<InternetConnectionChecker>(),
         ),);
     // use cases
     sl.registerLazySingleton<GetAllUsersUseCase>(() =>
         GetAllUsersUseCase(sl<UsersRepositoryImp>()));
+    sl.registerLazySingleton<DeleteUserUseCase>(() =>
+        DeleteUserUseCase(sl<UsersRepositoryImp>()));
+    sl.registerLazySingleton<ChangeUserRoleUseCase>(() =>
+        ChangeUserRoleUseCase(sl<UsersRepositoryImp>()));
     //cubit
     sl.registerLazySingleton<UsersCubit>(() =>
-        UsersCubit(sl<GetAllUsersUseCase>()));
+        UsersCubit(
+          sl<GetAllUsersUseCase>(),
+          sl<DeleteUserUseCase>(),
+          sl<ChangeUserRoleUseCase>(),
+        ));
     sl.registerLazySingleton<AdminDashboardCubit>(() => AdminDashboardCubit());
   }
 

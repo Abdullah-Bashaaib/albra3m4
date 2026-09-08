@@ -1,16 +1,12 @@
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/widgets/user_management/user_search_filter_bar.dart';
+import 'package:albra3m4/feature/users/presentation/widgets/user_management/user_stats_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/constants/app_font.dart';
 import '../../manager/users_state.dart';
 import 'user_list_item.dart';
-import 'user_search_filter_bar.dart';
-import 'user_stats_row.dart';
-
-/// ⚠️ لا تُنشئ أي BlocProvider هنا — [UsersCubit] مزوَّد بالفعل عالمياً
-/// من main.dart. هذا الـ widget فقط يستهلك النسخة الموجودة بأعلى الشجرة
-/// ويطلب تحميل البيانات مرة واحدة عند دخول الشاشة (initState)، بدل ما
-/// ينشئ نسخة جديدة كل ما يدخل المستخدم لتبويب "إدارة المستخدمين".
 class UserManagementView extends StatefulWidget {
   const UserManagementView({super.key});
 
@@ -31,9 +27,6 @@ class _UserManagementViewState extends State<UserManagementView> {
       builder: (context, state) {
         final cubit = context.read<UsersCubit>();
 
-        // switch شامل (exhaustive) على كل حالات UsersState —
-        // لو انضافت حالة جديدة لاحقاً ونسيت تتعامل معها هنا،
-        // Dart يعطيك خطأ وقت الكتابة مباشرة.
         return switch (state) {
           UsersInitial() ||
           UsersLoading() => const Center(child: CircularProgressIndicator()),
@@ -137,21 +130,27 @@ class _LoadedContent extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
+        title: const Text(
+          'تأكيد الحذف',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontFamily: AppFont.primary),
+        ),
         content: Text(
           'هل أنت متأكد من حذف المستخدم "$name"؟ هذا الإجراء لا يمكن التراجع عنه.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('إلغاء'),
+            child: const Text(
+              'إلغاء', style: TextStyle(fontFamily: AppFont.primary),),
           ),
           TextButton(
             onPressed: () {
               cubit.deleteUser(uid);
               Navigator.pop(ctx);
             },
-            child: const Text('حذف', style: TextStyle(color: Colors.red)),
+            child: const Text('حذف', style: TextStyle(
+                color: Colors.red, fontFamily: AppFont.primary)),
           ),
         ],
       ),

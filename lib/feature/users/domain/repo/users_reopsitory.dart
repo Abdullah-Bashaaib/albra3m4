@@ -13,4 +13,6 @@ abstract class UsersRepository {
   Future<Either<Failure, UserEntity>> updateUser(UserEntity user);
 
   Future<Either<Failure, Unit>> deleteUser(String id);
+
+  Future<Either<Failure, Unit>> changeUserRole(String uid, UserRole newRole);
 }

@@ -4,12 +4,20 @@ import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:albra3m4/feature/users/domain/use_cases/get_all_users_use_case.dart';
 import 'package:bloc/bloc.dart';
 
+import '../../domain/use_cases/change_user_role_use_case.dart';
+import '../../domain/use_cases/delete_user_use_case.dart';
 import 'users_state.dart';
 
 class UsersCubit extends Cubit<UsersState> {
-  UsersCubit(this._getAllUsersUseCase) : super(UsersInitial());
+  UsersCubit(
+    this._getAllUsersUseCase,
+    this._deleteUserUseCase,
+    this._changeUserRoleUseCase,
+  ) : super(UsersInitial());
 
   final GetAllUsersUseCase _getAllUsersUseCase;
+  final DeleteUserUseCase _deleteUserUseCase;
+  final ChangeUserRoleUseCase _changeUserRoleUseCase;
 
   Future<void> getAllUsers() async {
     log(
@@ -56,22 +64,35 @@ class UsersCubit extends Cubit<UsersState> {
     // TODO: استدعاء use case حقيقي لتحديث isActive في Firestore عبر UserModel
   }
 
-  void changeUserRole(String uid, UserRole newRole) {
+  Future<void> changeUserRole(String uid, UserRole newRole) async {
     final current = state;
     if (current is! UsersLoaded) return;
+
+    final previousUsers = current.users;
     final updated = current.users.map((u) {
       if (u.uid != uid) return u;
       return u.copyWith(role: newRole);
     }).toList();
+
     emit(current.copyWith(users: updated));
-    // TODO: استدعاء use case حقيقي لتحديث role في Firestore عبر UserModel
+
+    final result = await _changeUserRoleUseCase(uid, newRole);
+
+    result.fold(
+      (error) {
+        emit(current.copyWith(users: previousUsers));
+        emit(UsersError(message: error.message));
+      },
+      (_) {},
+    );
   }
 
-  void deleteUser(String uid) {
+  void deleteUser(String uid) async {
     final current = state;
     if (current is! UsersLoaded) return;
     final updated = current.users.where((u) => u.uid != uid).toList();
-    emit(current.copyWith(users: updated));
-    // TODO: استدعاء use case حقيقي لحذف المستخدم من Firestore (بعد التأكيد المزدوج بالواجهة)
+    final result = await _deleteUserUseCase(uid);
+    result.fold((error) => emit(UsersError(message: error.message)), (_) =>
+        emit(current.copyWith(users: updated)));
   }
 }

@@ -8,6 +8,8 @@ import 'package:albra3m4/feature/teachers_management/presentation/widgets/dashbo
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/app_font.dart';
+
 /// صفحة داشبورد المديرة — تعرض الإحصائيات الرئيسية للروضة
 class ManagerDashboardScreen extends StatelessWidget {
   final UserEntity user;
@@ -161,6 +163,7 @@ class ManagerDashboardScreen extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w900,
+            fontFamily: AppFont.primary,
             fontSize: 18,
           ),
         ),

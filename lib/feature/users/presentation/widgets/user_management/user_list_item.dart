@@ -1,3 +1,4 @@
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../auth/domain/entities/user.dart';
@@ -37,7 +38,7 @@ class UserListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha:0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -47,7 +48,7 @@ class UserListItem extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: _roleColor.withOpacity(0.12),
+            backgroundColor: _roleColor.withValues(alpha: 0.12),
             child: Text(
               initial,
               style: TextStyle(
@@ -98,7 +99,7 @@ class UserListItem extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: _roleColor.withOpacity(0.1),
+                    color: _roleColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -136,17 +137,24 @@ class UserListItem extends StatelessWidget {
                   );
                   onRoleChange(role);
                 },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'manager', child: Text('تعيين كمدير')),
-                  PopupMenuItem(value: 'teacher', child: Text('تعيين كمعلمة')),
-                  PopupMenuItem(value: 'parent', child: Text('تعيين كولي أمر')),
-                  PopupMenuDivider(),
+                itemBuilder: (context) =>
+                [
+                  const PopupMenuItem(
+                      value: 'manager', child: Text('تعيين كمدير')),
+                  const PopupMenuItem(
+                      value: 'teacher', child: Text('تعيين كمعلمة')),
+                  const PopupMenuItem(
+                      value: 'parent', child: Text('تعيين كولي أمر')),
+                  const PopupMenuDivider(),
                   PopupMenuItem(
                     value: 'delete',
-                    child: Text(
+                    child: const Text(
                       'حذف المستخدم',
                       style: TextStyle(color: Colors.red),
                     ),
+                    onTap: () {
+                      CustomSnackBar.showWarning(context, 'will be deleted');
+                    },
                   ),
                 ],
               ),
