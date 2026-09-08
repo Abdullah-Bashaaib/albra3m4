@@ -7,6 +7,7 @@ import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_q_r_usec
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_teacher_attendance_by_date_usecase.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/auth/domain/usecases/complete_google_profile_use_case.dart';
 import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
@@ -70,8 +71,6 @@ class Injection {
     sl.registerLazySingleton<FirebaseFirestore>(
       () => FirebaseFirestore.instance,
     );
-
-    
 
     // =========================
     // Database
@@ -209,6 +208,9 @@ class Injection {
     sl.registerLazySingleton<GetQRTeacherUsecase>(
       () => GetQRTeacherUsecase(sl<AttendanceRepo>()),
     );
+    sl.registerLazySingleton<GetTeacherAttendanceByDateUsecase>(
+      () => GetTeacherAttendanceByDateUsecase(sl<AttendanceRepo>()),
+    );
     // Cubit
     sl.registerLazySingleton<AttendanceCubit>(
       () => AttendanceCubit(
@@ -217,8 +219,11 @@ class Injection {
         checkCodeUsecase: sl<CheckCodeUsecase>(),
         addAttendanceTeacherUsecase: sl<AddAttendanceTeacherUsecase>(),
         getQRTeacherUsecase: sl<GetQRTeacherUsecase>(),
+        getTeacherAttendanceByDateUsecase:
+            sl<GetTeacherAttendanceByDateUsecase>(),
       ),
     );
+
     /// ====================== [ Teacher Management ] ==================
     // source
     sl.registerLazySingleton<TeacherLocal>(
@@ -258,6 +263,7 @@ class Injection {
         deleteTeacherUsecase: sl<DeleteTeacherUsecase>(),
       ),
     );
+
     ///=========================[ Users Management ]========================
     // DataSource Remote & Local
     sl.registerLazySingleton<UsersRemoteDataSourceImpl>(() =>
@@ -293,6 +299,4 @@ class Injection {
         ));
     sl.registerLazySingleton<AdminDashboardCubit>(() => AdminDashboardCubit());
   }
-
-
 }

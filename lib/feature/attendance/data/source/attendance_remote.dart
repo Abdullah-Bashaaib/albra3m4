@@ -8,6 +8,7 @@ abstract class AttendanceRemote {
   Future<QRModel> getQR(String schoolId);
   Future<void> addQR(QRModel code);
   Future<void> addAttendanceTeacher(TeacherAttendanceModel attendance);
+  Future<List<TeacherAttendanceModel>> getTeacherAttendanceByDate(String date);
 
   /// Students
 }
@@ -64,4 +65,21 @@ class AttendanceRemoteImp implements AttendanceRemote {
     }
   }
 
+  @override
+  Future<List<TeacherAttendanceModel>> getTeacherAttendanceByDate(
+    String date,
+  ) async {
+    try {
+      final snapshot = await firestore
+          .collection('teacherAttendance')
+          .doc(date)
+          .collection('teachers')
+          .get();
+      return snapshot.docs
+          .map((doc) => TeacherAttendanceModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
 }

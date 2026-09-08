@@ -123,9 +123,20 @@ class AppDrawer extends StatelessWidget {
             label: 'لوحة التحكم',
           ),
           _DrawerItem(
-            key: 'attendanceOverview',
+            key: 'teacherAttendance',
             icon: Icons.how_to_reg_rounded,
-            label: 'نسب الحضور',
+            label: 'تحضير المعلمات',
+          ),
+          _DrawerItem(
+            key: 'viewStudents',
+            icon: Icons.info_outline_rounded,
+            label: 'عرض الطلاب',
+            comingSoon: true,
+          ),
+          _DrawerItem(
+            key: 'viewStudentsAttendance',
+            icon: Icons.info_outline_rounded,
+            label: 'عرض حضور الطلاب',
             comingSoon: true,
           ),
           _DrawerItem(
@@ -139,10 +150,14 @@ class AppDrawer extends StatelessWidget {
       case UserRole.teacher:
         return [
           _DrawerItem(
+            key: 'teacherDashboard',
+            icon: Icons.dashboard_rounded,
+            label: 'الرئيسية',
+          ),
+          _DrawerItem(
             key: 'attendance',
-            icon: Icons.check_circle_outline_rounded,
-            label: 'الحضور',
-            comingSoon: true,
+            icon: Icons.qr_code_scanner_rounded,
+            label: 'تسجيل الحضور',
           ),
           _DrawerItem(
             key: 'schedule',
