@@ -35,6 +35,10 @@ class UserDisabledFailure extends FirebaseFailure {
   const UserDisabledFailure() : super('تم تعطيل هذا الحساب.');
 }
 
+class DeleteUserFailure extends FirebaseFailure {
+  const DeleteUserFailure() : super('مشكلة في حذف الحساب');
+}
+
 class TooManyRequestsFailure extends FirebaseFailure {
   const TooManyRequestsFailure()
     : super('تم تجاوز عدد المحاولات المسموح بها. حاول لاحقًا.');

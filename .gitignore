@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# تجاهل هذه الملفات
+firebase.json
+devtools_options.yaml
+google-services.json

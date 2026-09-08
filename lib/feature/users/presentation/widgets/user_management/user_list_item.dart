@@ -1,3 +1,5 @@
+import 'package:albra3m4/core/constants/app_font.dart';
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../auth/domain/entities/user.dart';
@@ -5,15 +7,17 @@ import '../../../../auth/domain/entities/user.dart';
 class UserListItem extends StatelessWidget {
   final UserEntity user;
   final ValueChanged<bool> onStatusToggle;
-  final ValueChanged<UserRole> onRoleChange;
-  final VoidCallback onDelete;
+  final ValueChanged<UserRole>? onRoleChange;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
   const UserListItem({
     super.key,
     required this.user,
     required this.onStatusToggle,
-    required this.onRoleChange,
-    required this.onDelete,
+    this.onRoleChange,
+    this.onDelete,
+    this.onEdit,
   });
 
   Color get _roleColor => switch (user.role) {
@@ -37,7 +41,7 @@ class UserListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -47,7 +51,7 @@ class UserListItem extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: _roleColor.withOpacity(0.12),
+            backgroundColor: _roleColor.withValues(alpha: 0.12),
             child: Text(
               initial,
               style: TextStyle(
@@ -98,7 +102,7 @@ class UserListItem extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: _roleColor.withOpacity(0.1),
+                    color: _roleColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -118,38 +122,100 @@ class UserListItem extends StatelessWidget {
             children: [
               Switch(
                 value: user.isActive,
-                onChanged: onStatusToggle,
+                onChanged: user.role == UserRole.superAdmin
+                    ? null
+                    : onStatusToggle,
                 activeColor: const Color(0xFF2ECC71),
               ),
-              PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.more_vert_rounded,
-                  color: Colors.grey.shade500,
-                ),
-                onSelected: (value) {
-                  if (value == 'delete') {
-                    onDelete();
-                    return;
-                  }
-                  final role = UserRole.values.firstWhere(
-                    (r) => r.name == value,
-                  );
-                  onRoleChange(role);
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'manager', child: Text('تعيين كمدير')),
-                  PopupMenuItem(value: 'teacher', child: Text('تعيين كمعلمة')),
-                  PopupMenuItem(value: 'parent', child: Text('تعيين كولي أمر')),
-                  PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text(
-                      'حذف المستخدم',
-                      style: TextStyle(color: Colors.red),
-                    ),
+              if (user.role != UserRole.superAdmin)
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert_rounded,
+                    color: Colors.grey.shade500,
                   ),
-                ],
-              ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      onEdit?.call();
+                      return;
+                    }
+                    if (value == 'delete') {
+                      onDelete?.call();
+                      return;
+                    }
+                    final role = UserRole.values.firstWhere(
+                      (r) => r.name == value,
+                    );
+                    onRoleChange?.call(role);
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 18,
+                            color: Color(0xFF0277BD),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'تعديل البيانات',
+                            style: TextStyle(
+                              fontFamily: AppFont.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    const PopupMenuItem(
+                      value: 'manager',
+                      child: Text(
+                        'تعيين كمدير',
+                        style: TextStyle(
+                          fontFamily: AppFont.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'teacher',
+                      child: Text(
+                        'تعيين كمعلمة',
+                        style: TextStyle(
+                          fontFamily: AppFont.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'parent',
+                      child: Text(
+                        'تعيين كولي أمر',
+                        style: TextStyle(
+                          fontFamily: AppFont.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text(
+                        'حذف المستخدم',
+                        style: TextStyle(
+                          fontFamily: AppFont.primary,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                      onTap: () {
+                        CustomSnackBar.showWarning(context, 'will be deleted');
+                      },
+                    ),
+                  ],
+                ),
             ],
           ),
         ],

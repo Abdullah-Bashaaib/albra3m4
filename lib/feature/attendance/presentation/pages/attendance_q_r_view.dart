@@ -1,9 +1,12 @@
+import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:albra3m4/core/utils/snake_bar_helper.dart';
 import 'package:albra3m4/core/utils/widgets/app_background.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+
+import '../../../../core/constants/app_font.dart';
 
 class AttendanceQRView extends StatefulWidget {
   const AttendanceQRView({super.key});
@@ -74,9 +77,7 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                         // _generatePdf(state);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme
-                            .of(context)
-                            .primaryColor,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
@@ -94,10 +95,10 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          fontFamily: AppFont.primary,
                         ),
                       ),
-                    ),
-                  ),
+                    )),
                 ],
               ),
 
@@ -117,8 +118,7 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                           context,
                         )
                             .primaryColor
-                            .withOpacity(0.2),
-                        blurRadius: 15,
+                            .withValues(alpha: 0.2), blurRadius: 15,
                         spreadRadius: 3,
                         offset: const Offset(0, 5),
                       ),
@@ -129,7 +129,7 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                         context,
                       )
                           .primaryColor
-                          .withOpacity(0.1),
+                          .withValues(alpha: 0.1),
                       width: 1.5,
                     ),
                   ),
@@ -149,19 +149,23 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
+                            fontFamily: AppFont.primary
                         ),
                       ),
                     ],
                   ),
                 ),
               )
-                  : Text('لا يوجد QR حاليا قم بانشاءه'),
+                  : Text('لا يوجد QR حاليا قم بانشاءه',
+                style: TextStyle(fontFamily: AppFont.primary),),
 
               const SizedBox(height: 20),
 
               Text(
                 'آخر تحديث: ${_formatDate(state.attendanceQR?.date)}',
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: const TextStyle(fontSize: 14,
+                    color: Colors.grey,
+                    fontFamily: AppFont.primary),
               ),
 
               const SizedBox(height: 30),
@@ -170,6 +174,7 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                 controller: _controller,
                 decoration: InputDecoration(
                   labelText: '🔄 تغيير كود الحضور',
+                  labelStyle: TextStyle(fontFamily: AppFont.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -191,7 +196,7 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                         context.read<AttendanceCubit>().clearMessage();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -200,7 +205,8 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                       icon: const Icon(Icons.save),
                       label: const Text(
                         'حفظ الكود الجديد',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            color: Colors.white, fontFamily: AppFont.primary),
                       ),
                     ),
                   ),
@@ -213,7 +219,7 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                         context.read<AttendanceCubit>().generateNewCode();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -222,7 +228,8 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
                       icon: const Icon(Icons.refresh),
                       label: const Text(
                         ' انشاء كود عشوائي',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            color: Colors.white, fontFamily: AppFont.primary),
                       ),
                     ),
                   ),

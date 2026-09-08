@@ -73,7 +73,7 @@ class DashboardStatCard extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Colors.white.withValues(alpha: 0.85),
                   ),

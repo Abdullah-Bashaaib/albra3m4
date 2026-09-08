@@ -37,6 +37,7 @@ class LoginCubit extends Cubit<LoginState> {
 
   // Global variables
   UserEntity? user;
+
   Future<void> checkAuthStatus() async {
     log(
         '[message]:-----------------------------------[Here in Cubit method checkAuthStatus start]');
