@@ -101,7 +101,9 @@ class AttendanceRepoImp implements AttendanceRepo {
   Future<Either<String, QREntity>> getQRTeacher(String schoolId) async {
     try {
       final model = await remote.getQR(schoolId);
+      // print('===============================================');
       final entity = QREntity.fromModel(model);
+      // print(entity.endTime);
       return right(entity);
     } on ServerException catch (e) {
       return left(e.message);
@@ -120,6 +122,19 @@ class AttendanceRepoImp implements AttendanceRepo {
           .map((m) => TeacherAttendanceEntity.fromModel(m))
           .toList();
       return right(entities);
+    } on ServerException catch (e) {
+      return left(e.message);
+    }
+  }
+
+  @override
+  Future<Either<String, DateTime>> getDateTimeFromService() async {
+    try {
+      if (!await conn.hasConnection) {
+        return left('لا يوجد اتصال بالإنترنت');
+      }
+      final dateTime = await remote.getDateTimeFromService();
+      return right(dateTime);
     } on ServerException catch (e) {
       return left(e.message);
     }

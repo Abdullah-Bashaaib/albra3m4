@@ -2,13 +2,14 @@ import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class QuickSummaryCard extends StatelessWidget {
-  final int teacherCount;
+  final int teacherActiveCount;
   final int studentCount;
   final double teacherAttendance;
   final double studentAttendance;
 
-  const QuickSummaryCard({super.key, 
-    required this.teacherCount,
+  const QuickSummaryCard({
+    super.key,
+    required this.teacherActiveCount,
     required this.studentCount,
     required this.teacherAttendance,
     required this.studentAttendance,
@@ -48,8 +49,8 @@ class QuickSummaryCard extends StatelessWidget {
           _SummaryRow(
             icon: Icons.school_rounded,
             iconColor: AppColors.primary,
-            label: 'إجمالي المعلمات',
-            value: '$teacherCount معلمة',
+            label: 'المعلمات النشطة',
+            value: '$teacherActiveCount معلمة',
           ),
           _SummaryRow(
             icon: Icons.child_care_rounded,

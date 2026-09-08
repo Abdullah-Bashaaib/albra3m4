@@ -1,10 +1,11 @@
 import 'package:albra3m4/feature/attendance/data/models/teacher_attendance_model.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 
 class TeacherAttendanceEntity {
   final String id;
   final String userId;
   final String schoolId;
-  final String role;
+  final UserRole role;
   final String name;
   final String timeOfArrival;
   final String departureTime;
@@ -27,7 +28,7 @@ class TeacherAttendanceEntity {
     String? id,
     String? userId,
     String? schoolId,
-    String? role,
+    UserRole? role,
     String? name,
     String? timeOfArrival,
     String? departureTime,

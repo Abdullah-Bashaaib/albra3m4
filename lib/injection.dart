@@ -5,6 +5,7 @@ import 'package:albra3m4/feature/attendance/domain/repo/attendance_repo.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_attendance_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_date_time_from_service_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_teacher_attendance_by_date_usecase.dart';
@@ -211,6 +212,9 @@ class Injection {
     sl.registerLazySingleton<GetTeacherAttendanceByDateUsecase>(
       () => GetTeacherAttendanceByDateUsecase(sl<AttendanceRepo>()),
     );
+    sl.registerLazySingleton<GetDateTimeFromServiceUsecase>(
+      () => GetDateTimeFromServiceUsecase(sl<AttendanceRepo>()),
+    );
     // Cubit
     sl.registerLazySingleton<AttendanceCubit>(
       () => AttendanceCubit(
@@ -221,6 +225,7 @@ class Injection {
         getQRTeacherUsecase: sl<GetQRTeacherUsecase>(),
         getTeacherAttendanceByDateUsecase:
             sl<GetTeacherAttendanceByDateUsecase>(),
+        getDateTimeFromServiceUsecase: sl<GetDateTimeFromServiceUsecase>(),
       ),
     );
 

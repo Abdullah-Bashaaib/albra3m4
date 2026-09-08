@@ -80,13 +80,11 @@ class _TeacherAttendanceScreenState extends State<TeacherAttendanceScreen> {
 
                       const SizedBox(height: 20),
 
-                      // ── ملخص سريع ──────────────────────────────────
                       if (!state.isLoadingAttendanceList)
                         SummaryRow(records: state.teacherAttendanceList),
 
                       const SizedBox(height: 16),
 
-                      // ── قائمة المعلمات ─────────────────────────────
                       if (state.isLoadingAttendanceList)
                         _buildShimmer()
                       else if (state.error != null)

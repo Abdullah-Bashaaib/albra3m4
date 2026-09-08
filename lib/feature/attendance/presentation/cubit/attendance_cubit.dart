@@ -7,9 +7,11 @@ import 'package:albra3m4/feature/attendance/domain/entities/teacher_attendance_e
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_attendance_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/add_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/check_code.dart';
+import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_date_time_from_service_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_teacher_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_q_r_usecase.dart';
 import 'package:albra3m4/feature/attendance/domain/usecases/Teacher/get_teacher_attendance_by_date_usecase.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +26,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   final AddAttendanceTeacherUsecase addAttendanceTeacherUsecase;
   final GetQRTeacherUsecase getQRTeacherUsecase;
   final GetTeacherAttendanceByDateUsecase getTeacherAttendanceByDateUsecase;
+  final GetDateTimeFromServiceUsecase getDateTimeFromServiceUsecase;
 
   AttendanceCubit({
     required this.getQRUsecase,
@@ -32,6 +35,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     required this.addAttendanceTeacherUsecase,
     required this.getQRTeacherUsecase,
     required this.getTeacherAttendanceByDateUsecase,
+    required this.getDateTimeFromServiceUsecase,
   }) : super(AttendanceState());
 
   attendanceTrue() {
@@ -86,7 +90,12 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   }
 
   // حفظ كود جديد
-  Future<void> saveAttendanceCode(String code) async {
+  Future<void> saveAttendanceCode(
+    UserEntity user,
+    String code,
+    int startTime,
+    int endTime,
+  ) async {
     if (code.isEmpty) {
       emit(state.copyWith(error: 'ادخل الباركورد اولا'));
       return;
@@ -96,13 +105,13 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     final id = uuid.v4();
     final qr = QREntity(
       id: id,
-      schoolId: '1',
+      schoolId: user.schoolId ?? '1',
       schoolName: 'روضة البراعم',
       code: state.attendanceQR?.code ?? '',
       date: state.attendanceQR?.date ?? DateTime.now(),
-      startTime: '8:00Am',
-      endTime: '11:00AM',
-      createdBy: '1',
+      startTime: startTime,
+      endTime: endTime,
+      createdBy: user.uid,
     );
     final result = await addQRUsecase(qr);
     result.fold(
@@ -122,7 +131,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   }
 
   // إنشاء كود عشوائي
-  String generateNewCode() {
+  String generateNewCode(UserEntity user) {
     final newCode = _generateRandomCode();
     final currentQR = state.attendanceQR;
     final Uuid uuid = Uuid();
@@ -132,13 +141,13 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         ? currentQR.copyWith(code: newCode, date: DateTime.now())
         : QREntity(
             id: id,
-            schoolId: '1',
+            schoolId: user.schoolId ?? '1',
             schoolName: 'روضة البراعم',
             code: newCode,
             date: DateTime.now(),
-            startTime: '8:00Am',
-            endTime: '11:00AM',
-            createdBy: '1',
+            startTime: 8,
+            endTime: 9,
+            createdBy: user.uid,
           );
     emit(state.copyWith(attendanceQR: qr));
 
@@ -158,15 +167,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     );
   }
 
-  // وقت بداية التحضير
-  final int allowedStartHour = 7;
-
-  // وقت نهاية التحضير
-  final int allowedEndHour = 9;
-
   // بعد كم دقيقة يصبح المعلم متأخرًا
-  final int lateMinuteThreshold = 30;
-
   Future<String> getQR() async {
     emit(state.copyWith(isLoading: true, error: null, success: null));
     final result = await getQRUsecase('1');
@@ -221,7 +222,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     );
   }
 
-  Future<void> handleScan(String scannedCode) async {
+  Future<void> handleScan(UserEntity user, String scannedCode) async {
     emit(state.copyWith(isLoading: true, error: null));
     if (state.attendanceDone) {
       emit(
@@ -252,36 +253,76 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     }
 
     final attendanceStatus = _calculateAttendanceStatus();
+    if (await attendanceStatus == 'غائب') {
+      emit(state.copyWith(isLoading: false, error: 'إنتهاء وقت التحضير'));
+      return;
+    }
+    if (await attendanceStatus == 'متقدم') {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          error: 'الوقت حاليا غير مسموح التحضير فيه',
+        ),
+      );
+      return;
+    }
 
-    await addAttendanceTeacher(attendanceStatus: attendanceStatus);
+    await addAttendanceTeacher(
+      user: user,
+      attendanceStatus: await attendanceStatus,
+    );
   }
   // =========================================================
   // تحديد حالة الحضور
   // =========================================================
 
-  String _calculateAttendanceStatus() {
-    final now = DateTime.now();
+  Future<String> _calculateAttendanceStatus() async {
+    emit(state.copyWith(isLoading: true, error: null));
+    final datetimeNow = await getDateTimeFromServiceUsecase();
+    return datetimeNow.fold(
+      (l) {
+        emit(state.copyWith(isLoading: false, error: l));
+        return l;
+      },
+      (r) {
+        print(r.hour);
+        if (r.hour < state.attendanceQR!.startTime) {
+          return 'متقدم';
+        }
 
-    if ((now.hour == allowedStartHour && now.minute > lateMinuteThreshold) ||
-        now.hour > allowedStartHour) {
-      return 'متأخر';
-    }
+        if (r.hour == state.attendanceQR!.startTime && r.minute <= 30) {
+          return 'حاضر';
+        }
 
-    return 'حاضر';
+        if (r.hour == state.attendanceQR!.startTime && r.minute > 30) {
+          return 'متأخر';
+        }
+
+        if (r.hour > state.attendanceQR!.startTime &&
+            r.hour <= state.attendanceQR!.endTime) {
+          return 'متأخر';
+        }
+
+        return 'غائب';
+      },
+    );
   }
   // =========================================================
   // تسجيل الحضور
   // =========================================================
 
-  Future<void> addAttendanceTeacher({required String attendanceStatus}) async {
+  Future<void> addAttendanceTeacher({
+    required UserEntity user,
+    required String attendanceStatus,
+  }) async {
     emit(state.copyWith(isLoading: true, error: null, success: null));
 
     final attendance = TeacherAttendanceEntity(
       id: const Uuid().v4(),
-      userId: '1',
-      role: 'T',
-      schoolId: state.schoolId,
-      name: state.teacherName,
+      userId: user.uid,
+      role: user.role,
+      schoolId: user.schoolId!,
+      name: user.fullName,
       status: attendanceStatus,
       date: DateTime.now(),
       timeOfArrival: '0',

@@ -45,7 +45,7 @@ class AdminDashboardScreen extends StatelessWidget {
       case AdminSection.userManagement:
         return const UserManagementView();
       case AdminSection.attendanceOverview:
-        return const AttendanceQRView();
+        return AttendanceQRView(user: user);
       case AdminSection.systemSettings:
         return const ComingSoonView(
           title: 'إعدادات النظام',
@@ -57,7 +57,7 @@ class AdminDashboardScreen extends StatelessWidget {
           icon: Icons.info_outline_rounded,
         );
       case AdminSection.printQR:
-        return const AttendanceQRView();
+        return AttendanceQRView(user: user);
     }
   }
 

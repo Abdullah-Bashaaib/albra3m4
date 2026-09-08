@@ -8,15 +8,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// داشبورد المعلمة — تعرض حالة حضورها اليوم + ملخص معلوماتها
-class TeacherDashboardScreen extends StatelessWidget {
+class TeacherDashboardScreen extends StatefulWidget {
   final UserEntity user;
   const TeacherDashboardScreen({super.key, required this.user});
+
+  @override
+  State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
+}
+
+class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
+  void _onDrawerItemSelected(String key) {
+    switch (key) {
+      case 'teacherAttendanceScanning':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<AttendanceCubit>(),
+              child: TeacherScanningQR(user: widget.user),
+            ),
+          ),
+        );
+        break;
+      // case 'QRTeacher':
+      //   Navigator.of(context).push(
+      //     MaterialPageRoute(
+      //       builder: (_) => BlocProvider.value(
+      //         value: context.read<AttendanceCubit>(),
+      //         child: AttendanceQRView(user: widget.user),
+      //       ),
+      //     ),
+      //   );
+      //   break;
+      case 'TeacherDashboard':
+        // نحن هنا بالفعل — لا شيء
+        break;
+      default:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FF),
-      drawer: AppDrawer(user: user, onLogout: () {}),
+      drawer: AppDrawer(
+        user: widget.user,
+        onLogout: () {},
+        onItemSelected: _onDrawerItemSelected,
+        selectedItemKey: 'teacherDashboard',
+      ),
       body: AppBackground(
         child: BlocBuilder<AttendanceCubit, AttendanceState>(
           builder: (context, state) {
@@ -32,7 +72,7 @@ class TeacherDashboardScreen extends StatelessWidget {
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
                       // ── بطاقة الترحيب ── ─────────────────────────
-                      _WelcomeCard(user: user),
+                      _WelcomeCard(user: widget.user),
 
                       const SizedBox(height: 22),
 
@@ -48,7 +88,7 @@ class TeacherDashboardScreen extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (_) => BlocProvider.value(
                                 value: context.read<AttendanceCubit>(),
-                                child: const TeacherScanningQR(),
+                                child: TeacherScanningQR(user: widget.user),
                               ),
                             ),
                           ),
@@ -59,7 +99,7 @@ class TeacherDashboardScreen extends StatelessWidget {
                       // ── معلومات المعلمة ──────────────────────────
                       _SectionTitle(title: 'معلوماتي'),
                       const SizedBox(height: 12),
-                      _ProfileCard(user: user),
+                      _ProfileCard(user: widget.user),
 
                       const SizedBox(height: 22),
 
