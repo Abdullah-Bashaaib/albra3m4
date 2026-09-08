@@ -6,6 +6,8 @@ import 'package:albra3m4/feature/users/domain/repo/users_reopsitory.dart';
 import 'package:dartz/dartz.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
+import 'package:albra3m4/feature/auth/Data/models/user_model.dart';
+
 import '../datasource/users_local_datasource.dart';
 import '../datasource/users_remote_datasource.dart';
 
@@ -44,8 +46,17 @@ class UsersRepositoryImp implements UsersRepository {
   @override
   Future<Either<Failure, Unit>> deleteUser(String id) async {
     try {
-      await _remoteDataSource.deleteUser(id);
-      return Right(unit);
+      if (await _connectionChecker.hasConnection) {
+        // 1. الحذف من Firebase
+        await _remoteDataSource.deleteUser(id);
+
+        // 2. الحذف من Sqflite محلياً
+        await _localDataSource.deleteUser(id);
+
+        return const Right(unit);
+      }
+
+      return const Left(NetworkFailure('No internet connection'));
     } catch (e) {
       return Left(DeleteUserFailure());
     }
@@ -58,9 +69,24 @@ class UsersRepositoryImp implements UsersRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> updateUser(UserEntity user) {
-    // TODO: implement updateUser
-    throw UnimplementedError();
+  Future<Either<Failure, UserEntity>> updateUser(UserEntity user) async {
+    try {
+      if (await _connectionChecker.hasConnection) {
+        final userModel = UserModel.fromEntity(user);
+
+        // 1. التعديل في Firebase
+        await _remoteDataSource.updateUser(userModel);
+
+        // 2. التعديل في Sqflite محلياً
+        await _localDataSource.updateUser(userModel);
+
+        return Right(user);
+      }
+
+      return const Left(NetworkFailure('No internet connection'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
   @override
@@ -75,6 +101,28 @@ class UsersRepositoryImp implements UsersRepository {
 
         // 2. التعديل في Sqflite محلياً
         await _localDataSource.updateUserRole(uid, newRole);
+
+        return const Right(unit);
+      }
+
+      return const Left(NetworkFailure('No internet connection'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> toggleUserStatus(
+    String uid,
+    bool isActive,
+  ) async {
+    try {
+      if (await _connectionChecker.hasConnection) {
+        // 1. التعديل في Firebase
+        await _remoteDataSource.updateUserStatus(uid, isActive);
+
+        // 2. التعديل في Sqflite محلياً
+        await _localDataSource.updateUserStatus(uid, isActive);
 
         return const Right(unit);
       }

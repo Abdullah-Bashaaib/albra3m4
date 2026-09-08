@@ -17,6 +17,8 @@ abstract class UsersRemoteDataSource {
   Future<void> deleteUser(String id);
 
   Future<void> updateUserRole(String uid, UserRole role);
+
+  Future<void> updateUserStatus(String uid, bool isActive);
 }
 
 class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
@@ -66,15 +68,32 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateUser(UserModel user) {
-    // TODO: implement updateUser
-    throw UnimplementedError();
+  Future<UserModel> updateUser(UserModel user) async {
+    try {
+      await _usersCollection.doc(user.uid).update({
+        'full_name': user.fullName,
+        'phone': user.phone,
+        'role': user.role.name,
+      });
+      return user;
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
   }
 
   @override
   Future<void> updateUserRole(String uid, UserRole role) async {
     try {
       await _usersCollection.doc(uid).update({'role': role.name});
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateUserStatus(String uid, bool isActive) async {
+    try {
+      await _usersCollection.doc(uid).update({'is_active': isActive});
     } catch (e) {
       throw FirebaseException(e.toString());
     }

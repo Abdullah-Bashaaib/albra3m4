@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/widgets/user_management/user_search_filter_bar.dart';
 import 'package:albra3m4/feature/users/presentation/widgets/user_management/user_stats_row.dart';
@@ -6,7 +10,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/constants/app_font.dart';
 import '../../manager/users_state.dart';
+import 'edit_user_dialog.dart';
 import 'user_list_item.dart';
+
 class UserManagementView extends StatefulWidget {
   const UserManagementView({super.key});
 
@@ -104,17 +110,47 @@ class _LoadedContent extends StatelessWidget {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
+                    final isSuperAdmin = user.role == UserRole.superAdmin;
+
                     return UserListItem(
                       user: user,
                       onStatusToggle: (_) => cubit.toggleUserStatus(user.uid),
-                      onRoleChange: (role) =>
-                          cubit.changeUserRole(user.uid, role),
-                      onDelete: () => _confirmDelete(
-                        context,
-                        cubit,
-                        user.uid,
-                        user.fullName,
-                      ),
+                      onRoleChange: isSuperAdmin
+                          ? null
+                          : (role) {
+                              log(
+                                '---------------- [message] : role $role [message]----------------',
+                              );
+                              log(
+                                '---------------- [message] : uid ${user.fullName} [message]----------------',
+                              );
+                              cubit.changeUserRole(user.uid, role);
+                              CustomSnackBar.showSuccess(
+                                context,
+                                'تم تغيير الدور بنجاح ${user.fullName} الى ${role.arabicLabel}',
+                              );
+                            },
+                      onDelete: isSuperAdmin
+                          ? null
+                          : () => _confirmDelete(
+                                context,
+                                cubit,
+                                user.uid,
+                                user.fullName,
+                              ),
+                      onEdit: isSuperAdmin
+                          ? null
+                          : () => EditUserDialog.show(
+                                context,
+                                user: user,
+                                onSave: (updatedUser) {
+                                  cubit.updateUser(updatedUser);
+                                  CustomSnackBar.showSuccess(
+                                    context,
+                                    'تم تحديث بيانات ${updatedUser.fullName} بنجاح',
+                                  );
+                                },
+                              ),
                     );
                   },
                 ),
@@ -123,10 +159,12 @@ class _LoadedContent extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context,
-      UsersCubit cubit,
-      String uid,
-      String name,) {
+  void _confirmDelete(
+    BuildContext context,
+    UsersCubit cubit,
+    String uid,
+    String name,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -142,15 +180,23 @@ class _LoadedContent extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text(
-              'إلغاء', style: TextStyle(fontFamily: AppFont.primary),),
+              'إلغاء',
+              style: TextStyle(fontFamily: AppFont.primary),
+            ),
           ),
           TextButton(
             onPressed: () {
-              cubit.deleteUser(uid);
               Navigator.pop(ctx);
+              cubit.deleteUser(uid);
+              CustomSnackBar.showSuccess(
+                context,
+                'تم حذف المستخدم "$name" بنجاح',
+              );
             },
-            child: const Text('حذف', style: TextStyle(
-                color: Colors.red, fontFamily: AppFont.primary)),
+            child: const Text(
+              'حذف',
+              style: TextStyle(color: Colors.red, fontFamily: AppFont.primary),
+            ),
           ),
         ],
       ),

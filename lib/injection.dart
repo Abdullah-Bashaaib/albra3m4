@@ -48,6 +48,8 @@ import 'feature/users/data/repository/users_repository_imp.dart';
 import 'feature/users/domain/use_cases/change_user_role_use_case.dart';
 import 'feature/users/domain/use_cases/delete_user_use_case.dart';
 import 'feature/users/domain/use_cases/get_all_users_use_case.dart';
+import 'feature/users/domain/use_cases/toggle_user_status_use_case.dart';
+import 'feature/users/domain/use_cases/update_user_use_case.dart';
 
 final sl = GetIt.instance;
 
@@ -276,12 +278,18 @@ class Injection {
         DeleteUserUseCase(sl<UsersRepositoryImp>()));
     sl.registerLazySingleton<ChangeUserRoleUseCase>(() =>
         ChangeUserRoleUseCase(sl<UsersRepositoryImp>()));
+    sl.registerLazySingleton<ToggleUserStatusUseCase>(() =>
+        ToggleUserStatusUseCase(sl<UsersRepositoryImp>()));
+    sl.registerLazySingleton<UpdateUserUseCase>(() =>
+        UpdateUserUseCase(sl<UsersRepositoryImp>()));
     //cubit
     sl.registerLazySingleton<UsersCubit>(() =>
         UsersCubit(
           sl<GetAllUsersUseCase>(),
           sl<DeleteUserUseCase>(),
           sl<ChangeUserRoleUseCase>(),
+          sl<ToggleUserStatusUseCase>(),
+          sl<UpdateUserUseCase>(),
         ));
     sl.registerLazySingleton<AdminDashboardCubit>(() => AdminDashboardCubit());
   }
