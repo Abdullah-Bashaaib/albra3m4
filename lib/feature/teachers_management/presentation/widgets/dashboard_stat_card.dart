@@ -8,7 +8,7 @@ class DashboardStatCard extends StatelessWidget {
   final List<Color> gradientColors;
   final Color iconBgColor;
 
-  /// نص صغير اختياري يظهر أسفل العنوان (بدلاً من trailing جانبي)
+  /// نص صغير اختياري يظهر أسفل العنوان
   final String? sublabel;
 
   const DashboardStatCard({
@@ -41,10 +41,11 @@ class DashboardStatCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // أيقونة دائرية فوق
+          // الأيقونة الدائرية
           Container(
             width: 52,
             height: 52,
@@ -57,53 +58,18 @@ class DashboardStatCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // العنوان والقيمة
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withValues(alpha: 0.85),
-                  ),
-                ),
-                if (sublabel != null) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      sublabel!,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+          // القيمة
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              height: 1.1,
             ),
           ),
+
           const SizedBox(height: 4),
 
           // العنوان
@@ -116,6 +82,8 @@ class DashboardStatCard extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
+
+          // النص الإضافي
           if (sublabel != null) ...[
             const SizedBox(height: 6),
             Container(
