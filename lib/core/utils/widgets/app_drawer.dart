@@ -86,6 +86,11 @@ class AppDrawer extends StatelessWidget {
       case UserRole.superAdmin:
         return [
           _DrawerItem(
+            key: 'adminDashboard',
+            icon: Icons.dashboard_rounded,
+            label: 'لوحة التحكم',
+          ),
+          _DrawerItem(
             key: 'userManagement',
             icon: Icons.people_alt_rounded,
             label: 'إدارة المستخدمين',

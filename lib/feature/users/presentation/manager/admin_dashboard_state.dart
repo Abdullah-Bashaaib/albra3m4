@@ -3,6 +3,7 @@ part of 'admin_dashboard_cubit.dart';
 /// أقسام Drawer الخاصة بلوحة تحكم المشرف التقني.
 /// حالياً مفعّل: userManagement فقط (UC-007) — الباقي "قريباً" حسب خارطة الطريق.
 enum AdminSection {
+  dashboard,
   userManagement,
   printQR,
   attendanceOverview,
@@ -14,7 +15,7 @@ class AdminDashboardState extends Equatable {
   final AdminSection selectedSection;
 
   const AdminDashboardState({
-    this.selectedSection = AdminSection.userManagement,
+    this.selectedSection = AdminSection.dashboard,
   });
 
   AdminDashboardState copyWith({AdminSection? selectedSection}) {

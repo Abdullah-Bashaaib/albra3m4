@@ -1,4 +1,5 @@
 import 'package:albra3m4/core/constants/app_colors.dart';
+import 'package:albra3m4/core/constants/app_font.dart';
 import 'package:flutter/material.dart';
 
 
@@ -46,6 +47,7 @@ class CustomSnackBar {
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     height: 1.4,
+                    fontFamily: AppFont.primary,
                   ),
                 ),
               ),

@@ -1,5 +1,4 @@
-import 'package:albra3m4/core/constants/app_colors.dart';
-import 'package:albra3m4/core/constants/app_font.dart';
+import 'package:albra3m4/core/constants/app_theme.dart';
 import 'package:albra3m4/core/routing/app_router.dart';
 import 'package:albra3m4/core/utils/observers/app_bloc_observer.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
@@ -40,15 +39,7 @@ class MainApp extends StatelessWidget {
       child: MaterialApp.router(
         routerConfig: AppRouter.router,
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-          textTheme: TextTheme(
-            bodyMedium: TextStyle(
-              fontFamily: AppFont.primary,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ),
+        theme: AppTheme.light(),
         builder: (context, child) {
           return Directionality(
             textDirection: TextDirection.rtl,
