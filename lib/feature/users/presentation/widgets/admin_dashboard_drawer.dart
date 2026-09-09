@@ -38,6 +38,12 @@ class AdminDashboardDrawer extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 children: [
                   DrawerMenuItem(
+                    icon: Icons.dashboard_rounded,
+                    label: 'لوحة التحكم',
+                    isSelected: selected == AdminSection.dashboard,
+                    onTap: () => select(AdminSection.dashboard),
+                  ),
+                  DrawerMenuItem(
                     icon: Icons.people_alt_rounded,
                     label: 'إدارة المستخدمين',
                     isSelected: selected == AdminSection.userManagement,
