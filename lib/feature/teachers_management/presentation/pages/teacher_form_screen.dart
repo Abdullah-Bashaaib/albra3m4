@@ -1,3 +1,6 @@
+import 'package:albra3m4/core/constants/app_font.dart';
+import 'package:albra3m4/core/utils/validators/validators.dart';
+import 'package:albra3m4/core/utils/widgets/custom_text_form_field.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:flutter/material.dart';
 
@@ -23,8 +26,6 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
   late final TextEditingController _nameCtrl;
 
-  late final TextEditingController _emailCtrl;
-
   late final TextEditingController _mobileCtrl;
 
   late final TextEditingController _birthPlaceCtrl;
@@ -43,9 +44,6 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
   late SocialStatus _selectedSocialStatus;
 
-  bool _isVerified = false;
-  bool _isActive = true;
-
   @override
   void initState() {
     super.initState();
@@ -55,11 +53,7 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
     _nameCtrl = TextEditingController(text: user?.fullName ?? '');
 
-    _emailCtrl = TextEditingController(text: user?.email ?? '');
-
-    _mobileCtrl = TextEditingController(
-      text: user?.phone ?? teacher?.mobilePhone.toString() ?? '',
-    );
+    _mobileCtrl = TextEditingController(text: user?.phone ?? '');
 
     _birthPlaceCtrl = TextEditingController(text: teacher?.birthPlace ?? '');
 
@@ -84,16 +78,11 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
     _qualificationDate = teacher?.qualificationDate;
 
     _selectedSocialStatus = teacher?.socialStatus ?? SocialStatus.single;
-
-    _isVerified = user?.isVerified ?? false;
-
-    _isActive = user?.isActive ?? true;
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _emailCtrl.dispose();
     _mobileCtrl.dispose();
     _birthPlaceCtrl.dispose();
     _qualificationCtrl.dispose();
@@ -152,17 +141,15 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
       return;
     }
     final Uuid uuid = Uuid();
-    final newUId = uuid.v4();
     final newTId = uuid.v4();
 
-    final userId = widget.existing?.uid ?? newUId;
+    final userId = widget.existing?.uid;
 
     final teacherId = widget.existing?.tDetails?.id ?? newTId;
 
     final teacher = TeacherEntity(
       id: teacherId,
-      userId: userId,
-      schoolId: widget.existing?.tDetails?.schoolId ?? 'school_001',
+      userId: userId!,
       birthDate: _birthDate!,
       birthPlace: _birthPlaceCtrl.text.trim(),
       academicQualification: _qualificationCtrl.text.trim(),
@@ -171,24 +158,16 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
       socialStatus: _selectedSocialStatus,
       childrenCount: int.tryParse(_childrenCtrl.text.trim()) ?? 0,
       homePhone: _homePhoneCtrl.text.trim(),
-      mobilePhone: _mobileCtrl.text.trim(),
     );
-
-    final user = UserEntity(
-      uid: userId,
+    final user = widget.existing?.copyWith(
       fullName: _nameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
       phone: _mobileCtrl.text.trim(),
-      role: UserRole.teacher,
-      isVerified: _isVerified,
-      isActive: _isActive,
-      createdAt: widget.existing?.createdAt ?? DateTime.now(),
       tDetails: teacher,
     );
 
     widget.isEdit
-        ? context.read<TeacherCubit>().updateTeacher(user)
-        : context.read<TeacherCubit>().addTeacher(user);
+        ? context.read<TeacherCubit>().saveTeacher(user!)
+        : context.read<TeacherCubit>().saveTeacher(user!);
     Navigator.pop(context, user);
   }
 
@@ -225,14 +204,11 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
               const SizedBox(height: 12),
 
-              _Label('الاسم الكامل'),
-
-              TextFormField(
+              // _Label('الاسم الكامل'),
+              CustomTextFormField(
                 controller: _nameCtrl,
 
-                decoration: const InputDecoration(
-                  hintText: 'مثال: منى عبدالله السالم',
-                ),
+                hintText: 'مثال: منى عبدالله السالم',
 
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -241,46 +217,24 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
                   return null;
                 },
+                label: 'الإسم الكامل',
               ),
 
+              // CustomTextFormField(
+              //   hintText: widget.existing?.email,
+              //   enabled: false,
+              //   keyboardType: TextInputType.emailAddress,
+              //   validator: Validators.email,
+              //   label: '',
+              // ),
               const SizedBox(height: 16),
 
-              _Label('البريد الإلكتروني'),
-
-              TextFormField(
-                controller: _emailCtrl,
-
-                keyboardType: TextInputType.emailAddress,
-
-                textDirection: TextDirection.ltr,
-
-                decoration: const InputDecoration(hintText: 'name@example.com'),
-
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'البريد الإلكتروني مطلوب';
-                  }
-
-                  if (!value.contains('@')) {
-                    return 'صيغة البريد الإلكتروني غير صحيحة';
-                  }
-
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              _Label('رقم الجوال'),
-
-              TextFormField(
+              // _Label('رقم الجوال'),
+              CustomTextFormField(
                 controller: _mobileCtrl,
 
                 keyboardType: TextInputType.phone,
-
-                textDirection: TextDirection.ltr,
-
-                decoration: const InputDecoration(hintText: '777000000'),
+                hintText: '777000000',
 
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -293,6 +247,7 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
                   return null;
                 },
+                label: 'رقم الجوال',
               ),
 
               const SizedBox(height: 20),
@@ -311,12 +266,11 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
               const SizedBox(height: 16),
 
-              _Label('مكان الميلاد'),
-
-              TextFormField(
+              // _Label('مكان الميلاد'),
+              CustomTextFormField(
                 controller: _birthPlaceCtrl,
 
-                decoration: const InputDecoration(hintText: 'مثال: سيئون'),
+                hintText: 'مثال: سيئون',
 
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -325,6 +279,7 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
                   return null;
                 },
+                label: 'مكان الميلاد',
               ),
 
               const SizedBox(height: 16),
@@ -343,14 +298,14 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
               const SizedBox(height: 16),
 
-              _Label('عدد الأبناء'),
-
-              TextFormField(
+              // _Label('عدد الأبناء'),
+              CustomTextFormField(
                 controller: _childrenCtrl,
 
                 keyboardType: TextInputType.number,
 
-                decoration: const InputDecoration(hintText: '0'),
+                hintText: '0',
+                label: 'عدد الأبناء',
               ),
 
               const SizedBox(height: 20),
@@ -359,22 +314,22 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
               const SizedBox(height: 12),
 
-              _Label('المؤهل العلمي'),
-
-              TextFormField(
+              // _Label('المؤهل العلمي'),
+              CustomTextFormField(
                 controller: _qualificationCtrl,
 
-                decoration: const InputDecoration(hintText: 'مثال: بكالوريوس'),
+                hintText: 'مثال: بكالوريوس',
+                label: 'المؤهل العلمي',
               ),
 
               const SizedBox(height: 16),
 
-              _Label('التخصص'),
-
-              TextFormField(
+              // _Label('التخصص'),
+              CustomTextFormField(
                 controller: _specializationCtrl,
 
-                decoration: const InputDecoration(hintText: 'مثال: لغة عربية'),
+                hintText: 'مثال: لغة عربية',
+                label: 'التخصص',
               ),
 
               const SizedBox(height: 16),
@@ -393,63 +348,61 @@ class _TeacherFormScreenState extends State<TeacherFormScreen> {
 
               const SizedBox(height: 12),
 
-              _Label('هاتف المنزل'),
-
-              TextFormField(
+              // _Label('هاتف المنزل'),
+              CustomTextFormField(
                 controller: _homePhoneCtrl,
 
                 keyboardType: TextInputType.phone,
 
-                textDirection: TextDirection.ltr,
-
-                decoration: const InputDecoration(hintText: '050000000'),
+                hintText: '050000000',
+                label: 'هاتف المنزل',
               ),
 
               const SizedBox(height: 20),
 
-              const _SectionTitle(title: 'إعدادات الحساب'),
+              // const _SectionTitle(title: 'إعدادات الحساب'),
 
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
+              // SwitchListTile(
+              //   contentPadding: EdgeInsets.zero,
 
-                title: const Text(
-                  'الحساب نشط',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                ),
+              //   title: const Text(
+              //     'الحساب نشط',
+              //     style: TextStyle(
+              //       fontSize: 13.5,
+              //       fontWeight: FontWeight.w700,
+              //       color: AppColors.ink,
+              //     ),
+              //   ),
 
-                value: _isActive,
+              //   value: _isActive,
 
-                onChanged: (value) {
-                  setState(() {
-                    _isActive = value;
-                  });
-                },
-              ),
+              //   onChanged: (value) {
+              //     setState(() {
+              //       _isActive = value;
+              //     });
+              //   },
+              // ),
 
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
+              // SwitchListTile(
+              //   contentPadding: EdgeInsets.zero,
 
-                title: const Text(
-                  'تم التحقق من الحساب',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
-                  ),
-                ),
+              //   title: const Text(
+              //     'تم التحقق من الحساب',
+              //     style: TextStyle(
+              //       fontSize: 13.5,
+              //       fontWeight: FontWeight.w700,
+              //       color: AppColors.ink,
+              //     ),
+              //   ),
 
-                value: _isVerified,
+              //   value: _isVerified,
 
-                onChanged: (value) {
-                  setState(() {
-                    _isVerified = value;
-                  });
-                },
-              ),
+              //   onChanged: (value) {
+              //     setState(() {
+              //       _isVerified = value;
+              //     });
+              //   },
+              // ),
             ],
           ),
         ),
@@ -538,7 +491,14 @@ class _DateField extends StatelessWidget {
       onTap: onTap,
 
       child: InputDecorator(
-        decoration: const InputDecoration(),
+        decoration: const InputDecoration(
+          floatingLabelStyle: TextStyle(
+            color: AppColors.textSecondary,
+            fontFamily: AppFont.primary,
+          ),
+          filled: true,
+          fillColor: Colors.transparent,
+        ),
 
         child: Row(
           children: [

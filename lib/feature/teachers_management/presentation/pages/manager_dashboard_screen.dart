@@ -6,6 +6,7 @@ import 'package:albra3m4/feature/attendance/presentation/pages/attendance_q_r_vi
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/pages/teacher_attendance_screen.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/pages/teachers_list_screen.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/widgets/attendance_card.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/widgets/dashboard_stat_card.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/widgets/decorative_circle.dart';
@@ -50,12 +51,22 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
           ),
         );
         break;
+      case 'teacherList':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<AttendanceCubit>(),
+              child: const TeachersListScreen(),
+            ),
+          ),
+        );
+        break;
       case 'QRTeacher':
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => BlocProvider.value(
               value: context.read<AttendanceCubit>(),
-              child: AttendanceQRView(user: widget.user,),
+              child: AttendanceQRView(user: widget.user),
             ),
           ),
         );

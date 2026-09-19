@@ -1,4 +1,4 @@
-import 'package:albra3m4/core/utils/snake_bar_helper.dart';
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/widgets/teacher_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,7 +20,7 @@ class TeachersListScreen extends StatelessWidget {
     );
 
     if (newTeacher != null && context.mounted) {
-      context.read<TeacherCubit>().addTeacher(newTeacher);
+      context.read<TeacherCubit>().saveTeacher(newTeacher);
     }
   }
 
@@ -39,7 +39,7 @@ class TeachersListScreen extends StatelessWidget {
 
       _showSnack(context, 'تم حذف المعلمة');
     } else if (result.updated != null) {
-      context.read<TeacherCubit>().updateTeacher(result.updated!);
+      context.read<TeacherCubit>().saveTeacher(result.updated!);
 
       _showSnack(context, 'تم حفظ التعديلات');
     }
@@ -61,10 +61,10 @@ class TeachersListScreen extends StatelessWidget {
     return BlocListener<TeacherCubit, TeacherState>(
       listener: (context, state) {
         if (state.error != null) {
-          SnackBarHelper.error(context, state.error!);
+          CustomSnackBar.showError(context, state.error!);
         }
         if (state.success != null) {
-          SnackBarHelper.success(context, state.success!);
+          CustomSnackBar.showSuccess(context, state.success!);
         }
       },
       child: Scaffold(
@@ -88,6 +88,12 @@ class TeachersListScreen extends StatelessWidget {
                   },
                 ),
               ),
+            ),
+            IconButton(
+              onPressed: () {
+                context.read<TeacherCubit>().syncTeachers();
+              },
+              icon: Icon(Icons.refresh_rounded),
             ),
           ],
         ),

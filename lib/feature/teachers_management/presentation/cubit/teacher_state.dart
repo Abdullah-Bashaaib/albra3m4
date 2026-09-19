@@ -2,6 +2,8 @@ part of 'teacher_cubit.dart';
 
 class TeacherState extends Equatable {
   final bool isLoading;
+  final bool isLoadingEdit;
+  final bool isLoadingDelete;
   final String? success;
   final String? error;
   final String query;
@@ -10,6 +12,8 @@ class TeacherState extends Equatable {
 
   const TeacherState({
     this.isLoading = false,
+    this.isLoadingEdit = false,
+    this.isLoadingDelete = false,
     this.success,
     this.error,
     this.query = '',
@@ -29,6 +33,8 @@ class TeacherState extends Equatable {
   @override
   List<Object?> get props => [
     isLoading,
+    isLoadingEdit,
+    isLoadingDelete,
     success,
     error,
     query,
@@ -38,6 +44,8 @@ class TeacherState extends Equatable {
 
   TeacherState copyWith({
     bool? isLoading,
+    bool? isLoadingEdit,
+    bool? isLoadingDelete,
     String? success,
     String? error,
     List<UserEntity>? teachers,
@@ -46,6 +54,8 @@ class TeacherState extends Equatable {
   }) {
     return TeacherState(
       isLoading: isLoading ?? this.isLoading,
+      isLoadingEdit: isLoadingEdit ?? this.isLoadingEdit,
+      isLoadingDelete: isLoadingDelete ?? this.isLoadingDelete,
       success: success,
       error: error,
       teachers: teachers ?? this.teachers,

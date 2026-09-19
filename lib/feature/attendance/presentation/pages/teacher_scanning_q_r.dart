@@ -1,6 +1,6 @@
 import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:albra3m4/core/constants/app_font.dart';
-import 'package:albra3m4/core/utils/snake_bar_helper.dart';
+import 'package:albra3m4/core/utils/widgets/custom_snack_bar.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:flutter/material.dart';
@@ -57,11 +57,11 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
     return BlocListener<AttendanceCubit, AttendanceState>(
       listener: (context, state) {
         if (state.error != null) {
-          SnackBarHelper.error(context, state.error!);
+          CustomSnackBar.showError(context, state.error!);
         }
 
         if (state.success != null) {
-          SnackBarHelper.success(context, state.success!);
+          CustomSnackBar.showSuccess(context, state.success!);
         }
       },
       child: BlocBuilder<AttendanceCubit, AttendanceState>(

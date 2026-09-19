@@ -4,7 +4,6 @@ class TeacherModel extends TeacherEntity {
   TeacherModel({
     required super.id,
     required super.userId,
-    required super.schoolId,
     required super.birthDate,
     required super.birthPlace,
     required super.academicQualification,
@@ -13,23 +12,23 @@ class TeacherModel extends TeacherEntity {
     required super.socialStatus,
     required super.childrenCount,
     required super.homePhone,
-    required super.mobilePhone,
   });
 
   factory TeacherModel.fromJson(Map<String, dynamic> json) {
     return TeacherModel(
       id: json['id'],
       userId: json['user_id'],
-      schoolId: json['school_id'],
       birthDate: DateTime.parse(json['birth_date']),
       birthPlace: json['birth_place'],
       academicQualification: json['academic_qualification'],
       qualificationDate: DateTime.parse(json['qualification_date']),
       specialization: json['specialization'],
-      socialStatus: json['social_status'],
+      socialStatus: SocialStatus.values.firstWhere(
+        (status) => status.name == json['social_status'],
+        orElse: () => SocialStatus.single,
+      ),
       childrenCount: json['children_count'],
       homePhone: json['home_phone'],
-      mobilePhone: json['mobile_phone'],
     );
   }
 
@@ -37,16 +36,14 @@ class TeacherModel extends TeacherEntity {
     return {
       'id': id,
       'user_id': userId,
-      'school_id': schoolId,
-      'birth_date': birthDate,
+      'birth_date': birthDate.toIso8601String(),
       'birth_place': birthPlace,
       'academic_qualification': academicQualification,
-      'qualification_date': qualificationDate,
+      'qualification_date': qualificationDate.toIso8601String(),
       'specialization': specialization,
-      'social_status': socialStatus,
+      'social_status': socialStatus.name,
       'children_count': childrenCount,
       'home_phone': homePhone,
-      'mobile_phone': mobilePhone,
     };
   }
 
@@ -54,7 +51,6 @@ class TeacherModel extends TeacherEntity {
     return TeacherModel(
       id: t.id,
       userId: t.userId,
-      schoolId: t.schoolId,
       birthDate: t.birthDate,
       birthPlace: t.birthPlace,
       academicQualification: t.academicQualification,
@@ -63,7 +59,6 @@ class TeacherModel extends TeacherEntity {
       socialStatus: t.socialStatus,
       childrenCount: t.childrenCount,
       homePhone: t.homePhone,
-      mobilePhone: t.mobilePhone,
     );
   }
 }

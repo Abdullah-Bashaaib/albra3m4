@@ -44,22 +44,26 @@ class UserEntity {
   UserEntity copyWith({
     String? uid,
     String? fullName,
+    String? schoolId,
     String? email,
     String? phone,
     UserRole? role,
     bool? isVerified,
     bool? isActive,
     DateTime? createdAt,
+    TeacherEntity? tDetails,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
       fullName: fullName ?? this.fullName,
+      schoolId: schoolId ?? this.schoolId,
       email: email ?? this.email,
       phone: phone ?? this.phone,
       role: role ?? this.role,
       isVerified: isVerified ?? this.isVerified,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
+      tDetails: tDetails ?? this.tDetails,
     );
   }
 }
@@ -74,4 +78,3 @@ extension UserRoleArabicLabel on UserRole {
     UserRole.parent => 'ولي أمر',
   };
 }
-

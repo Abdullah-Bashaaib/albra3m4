@@ -5,8 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class TeacherRemote {
   Future<List<UserModel>> getTeacher(String schoolId);
-  Future<void> addTeacher(UserModel user, TeacherModel teacher);
-  Future<void> updateTeacher(UserModel user, TeacherModel teacher);
+  Future<void> saveTeacher(UserModel user, TeacherModel teacher);
   Future<void> deleteTeacher(String userId);
 }
 
@@ -16,16 +15,16 @@ class TeacherRemoteImp implements TeacherRemote {
   TeacherRemoteImp(this.firestore);
 
   @override
-  Future<void> addTeacher(UserModel user, TeacherModel teacher) async {
+  Future<void> saveTeacher(UserModel user, TeacherModel teacher) async {
     try {
       await firestore.runTransaction((transaction) async {
         final userRef = firestore.collection('users').doc(user.uid);
 
         final teacherRef = firestore.collection('teachers').doc(user.uid);
 
-        transaction.set(userRef, user.toMap());
+        transaction.set(userRef, user.toFirestore(), SetOptions(merge: true));
 
-        transaction.set(teacherRef, teacher.toMap());
+        transaction.set(teacherRef, teacher.toMap(), SetOptions(merge: true));
       });
     } catch (e) {
       throw ServerException(e.toString());
@@ -51,19 +50,15 @@ class TeacherRemoteImp implements TeacherRemote {
   @override
   Future<List<UserModel>> getTeacher(String schoolId) async {
     try {
-      // جلب المستخدمين الذين:
-      // - دورهم معلم
-      // - تابعون للمدرسة المطلوبة
       final userSnapshot = await firestore
           .collection('users')
           .where('role', isEqualTo: 'teacher')
           .where('school_id', isEqualTo: schoolId)
           .get();
 
-      // جلب تفاصيل المعلمين الموجودة
       final teacherSnapshot = await firestore
           .collection('teachers')
-          .where('school_id', isEqualTo: schoolId)
+          // .where('school_id', isEqualTo: schoolId)
           .get();
 
       final teacherMap = <String, TeacherModel>{};
@@ -72,6 +67,7 @@ class TeacherRemoteImp implements TeacherRemote {
         final teacher = TeacherModel.fromJson(doc.data());
         teacherMap[teacher.userId] = teacher;
       }
+
       return userSnapshot.docs.map((doc) {
         final user = UserModel.fromFirestore(doc.data());
 
@@ -88,24 +84,6 @@ class TeacherRemoteImp implements TeacherRemote {
           tDetails: teacherMap[user.uid],
         );
       }).toList();
-    } catch (e) {
-      print(e.toString());
-      throw ServerException(e.toString());
-    }
-  }
-
-  @override
-  Future<void> updateTeacher(UserModel user, TeacherModel teacher) async {
-    try {
-      await firestore.runTransaction((transaction) async {
-        final userRef = firestore.collection('users').doc(user.uid);
-
-        final teacherRef = firestore.collection('teachers').doc(teacher.id);
-
-        transaction.update(userRef, user.toMap());
-
-        transaction.update(teacherRef, teacher.toMap());
-      });
     } catch (e) {
       throw ServerException(e.toString());
     }

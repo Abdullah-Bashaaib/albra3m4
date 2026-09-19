@@ -123,6 +123,11 @@ class AppDrawer extends StatelessWidget {
             label: 'لوحة التحكم',
           ),
           _DrawerItem(
+            key: 'teacherList',
+            icon: Icons.people_outline,
+            label: 'قائمة المعلمات',
+          ),
+          _DrawerItem(
             key: 'QRTeacher',
             icon: Icons.qr_code,
             label: 'باركود الحضور',
