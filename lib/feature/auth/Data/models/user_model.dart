@@ -1,4 +1,7 @@
+import 'package:albra3m4/feature/teachers_management/data/models/teacher_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:albra3m4/feature/teachers_management/domain/entities/teacher_entity.dart';
 
 import '../../domain/entities/user.dart';
 
@@ -27,6 +30,7 @@ class UserModel extends UserEntity {
       isVerified: entity.isVerified,
       isActive: entity.isActive,
       createdAt: entity.createdAt,
+      tDetails: entity.tDetails,
     );
   }
 
@@ -84,6 +88,25 @@ class UserModel extends UserEntity {
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
+    TeacherModel? teacher;
+
+    if (map['user_id'] != null) {
+      teacher = TeacherModel(
+        id: map['id'] as String,
+        userId: map['user_id'] as String,
+        birthDate: DateTime.parse(map['birth_date'] as String),
+        birthPlace: map['birth_place'] as String? ?? '',
+        academicQualification: map['academic_qualification'] as String? ?? '',
+        qualificationDate: DateTime.parse(map['qualification_date'] as String),
+        specialization: map['specialization'] as String? ?? '',
+        socialStatus: SocialStatus.values.firstWhere(
+          (status) => status.name == map['social_status'],
+          orElse: () => SocialStatus.single,
+        ),
+        childrenCount: map['children_count'] as int? ?? 0,
+        homePhone: map['home_phone'] as String? ?? '',
+      );
+    }
     return UserModel(
       uid: map['uid'] as String,
       fullName: map['full_name'] as String? ?? '',
@@ -97,9 +120,9 @@ class UserModel extends UserEntity {
       isVerified: map['is_verified'] == 1,
       isActive: map['is_active'] == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
+      tDetails: teacher,
     );
   }
-
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
@@ -115,6 +138,7 @@ class UserModel extends UserEntity {
     bool? isVerified,
     bool? isActive,
     DateTime? createdAt,
+    TeacherEntity? tDetails,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -126,6 +150,7 @@ class UserModel extends UserEntity {
       isVerified: isVerified ?? this.isVerified,
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
+      tDetails: tDetails ?? this.tDetails,
     );
   }
 

@@ -42,17 +42,13 @@ class TeacherLocalImp implements TeacherLocal {
   }
 
   @override
+  @override
   Future<void> updateTeacher(UserModel user, TeacherModel teacher) async {
     try {
       final db = await helper.database;
 
       await db.transaction((txn) async {
-        // --------------------------------------------------------
-        // 1. تحديث بيانات المستخدم
-        // --------------------------------------------------------
-
-        // لا نرسل tDetails إلى users
-
+        // تحديث بيانات المستخدم
         await txn.update(
           'users',
           user.toMap(),
@@ -60,15 +56,12 @@ class TeacherLocalImp implements TeacherLocal {
           whereArgs: [user.uid],
         );
 
-        // --------------------------------------------------------
-        // 2. تحديث بيانات المعلم
-        // --------------------------------------------------------
-
+        // تحديث بيانات المعلم
         await txn.update(
           'teachers',
           teacher.toMap(),
-          where: 'id = ?',
-          whereArgs: [teacher.id],
+          where: 'user_id = ?',
+          whereArgs: [user.uid],
         );
       });
     } catch (e) {
@@ -107,6 +100,7 @@ class TeacherLocalImp implements TeacherLocal {
       SELECT
         u.uid,
         u.full_name,
+        u.school_id,
         u.email,
         u.phone,
         u.role,
@@ -116,7 +110,6 @@ class TeacherLocalImp implements TeacherLocal {
 
         t.id AS id,
         t.user_id AS user_id,
-        t.school_id AS school_id,
         t.birth_date AS birth_date,
         t.birth_place AS birth_place,
         t.academic_qualification AS academic_qualification,
@@ -124,8 +117,7 @@ class TeacherLocalImp implements TeacherLocal {
         t.specialization AS specialization,
         t.social_status AS social_status,
         t.children_count AS children_count,
-        t.home_phone AS home_phone,
-        t.mobile_phone AS mobile_phone
+        t.home_phone AS home_phone
 
       FROM users u
 

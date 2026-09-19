@@ -1,5 +1,3 @@
-import 'package:albra3m4/core/constants/app_colors.dart';
-import 'package:albra3m4/core/utils/snake_bar_helper.dart';
 import 'package:albra3m4/core/utils/widgets/app_background.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/attendance/presentation/widgets/qr_code_card.dart';
@@ -15,7 +13,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../../../../core/constants/app_font.dart';
+import '../../../../core/utils/widgets/custom_snack_bar.dart';
 
 class AttendanceQRView extends StatefulWidget {
   final UserEntity user;
@@ -246,9 +244,11 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
   Widget build(BuildContext context) {
     return BlocListener<AttendanceCubit, AttendanceState>(
       listener: (context, state) {
-        if (state.error != null) SnackBarHelper.error(context, state.error!);
+        if (state.error != null) {
+          CustomSnackBar.showError(context, state.error!);
+        }
         if (state.success != null) {
-          SnackBarHelper.success(context, state.success!);
+          CustomSnackBar.showSuccess(context, state.success!);
         }
       },
       child: BlocBuilder<AttendanceCubit, AttendanceState>(

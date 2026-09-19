@@ -16,10 +16,10 @@ import 'package:albra3m4/feature/teachers_management/data/repo/teacher_repo_imp.
 import 'package:albra3m4/feature/teachers_management/data/source/teacher_local.dart';
 import 'package:albra3m4/feature/teachers_management/data/source/teacher_remote.dart';
 import 'package:albra3m4/feature/teachers_management/domain/repo/teacher_repo.dart';
-import 'package:albra3m4/feature/teachers_management/domain/usecases/add_teacher_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/domain/usecases/delete_teacher_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/domain/usecases/get_teachers_usecase.dart';
-import 'package:albra3m4/feature/teachers_management/domain/usecases/update_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/save_teacher_usecase.dart';
+import 'package:albra3m4/feature/teachers_management/domain/usecases/sync_teacher_usecase.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
@@ -250,58 +250,68 @@ class Injection {
     sl.registerLazySingleton<GetTeachersUsecase>(
       () => GetTeachersUsecase(sl<TeacherRepo>()),
     );
-    sl.registerLazySingleton<AddTeacherUsecase>(
-      () => AddTeacherUsecase(sl<TeacherRepo>()),
-    );
-    sl.registerLazySingleton<UpdateTeacherUsecase>(
-      () => UpdateTeacherUsecase(sl<TeacherRepo>()),
+
+    sl.registerLazySingleton<SaveTeacherUsecase>(
+      () => SaveTeacherUsecase(sl<TeacherRepo>()),
     );
     sl.registerLazySingleton<DeleteTeacherUsecase>(
       () => DeleteTeacherUsecase(sl<TeacherRepo>()),
+    );
+    sl.registerLazySingleton<SyncTeachersUseCase>(
+      () => SyncTeachersUseCase(sl<TeacherRepo>()),
     );
     // cubit
     sl.registerLazySingleton<TeacherCubit>(
       () => TeacherCubit(
         getTeachersUsecase: sl<GetTeachersUsecase>(),
-        addTeacherUsecase: sl<AddTeacherUsecase>(),
-        updateTeacherUsecase: sl<UpdateTeacherUsecase>(),
+        saveTeacherUsecase: sl<SaveTeacherUsecase>(),
         deleteTeacherUsecase: sl<DeleteTeacherUsecase>(),
+        syncTeachersUseCase: sl<SyncTeachersUseCase>(),
       ),
     );
 
     ///=========================[ Users Management ]========================
     // DataSource Remote & Local
-    sl.registerLazySingleton<UsersRemoteDataSourceImpl>(() =>
-        UsersRemoteDataSourceImpl());
-    sl.registerLazySingleton<UsersLocalDataSource>(() =>
-        UsersLocalDataSourceImpl(sl<DatabaseHelper>()));
+    sl.registerLazySingleton<UsersRemoteDataSourceImpl>(
+      () => UsersRemoteDataSourceImpl(),
+    );
+    sl.registerLazySingleton<UsersLocalDataSource>(
+      () => UsersLocalDataSourceImpl(sl<DatabaseHelper>()),
+    );
     // repository Implement
-    sl.registerLazySingleton<UsersRepositoryImp>(() =>
-        UsersRepositoryImp(
-          sl<UsersRemoteDataSourceImpl>(),
-          sl<UsersLocalDataSource>(),
-          sl<InternetConnectionChecker>(),
-        ),);
+    sl.registerLazySingleton<UsersRepositoryImp>(
+      () => UsersRepositoryImp(
+        sl<UsersRemoteDataSourceImpl>(),
+        sl<UsersLocalDataSource>(),
+        sl<InternetConnectionChecker>(),
+      ),
+    );
     // use cases
-    sl.registerLazySingleton<GetAllUsersUseCase>(() =>
-        GetAllUsersUseCase(sl<UsersRepositoryImp>()));
-    sl.registerLazySingleton<DeleteUserUseCase>(() =>
-        DeleteUserUseCase(sl<UsersRepositoryImp>()));
-    sl.registerLazySingleton<ChangeUserRoleUseCase>(() =>
-        ChangeUserRoleUseCase(sl<UsersRepositoryImp>()));
-    sl.registerLazySingleton<ToggleUserStatusUseCase>(() =>
-        ToggleUserStatusUseCase(sl<UsersRepositoryImp>()));
-    sl.registerLazySingleton<UpdateUserUseCase>(() =>
-        UpdateUserUseCase(sl<UsersRepositoryImp>()));
+    sl.registerLazySingleton<GetAllUsersUseCase>(
+      () => GetAllUsersUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerLazySingleton<DeleteUserUseCase>(
+      () => DeleteUserUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerLazySingleton<ChangeUserRoleUseCase>(
+      () => ChangeUserRoleUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerLazySingleton<ToggleUserStatusUseCase>(
+      () => ToggleUserStatusUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerLazySingleton<UpdateUserUseCase>(
+      () => UpdateUserUseCase(sl<UsersRepositoryImp>()),
+    );
     //cubit
-    sl.registerLazySingleton<UsersCubit>(() =>
-        UsersCubit(
-          sl<GetAllUsersUseCase>(),
-          sl<DeleteUserUseCase>(),
-          sl<ChangeUserRoleUseCase>(),
-          sl<ToggleUserStatusUseCase>(),
-          sl<UpdateUserUseCase>(),
-        ));
+    sl.registerLazySingleton<UsersCubit>(
+      () => UsersCubit(
+        sl<GetAllUsersUseCase>(),
+        sl<DeleteUserUseCase>(),
+        sl<ChangeUserRoleUseCase>(),
+        sl<ToggleUserStatusUseCase>(),
+        sl<UpdateUserUseCase>(),
+      ),
+    );
     sl.registerLazySingleton<AdminDashboardCubit>(() => AdminDashboardCubit());
   }
 }

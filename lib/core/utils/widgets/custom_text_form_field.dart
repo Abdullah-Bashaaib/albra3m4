@@ -56,7 +56,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     final bool isPasswordField = widget.obscureText;
 
     return TextFormField(
-      
       controller: widget.controller,
       focusNode: widget.focusNode,
       textDirection: TextDirection.rtl,
