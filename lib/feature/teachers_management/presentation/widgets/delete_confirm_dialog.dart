@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 // import '../models/teacher.dart';
 
 /// يعرض نافذة تأكيد الحذف ويرجع true إذا أكدت المديرة الحذف
-Future<bool> showDeleteTeacherDialog(BuildContext context, UserEntity teacher) async {
+Future<bool> showDeleteTeacherDialog(
+  BuildContext context,
+  UserEntity teacher,
+) async {
   final result = await showDialog<bool>(
     context: context,
     barrierColor: AppColors.ink.withOpacity(0.45),
@@ -21,21 +24,36 @@ Future<bool> showDeleteTeacherDialog(BuildContext context, UserEntity teacher) a
             Container(
               width: 52,
               height: 52,
-              decoration: const BoxDecoration(color: AppColors.dangerBg, shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: AppColors.dangerBg,
+                shape: BoxShape.circle,
+              ),
               alignment: Alignment.center,
-              child: const Icon(Icons.delete_outline, color: AppColors.dangerFg, size: 26),
+              child: const Icon(
+                Icons.delete_outline,
+                color: AppColors.dangerFg,
+                size: 26,
+              ),
             ),
             const SizedBox(height: 14),
             Text(
               'حذف ${teacher.fullName}؟',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: AppColors.ink),
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 15.5,
+                color: AppColors.ink,
+              ),
             ),
             const SizedBox(height: 6),
             const Text(
               'سيتم حذف بيانات المعلمة نهائيًا من النظام ولن تتمكني من التراجع عن هذا الإجراء.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5, color: AppColors.muted, height: 1.7),
+              style: TextStyle(
+                fontSize: 12.5,
+                color: AppColors.muted,
+                height: 1.7,
+              ),
             ),
             const SizedBox(height: 20),
             Row(
@@ -47,9 +65,14 @@ Future<bool> showDeleteTeacherDialog(BuildContext context, UserEntity teacher) a
                       foregroundColor: AppColors.ink,
                       side: const BorderSide(color: AppColors.line, width: 1.4),
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('تراجع', style: TextStyle(fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'تراجع',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -60,9 +83,14 @@ Future<bool> showDeleteTeacherDialog(BuildContext context, UserEntity teacher) a
                       backgroundColor: AppColors.danger,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('حذف نهائيًا', style: TextStyle(fontWeight: FontWeight.w800)),
+                    child: const Text(
+                      'حذف نهائيًا',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ),
               ],

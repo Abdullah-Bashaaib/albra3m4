@@ -9,7 +9,7 @@ abstract class AttendanceRepo {
   Future<Either<String, Unit>> addAttendanceTeacher(
     TeacherAttendanceEntity attendance,
   );
-  Future<Either<String, bool>> checkCode();
+  Future<Either<String, String>> checkCode();
   Future<Either<String, QREntity>> getQRTeacher(String schoolId);
   Future<Either<String, List<TeacherAttendanceEntity>>>
   getTeacherAttendanceByDate(String date);

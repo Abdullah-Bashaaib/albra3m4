@@ -10,11 +10,7 @@ class TeacherCard extends StatelessWidget {
   final UserEntity teacher;
   final VoidCallback onTap;
 
-  const TeacherCard({
-    super.key,
-    required this.teacher,
-    required this.onTap,
-  });
+  const TeacherCard({super.key, required this.teacher, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -25,23 +21,17 @@ class TeacherCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
 
       child: Container(
-        margin: const EdgeInsets.only(
-          bottom: 10,
-        ),
+        margin: const EdgeInsets.only(bottom: 10),
 
         padding: const EdgeInsets.all(12),
 
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius:
-              BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.line,
-          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.line),
           boxShadow: [
             BoxShadow(
-              color:
-                  AppColors.ink.withOpacity(0.04),
+              color: AppColors.ink.withOpacity(0.04),
               blurRadius: 3,
               offset: const Offset(0, 1),
             ),
@@ -50,18 +40,13 @@ class TeacherCard extends StatelessWidget {
 
         child: Row(
           children: [
-            TeacherAvatar(
-              initials: _initials(
-                teacher.fullName,
-              ),
-            ),
+            TeacherAvatar(initials: _initials(teacher.fullName)),
 
             const SizedBox(width: 12),
 
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     teacher.fullName,
@@ -87,15 +72,11 @@ class TeacherCard extends StatelessWidget {
 
                       Expanded(
                         child: Text(
-                          teacherDetails
-                                  ?.specialization ??
-                              'بدون تخصص',
+                          teacherDetails?.specialization ?? 'بدون تخصص',
 
-                          style:
-                              const TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
-                            color:
-                                AppColors.muted,
+                            color: AppColors.muted,
                           ),
                         ),
                       ),
@@ -105,9 +86,7 @@ class TeacherCard extends StatelessWidget {
               ),
             ),
 
-            StatusPill(
-            isActive: teacher.isActive ,
-            ),
+            StatusPill(isActive: teacher.isActive),
           ],
         ),
       ),
@@ -118,9 +97,7 @@ class TeacherCard extends StatelessWidget {
     final parts = name.trim().split(' ');
 
     if (parts.length == 1) {
-      return parts.first.isNotEmpty
-          ? parts.first[0]
-          : '';
+      return parts.first.isNotEmpty ? parts.first[0] : '';
     }
 
     return '${parts[0][0]}${parts[1][0]}';

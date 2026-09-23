@@ -3,6 +3,7 @@ part of 'login_cubit.dart';
 sealed class LoginState extends Equatable {
   const LoginState();
 }
+
 /// أول حالة عند تشغيل التطبيق.
 class AuthInitial extends LoginState {
   const AuthInitial();

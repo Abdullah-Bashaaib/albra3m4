@@ -9,7 +9,7 @@ abstract class AttendanceLocal {
   Future<QRModel?> getQR();
   Future<void> addQR(QRModel code);
   Future<void> addAttendanceTeacher(TeacherAttendanceModel attendance);
-  Future<bool> checkCode();
+  Future<String> checkCode();
 
   /// Students
 }
@@ -26,10 +26,18 @@ class AttendanceLocalImp implements AttendanceLocal {
   @override
   Future<void> addAttendanceTeacher(TeacherAttendanceModel attendance) async {
     try {
-      await perf.setString(
-        PerfKeys.attendanceDateKey,
-        DateTime.now().toIso8601String(),
-      );
+      if (attendance.departureTime != '0' &&
+          attendance.departureTime!.isNotEmpty) {
+        await perf.setString(
+          PerfKeys.departureDateKey,
+          DateTime.now().toIso8601String(),
+        );
+      } else {
+        await perf.setString(
+          PerfKeys.attendanceDateKey,
+          DateTime.now().toIso8601String(),
+        );
+      }
       await perf.setString(PerfKeys.attendanceStatus, attendance.status);
     } catch (e) {
       throw LocalException(e.toString());
@@ -44,8 +52,8 @@ class AttendanceLocalImp implements AttendanceLocal {
       perf.setString(PerfKeys.schoolNameKey, code.schoolName);
       perf.setString(PerfKeys.currentQRKey, code.code);
       perf.setString(PerfKeys.dateKey, code.date?.toIso8601String() ?? '');
-      perf.setInt(PerfKeys.startTimeKey, code.startTime);
-      perf.setInt(PerfKeys.endTimeKey, code.endTime);
+      perf.setInt(PerfKeys.arrivalTimeKey, code.arrivalTime);
+      perf.setInt(PerfKeys.departureTimeKey, code.departureTime);
       perf.setString(PerfKeys.createdByKey, code.createdBy);
     } catch (e) {
       throw LocalException(e.toString());
@@ -60,8 +68,8 @@ class AttendanceLocalImp implements AttendanceLocal {
       final String? schoolName = perf.getString(PerfKeys.schoolNameKey);
       final String? currentQR = perf.getString(PerfKeys.currentQRKey);
       final String? dateQ = perf.getString(PerfKeys.dateKey);
-      final int? startTimeString = perf.getInt(PerfKeys.startTimeKey);
-      final int? endTimeString = perf.getInt(PerfKeys.endTimeKey);
+      final int? arrivalTimeString = perf.getInt(PerfKeys.arrivalTimeKey);
+      final int? departureTimeString = perf.getInt(PerfKeys.departureTimeKey);
       final String? createdBy = perf.getString(PerfKeys.createdByKey);
 
       final qrModel = QRModel(
@@ -70,34 +78,52 @@ class AttendanceLocalImp implements AttendanceLocal {
         schoolName: schoolName ?? '',
         code: currentQR ?? '',
         date: dateQ != null ? DateTime.parse(dateQ) : null,
-        startTime: startTimeString ?? 0,
-        endTime: endTimeString ?? 0,
+        arrivalTime: arrivalTimeString ?? 0,
+        departureTime: departureTimeString ?? 0,
         createdBy: createdBy ?? '',
       );
       return qrModel;
     } catch (e) {
-      print(e.toString());
+      // print(e.toString());
       throw LocalException(e.toString());
     }
   }
 
   @override
-  Future<bool> checkCode() async {
+  Future<String> checkCode() async {
     try {
       final savedDateString = perf.getString(PerfKeys.attendanceDateKey);
-      if (savedDateString == null) {
-        return false;
-      }
-      final savedDate = DateTime.tryParse(savedDateString);
-      if (savedDate == null) {
-        return false;
-      }
+      final departureDateString = perf.getString(PerfKeys.departureDateKey);
       final toDay = DateTime.now();
 
-      return savedDate.year == toDay.year &&
-          savedDate.month == toDay.month &&
-          savedDate.day == toDay.day;
+      bool hasAttendance = false;
+      bool hasDeparture = false;
+
+      if (savedDateString != null) {
+        final savedDate = DateTime.tryParse(savedDateString);
+        if (savedDate != null &&
+            savedDate.year == toDay.year &&
+            savedDate.month == toDay.month &&
+            savedDate.day == toDay.day) {
+          hasAttendance = true;
+        }
+      }
+
+      if (departureDateString != null) {
+        final departureDate = DateTime.tryParse(departureDateString);
+        if (departureDate != null &&
+            departureDate.year == toDay.year &&
+            departureDate.month == toDay.month &&
+            departureDate.day == toDay.day) {
+          hasDeparture = true;
+        }
+      }
+
+      if (hasAttendance && hasDeparture) return 'departure';
+      if (hasAttendance) return 'attendance';
+      return 'none';
     } catch (e) {
+      // print(e.toString());
       throw LocalException(e.toString());
     }
   }

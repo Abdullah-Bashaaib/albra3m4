@@ -2,7 +2,6 @@ import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:albra3m4/core/constants/app_font.dart';
 import 'package:flutter/material.dart';
 
-
 enum ButtonVariant { filled, outlined, text }
 
 class CustomButton extends StatelessWidget {

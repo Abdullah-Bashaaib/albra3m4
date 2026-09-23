@@ -40,7 +40,8 @@ class LoginCubit extends Cubit<LoginState> {
 
   Future<void> checkAuthStatus() async {
     log(
-        '[message]:-----------------------------------[Here in Cubit method checkAuthStatus start]');
+      '[message]:-----------------------------------[Here in Cubit method checkAuthStatus start]',
+    );
     emit(const AuthCheckingSession());
 
     final result = await _getCurrentUserUseCase();

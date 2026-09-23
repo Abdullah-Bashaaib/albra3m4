@@ -93,8 +93,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   Future<void> saveAttendanceCode(
     UserEntity user,
     String code,
-    int startTime,
-    int endTime,
+    int arrivalTime,
+    int departureTime,
   ) async {
     if (code.isEmpty) {
       emit(state.copyWith(error: 'ادخل الباركورد اولا'));
@@ -109,8 +109,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       schoolName: 'روضة البراعم',
       code: state.attendanceQR?.code ?? '',
       date: state.attendanceQR?.date ?? DateTime.now(),
-      startTime: startTime,
-      endTime: endTime,
+      arrivalTime: arrivalTime,
+      departureTime: departureTime,
       createdBy: user.uid,
     );
     final result = await addQRUsecase(qr);
@@ -145,8 +145,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
             schoolName: 'روضة البراعم',
             code: newCode,
             date: DateTime.now(),
-            startTime: 8,
-            endTime: 9,
+            arrivalTime: 8,
+            departureTime: 9,
             createdBy: user.uid,
           );
     emit(state.copyWith(attendanceQR: qr));
@@ -195,6 +195,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     return result.fold(
       (l) {
         emit(state.copyWith(isLoading: false, error: l));
+        // print(l);
       },
       (r) {
         emit(
@@ -216,19 +217,27 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       (error) {
         emit(state.copyWith(error: error));
       },
-      (done) {
-        emit(state.copyWith(attendanceDone: done));
+      (status) {
+        bool attendanceDone = status == 'attendance' || status == 'departure';
+        bool departureDone = status == 'departure';
+
+        emit(
+          state.copyWith(
+            attendanceDone: attendanceDone,
+            departureDone: departureDone,
+          ),
+        );
       },
     );
   }
 
   Future<void> handleScan(UserEntity user, String scannedCode) async {
     emit(state.copyWith(isLoading: true, error: null));
-    if (state.attendanceDone) {
+    if (state.attendanceDone && state.departureDone) {
       emit(
         state.copyWith(
           isLoading: false,
-          error: 'لقد قمت بتسجيل حضورك اليوم بالفعل.',
+          error: 'لقد قمت بتسجيل حضورك وانصرافك اليوم بالفعل.',
         ),
       );
       return;
@@ -252,25 +261,54 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       return;
     }
 
-    final attendanceStatus = _calculateAttendanceStatus();
-    if (await attendanceStatus == 'غائب') {
-      emit(state.copyWith(isLoading: false, error: 'إنتهاء وقت التحضير'));
-      return;
-    }
-    if (await attendanceStatus == 'متقدم') {
-      emit(
-        state.copyWith(
-          isLoading: false,
-          error: 'الوقت حاليا غير مسموح التحضير فيه',
-        ),
-      );
-      return;
-    }
+    bool isDeparture = state.attendanceDone && !state.departureDone;
 
-    await addAttendanceTeacher(
-      user: user,
-      attendanceStatus: await attendanceStatus,
-    );
+    if (isDeparture) {
+      // Logic for departure
+      final departureStatus = await _calculateDepartureStatus();
+
+      if (departureStatus == 'مبكر') {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: 'الوقت حالياً غير مسموح الانصراف فيه (خروج مبكر)',
+          ),
+        );
+        return;
+      }
+
+      final now = DateTime.now();
+      await addAttendanceTeacher(
+        user: user,
+        attendanceStatus: state.attendanceTStatus ?? 'حاضر',
+        isDeparture: true,
+        departureTime: '${now.hour}:${now.minute}',
+      );
+    } else {
+      // Logic for attendance
+      final attendanceStatus = _calculateAttendanceStatus();
+      if (await attendanceStatus == 'غائب') {
+        emit(state.copyWith(isLoading: false, error: 'إنتهاء وقت التحضير'));
+        return;
+      }
+      if (await attendanceStatus == 'متقدم') {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: 'الوقت حاليا غير مسموح التحضير فيه',
+          ),
+        );
+        return;
+      }
+
+      final now = DateTime.now();
+      await addAttendanceTeacher(
+        user: user,
+        attendanceStatus: await attendanceStatus,
+        isDeparture: false,
+        timeOfArrival: '${now.hour}:${now.minute}',
+      );
+    }
   }
   // =========================================================
   // تحديد حالة الحضور
@@ -285,22 +323,21 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         return l;
       },
       (r) {
-        print(r.hour);
-        if (r.hour < state.attendanceQR!.startTime) {
+        // print(r.hour);
+        if (r.hour < state.attendanceQR!.arrivalTime) {
           return 'متقدم';
         }
 
-        if (r.hour == state.attendanceQR!.startTime && r.minute <= 30) {
+        if (r.hour == state.attendanceQR!.arrivalTime && r.minute <= 30) {
           return 'حاضر';
         }
 
-        if (r.hour == state.attendanceQR!.startTime && r.minute > 30) {
+        if (r.hour == state.attendanceQR!.arrivalTime && r.minute > 30) {
           return 'متأخر';
         }
 
-        if (r.hour > state.attendanceQR!.startTime &&
-            r.hour <= state.attendanceQR!.endTime) {
-          return 'متأخر';
+        if (r.hour > state.attendanceQR!.arrivalTime) {
+          return 'غائب';
         }
 
         return 'غائب';
@@ -308,12 +345,39 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     );
   }
   // =========================================================
+  // تحديد حالة الانصراف
+  // =========================================================
+
+  Future<String> _calculateDepartureStatus() async {
+    emit(state.copyWith(isLoading: true, error: null));
+    final datetimeNow = await getDateTimeFromServiceUsecase();
+    return datetimeNow.fold(
+      (l) {
+        emit(state.copyWith(isLoading: false, error: l));
+        return l;
+      },
+      (r) {
+        if (state.attendanceQR == null) return 'منصرف';
+
+        if (r.hour < state.attendanceQR!.departureTime) {
+          return 'مبكر';
+        }
+
+        return 'منصرف';
+      },
+    );
+  }
+
+  // =========================================================
   // تسجيل الحضور
   // =========================================================
 
   Future<void> addAttendanceTeacher({
     required UserEntity user,
     required String attendanceStatus,
+    bool isDeparture = false,
+    String? timeOfArrival,
+    String? departureTime,
   }) async {
     emit(state.copyWith(isLoading: true, error: null, success: null));
 
@@ -325,8 +389,8 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       name: user.fullName,
       status: attendanceStatus,
       date: DateTime.now(),
-      timeOfArrival: '0',
-      departureTime: '0',
+      timeOfArrival: timeOfArrival ?? '0',
+      departureTime: departureTime ?? '0',
     );
 
     final result = await addAttendanceTeacherUsecase(attendance);
@@ -339,8 +403,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         emit(
           state.copyWith(
             isLoading: false,
-            success: 'تم تسجيل حضورك بنجاح',
+            success: isDeparture
+                ? 'تم تسجيل انصرافك بنجاح'
+                : 'تم تسجيل حضورك بنجاح',
             attendanceDone: true,
+            departureDone: isDeparture ? true : state.departureDone,
             attendanceTStatus: attendanceStatus,
           ),
         );

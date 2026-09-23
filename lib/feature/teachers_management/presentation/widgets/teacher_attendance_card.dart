@@ -82,7 +82,24 @@ class TeacherAttendanceCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'وصل: ${attendance.timeOfArrival}',
+                        'وصلت: ${attendance.timeOfArrival}',
+                        style: TextStyle(fontSize: 12, color: AppColors.muted),
+                      ),
+                    ],
+                  ),
+                if (attendance.status != 'غائب' &&
+                    attendance.departureTime!.isNotEmpty &&
+                    attendance.departureTime != '0')
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 13,
+                        color: AppColors.muted,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'غادرت: ${attendance.departureTime}',
                         style: TextStyle(fontSize: 12, color: AppColors.muted),
                       ),
                     ],

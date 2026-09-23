@@ -139,190 +139,197 @@ class _StudentsAttendanceState extends State<StudentsAttendance> {
       ),
       body: isLoading
           ? AppBackground(
-          child: SafeArea(
-              child: const Center(child: CircularProgressIndicator())))
+              child: SafeArea(
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            )
           : _errorMessage != null
           ? AppBackground(
-        child: SafeArea(
-          child: Center(
-            child: Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ),
-      )
-          : AppBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              // عرض التاريخ
-              Container(
-                padding: const EdgeInsets.all(16),
-                // color: Colors.grey.shade100,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'تاريخ التحضير:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      _formatDate(_selectedDate),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
+              child: SafeArea(
+                child: Center(
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ),
-
-              // الإحصائيات
-              BlocBuilder<AttendanceCubit, AttendanceState>(
-                builder: (context, state) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    // color: Colors.grey.shade200,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        BuildStateCard(
-                          title: 'إجمالي الطلاب',
-                          value: state.students.length.toString(),
-                          color: Colors.blue,
-                        ),
-                        BuildStateCard(
-                          title: 'الحضور',
-                          value: state.attendanceStatus.values
-                              .where((e) => e)
-                              .length
-                              .toString(),
-                          color: Colors.green,
-                        ),
-                        BuildStateCard(
-                          title: 'الغياب',
-                          value: state.attendanceStatus.values
-                              .where((e) => !e)
-                              .length
-                              .toString(),
-                          color: Colors.red,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-
-              // قائمة الطلاب
-              BlocBuilder<AttendanceCubit, AttendanceState>(
-                builder: (context, state) {
-                  return Expanded(
-                    child: state.students.isEmpty
-                        ? const Center(
-                      child: Text('لا يوجد طلاب في هذه الحلقة'),
-                    )
-                        : ListView.builder(
-                      itemCount: state.students.length,
-                      itemBuilder: (context, index) {
-                        final student = state.students[index];
-
-                        final String studentId = student['id'];
-
-                        final bool isPresent =
-                            state.attendanceStatus[studentId] ?? true;
-
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+            )
+          : AppBackground(
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    // عرض التاريخ
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      // color: Colors.grey.shade100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'تاريخ التحضير:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          elevation: 2,
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: isPresent
-                                  ? Colors.green
-                                  : Colors.red,
-                              child: Icon(
-                                isPresent ? Icons.check : Icons.close,
-                                color: Colors.white,
+                          Text(
+                            _formatDate(_selectedDate),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // الإحصائيات
+                    BlocBuilder<AttendanceCubit, AttendanceState>(
+                      builder: (context, state) {
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          // color: Colors.grey.shade200,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              BuildStateCard(
+                                title: 'إجمالي الطلاب',
+                                value: state.students.length.toString(),
+                                color: Colors.blue,
                               ),
-                            ),
-                            title: Text(
-                              '${student['firstName'] ?? ''} '
-                                  '${student['middleName'] ?? ''} '
-                                  '${student['lastName'] ?? ''}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: AppFont.primary
+                              BuildStateCard(
+                                title: 'الحضور',
+                                value: state.attendanceStatus.values
+                                    .where((e) => e)
+                                    .length
+                                    .toString(),
+                                color: Colors.green,
                               ),
-                            ),
-
-                            // عرض سبب الغياب
-                            subtitle:
-                            !isPresent &&
-                                state
-                                    .absenceReasons[studentId]
-                                    ?.isNotEmpty ==
-                                    true
-                                ? Text(
-                              'سبب الغياب: '
-                                  '${state.absenceReasons[studentId]}',
-                              style: TextStyle(
-                                color: Colors.red.shade700,
+                              BuildStateCard(
+                                title: 'الغياب',
+                                value: state.attendanceStatus.values
+                                    .where((e) => !e)
+                                    .length
+                                    .toString(),
+                                color: Colors.red,
                               ),
-                            )
-                                : null,
-
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // زر سبب الغياب
-                                if (!isPresent)
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit_note,
-                                      color: Colors.orange,
-                                    ),
-                                    onPressed: () =>
-                                        _showAbsenceReasonDialog(
-                                          state.absenceReasons,
-                                          student,
-                                        ),
-                                    tooltip: 'سبب الغياب',
-                                  ),
-
-                                // مفتاح تبديل الحضور
-                                Switch(
-                                  value: isPresent,
-                                  activeColor: Colors.green,
-                                  inactiveTrackColor:
-                                  Colors.red.shade200,
-                                  inactiveThumbColor: Colors.red,
-                                  onChanged: (value) {
-                                    context
-                                        .read<AttendanceCubit>()
-                                        .updateAttendance(studentId);
-
-                                    // إذا أصبح حاضرًا
-                                    // نحذف سبب الغياب
-                                    if (value) {
-                                      context
-                                          .read<AttendanceCubit>()
-                                          .removeAbsence(studentId);
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
                         );
                       },
                     ),
-                  );
-                },
+
+                    // قائمة الطلاب
+                    BlocBuilder<AttendanceCubit, AttendanceState>(
+                      builder: (context, state) {
+                        return Expanded(
+                          child: state.students.isEmpty
+                              ? const Center(
+                                  child: Text('لا يوجد طلاب في هذه الحلقة'),
+                                )
+                              : ListView.builder(
+                                  itemCount: state.students.length,
+                                  itemBuilder: (context, index) {
+                                    final student = state.students[index];
+
+                                    final String studentId = student['id'];
+
+                                    final bool isPresent =
+                                        state.attendanceStatus[studentId] ??
+                                        true;
+
+                                    return Card(
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                      elevation: 2,
+                                      child: ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundColor: isPresent
+                                              ? Colors.green
+                                              : Colors.red,
+                                          child: Icon(
+                                            isPresent
+                                                ? Icons.check
+                                                : Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        title: Text(
+                                          '${student['firstName'] ?? ''} '
+                                          '${student['middleName'] ?? ''} '
+                                          '${student['lastName'] ?? ''}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: AppFont.primary,
+                                          ),
+                                        ),
+
+                                        // عرض سبب الغياب
+                                        subtitle:
+                                            !isPresent &&
+                                                state
+                                                        .absenceReasons[studentId]
+                                                        ?.isNotEmpty ==
+                                                    true
+                                            ? Text(
+                                                'سبب الغياب: '
+                                                '${state.absenceReasons[studentId]}',
+                                                style: TextStyle(
+                                                  color: Colors.red.shade700,
+                                                ),
+                                              )
+                                            : null,
+
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // زر سبب الغياب
+                                            if (!isPresent)
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.edit_note,
+                                                  color: Colors.orange,
+                                                ),
+                                                onPressed: () =>
+                                                    _showAbsenceReasonDialog(
+                                                      state.absenceReasons,
+                                                      student,
+                                                    ),
+                                                tooltip: 'سبب الغياب',
+                                              ),
+
+                                            // مفتاح تبديل الحضور
+                                            Switch(
+                                              value: isPresent,
+                                              activeColor: Colors.green,
+                                              inactiveTrackColor:
+                                                  Colors.red.shade200,
+                                              inactiveThumbColor: Colors.red,
+                                              onChanged: (value) {
+                                                context
+                                                    .read<AttendanceCubit>()
+                                                    .updateAttendance(
+                                                      studentId,
+                                                    );
+
+                                                // إذا أصبح حاضرًا
+                                                // نحذف سبب الغياب
+                                                if (value) {
+                                                  context
+                                                      .read<AttendanceCubit>()
+                                                      .removeAbsence(studentId);
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

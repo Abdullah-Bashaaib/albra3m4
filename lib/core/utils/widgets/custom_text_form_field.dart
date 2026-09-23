@@ -75,7 +75,6 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
         fontFamily: AppFont.primary,
       ),
       decoration: InputDecoration(
-        
         labelText: widget.label,
         hintText: widget.hintText,
         labelStyle: TextStyle(

@@ -88,10 +88,10 @@ class AttendanceRepoImp implements AttendanceRepo {
   }
 
   @override
-  Future<Either<String, bool>> checkCode() async {
+  Future<Either<String, String>> checkCode() async {
     try {
-      final codeDate = await local.checkCode();
-      return right(codeDate);
+      final codeStatus = await local.checkCode();
+      return right(codeStatus);
     } on LocalException catch (e) {
       return left(e.message);
     }

@@ -35,7 +35,8 @@ class MainApp extends StatelessWidget {
         BlocProvider<TeacherCubit>(create: (_) => sl<TeacherCubit>()),
         BlocProvider<UsersCubit>(create: (_) => sl<UsersCubit>()),
         BlocProvider<AdminDashboardCubit>(
-            create: (_) => sl<AdminDashboardCubit>()),
+          create: (_) => sl<AdminDashboardCubit>(),
+        ),
       ],
       child: MaterialApp.router(
         routerConfig: AppRouter.router,

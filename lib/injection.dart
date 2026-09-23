@@ -53,6 +53,12 @@ import 'feature/users/domain/use_cases/get_all_users_use_case.dart';
 import 'feature/users/domain/use_cases/toggle_user_status_use_case.dart';
 import 'feature/users/domain/use_cases/update_user_use_case.dart';
 
+import 'package:albra3m4/feature/student_management/data/repo/student_repo_impl.dart';
+import 'package:albra3m4/feature/student_management/data/source/student_local_source.dart';
+import 'package:albra3m4/feature/student_management/data/source/student_remote_source.dart';
+import 'package:albra3m4/feature/student_management/domain/repo/student_repo.dart';
+import 'package:albra3m4/feature/student_management/presentation/cubit/student_cubit.dart';
+
 final sl = GetIt.instance;
 
 class Injection {
@@ -313,5 +319,18 @@ class Injection {
       ),
     );
     sl.registerLazySingleton<AdminDashboardCubit>(() => AdminDashboardCubit());
+
+    /// ====================== [ Student Management ] ==================
+    sl.registerLazySingleton<StudentLocalSource>(
+      () => StudentLocalSourceImpl(sl<DatabaseHelper>()),
+    );
+    sl.registerLazySingleton<StudentRemoteSource>(
+      () => StudentRemoteSourceImpl(sl<FirebaseFirestore>()),
+    );
+    sl.registerLazySingleton<StudentRepo>(
+      () =>
+          StudentRepoImpl(sl<StudentLocalSource>(), sl<StudentRemoteSource>()),
+    );
+    sl.registerFactory<StudentCubit>(() => StudentCubit(sl<StudentRepo>()));
   }
 }

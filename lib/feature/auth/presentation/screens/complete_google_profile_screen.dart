@@ -90,7 +90,9 @@ class _CompleteGoogleProfileScreenState
           }
           if (state is AuthUnauthenticated) {
             CustomSnackBar.showWarning(
-                context, 'تواصل مع الإدارة لتنشيط حسابك');
+              context,
+              'تواصل مع الإدارة لتنشيط حسابك',
+            );
             context.go(AppRoutes.login);
           }
           if (state is LoginFailure) {

@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 /// Dropdown مخصص لاختيار الدور، بنفس نمط تصميم CustomTextFormField
 /// (حدود دائرية، خلفية معبأة، رسالة خطأ تحت الحقل عند عدم الاختيار).
 class RoleDropdown extends StatelessWidget {
-  const RoleDropdown({super.key, 
+  const RoleDropdown({
+    super.key,
     required this.selectedRole,
     required this.showError,
     required this.roles,

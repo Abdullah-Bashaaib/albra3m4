@@ -6,7 +6,7 @@ class CheckCodeUsecase {
 
   CheckCodeUsecase(this.repo);
 
-  Future<Either<String, bool>> call() async {
+  Future<Either<String, String>> call() async {
     return await repo.checkCode();
   }
 }

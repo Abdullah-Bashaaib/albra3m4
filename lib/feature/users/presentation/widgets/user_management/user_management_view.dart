@@ -133,24 +133,24 @@ class _LoadedContent extends StatelessWidget {
                       onDelete: isSuperAdmin
                           ? null
                           : () => _confirmDelete(
-                                context,
-                                cubit,
-                                user.uid,
-                                user.fullName,
-                              ),
+                              context,
+                              cubit,
+                              user.uid,
+                              user.fullName,
+                            ),
                       onEdit: isSuperAdmin
                           ? null
                           : () => EditUserDialog.show(
-                                context,
-                                user: user,
-                                onSave: (updatedUser) {
-                                  cubit.updateUser(updatedUser);
-                                  CustomSnackBar.showSuccess(
-                                    context,
-                                    'تم تحديث بيانات ${updatedUser.fullName} بنجاح',
-                                  );
-                                },
-                              ),
+                              context,
+                              user: user,
+                              onSave: (updatedUser) {
+                                cubit.updateUser(updatedUser);
+                                CustomSnackBar.showSuccess(
+                                  context,
+                                  'تم تحديث بيانات ${updatedUser.fullName} بنجاح',
+                                );
+                              },
+                            ),
                     );
                   },
                 ),

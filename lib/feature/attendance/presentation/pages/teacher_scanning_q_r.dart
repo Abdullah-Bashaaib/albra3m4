@@ -19,6 +19,8 @@ class TeacherScanningQR extends StatefulWidget {
 class _AttendanceScannerPageState extends State<TeacherScanningQR> {
   final MobileScannerController _controller = MobileScannerController();
 
+  bool _showScannerForDeparture = false;
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +77,11 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
               children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: state.attendanceDone
+                  child:
+                      (state.attendanceDone &&
+                              !state.departureDone &&
+                              !_showScannerForDeparture) ||
+                          (state.attendanceDone && state.departureDone)
                       ? _buildSuccessView(state)
                       : _buildScannerView(),
                 ),
@@ -535,7 +541,8 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
               // Title
               // ===================================================
               Text(
-                isLate ? 'تم تسجيل حضورك' : 'تم تسجيل حضورك بنجاح',
+                state.success ??
+                    (isLate ? 'تم تسجيل حضورك' : 'تم تسجيل حضورك بنجاح'),
                 textAlign: TextAlign.center,
 
                 style: TextStyle(
@@ -652,6 +659,39 @@ class _AttendanceScannerPageState extends State<TeacherScanningQR> {
               ),
 
               const SizedBox(height: 24),
+
+              if (!state.departureDone)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _showScannerForDeparture = true;
+                    });
+                    // _controller.start();
+                  },
+                  icon: const Icon(Icons.exit_to_app_rounded, size: 20),
+                  label: const Text(
+                    'مسح رمز الانصراف',
+                    style: TextStyle(
+                      fontFamily: AppFont.primary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+
+              if (!state.departureDone) const SizedBox(height: 16),
 
               Text(
                 'يمكنك الآن متابعة استخدام التطبيق',

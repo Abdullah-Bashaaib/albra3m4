@@ -6,8 +6,8 @@ class QREntity {
   final String schoolName;
   final String code;
   final DateTime? date;
-  final int startTime;
-  final int endTime;
+  final int arrivalTime;
+  final int departureTime;
   final String createdBy;
 
   QREntity({
@@ -16,8 +16,8 @@ class QREntity {
     required this.schoolName,
     required this.code,
     required this.date,
-    required this.startTime,
-    required this.endTime,
+    required this.arrivalTime,
+    required this.departureTime,
     required this.createdBy,
   });
 
@@ -27,8 +27,8 @@ class QREntity {
     String? schoolName,
     String? code,
     DateTime? date,
-    int? startTime,
-    int? endTime,
+    int? arrivalTime,
+    int? departureTime,
     String? createdBy,
   }) {
     return QREntity(
@@ -37,8 +37,8 @@ class QREntity {
       schoolName: schoolName ?? this.schoolName,
       code: code ?? this.code,
       date: date ?? this.date,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
+      arrivalTime: arrivalTime ?? this.arrivalTime,
+      departureTime: departureTime ?? this.departureTime,
       createdBy: createdBy ?? this.createdBy,
     );
   }
@@ -50,8 +50,8 @@ class QREntity {
       schoolName: qr.schoolName,
       code: qr.code,
       date: qr.date,
-      startTime: qr.startTime,
-      endTime: qr.endTime,
+      arrivalTime: qr.arrivalTime,
+      departureTime: qr.departureTime,
       createdBy: qr.createdBy,
     );
   }

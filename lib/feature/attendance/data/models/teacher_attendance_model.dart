@@ -17,6 +17,7 @@ class TeacherAttendanceModel extends TeacherAttendanceEntity {
   factory TeacherAttendanceModel.fromJson(Map<String, dynamic> json) {
     // print('ROLE FROM JSON: ${json['role']}');
     // print('ROLE TYPE: ${json['role'].runtimeType}');
+
     return TeacherAttendanceModel(
       id: json['id'],
       userId: json['user_id'],

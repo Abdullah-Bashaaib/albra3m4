@@ -8,7 +8,7 @@ class TeacherAttendanceEntity {
   final UserRole role;
   final String name;
   final String timeOfArrival;
-  final String departureTime;
+  final String? departureTime;
   final String status;
   final DateTime date;
 
@@ -57,7 +57,8 @@ class TeacherAttendanceEntity {
       timeOfArrival: t.timeOfArrival,
       departureTime: t.departureTime,
       date: t.date,
-      schoolId: t.schoolId, status: t.status,
+      schoolId: t.schoolId,
+      status: t.status,
     );
   }
 }

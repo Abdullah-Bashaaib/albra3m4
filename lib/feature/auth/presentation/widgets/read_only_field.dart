@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 /// الحقول، لكن غير قابل للتعديل، ليبقى للمستخدم واضح أن هذه بياناته
 /// الحقيقية من حساب Google الذي سجّل به للتو.
 class ReadOnlyField extends StatelessWidget {
-  const ReadOnlyField({super.key, 
+  const ReadOnlyField({
+    super.key,
     required this.label,
     required this.value,
     required this.icon,
@@ -63,4 +64,3 @@ class ReadOnlyField extends StatelessWidget {
     );
   }
 }
-

@@ -20,7 +20,8 @@ class CompleteGoogleProfileUseCase {
     return repository.completeGoogleProfile(
       currentUser: currentUser,
       role: role,
-      phone: phone, fullName: fullName,
+      phone: phone,
+      fullName: fullName,
     );
   }
 }

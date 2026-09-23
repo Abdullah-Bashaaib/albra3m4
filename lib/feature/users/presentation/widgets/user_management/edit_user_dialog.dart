@@ -12,11 +12,7 @@ class EditUserDialog extends StatefulWidget {
   final UserEntity user;
   final ValueChanged<UserEntity> onSave;
 
-  const EditUserDialog({
-    super.key,
-    required this.user,
-    required this.onSave,
-  });
+  const EditUserDialog({super.key, required this.user, required this.onSave});
 
   static Future<void> show(
     BuildContext context, {

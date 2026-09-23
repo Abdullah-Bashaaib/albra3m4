@@ -1,7 +1,6 @@
 import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 
-
 enum SnackBarType { success, error, warning, info }
 
 class CustomSnackBar {
@@ -28,9 +27,7 @@ class CustomSnackBar {
         elevation: 4,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         content: Directionality(
           textDirection: TextDirection.rtl,
           child: Row(
@@ -69,7 +66,12 @@ class CustomSnackBar {
     String message, {
     Duration duration = const Duration(seconds: 3),
   }) {
-    show(context, message: message, type: SnackBarType.success, duration: duration);
+    show(
+      context,
+      message: message,
+      type: SnackBarType.success,
+      duration: duration,
+    );
   }
 
   /// اختصار لرسائل الخطأ — مثال: مباشرة من Failure.message عبر BlocListener
@@ -78,7 +80,12 @@ class CustomSnackBar {
     String message, {
     Duration duration = const Duration(seconds: 4),
   }) {
-    show(context, message: message, type: SnackBarType.error, duration: duration);
+    show(
+      context,
+      message: message,
+      type: SnackBarType.error,
+      duration: duration,
+    );
   }
 
   static void showWarning(
@@ -86,7 +93,12 @@ class CustomSnackBar {
     String message, {
     Duration duration = const Duration(seconds: 4),
   }) {
-    show(context, message: message, type: SnackBarType.warning, duration: duration);
+    show(
+      context,
+      message: message,
+      type: SnackBarType.warning,
+      duration: duration,
+    );
   }
 
   static void showInfo(
@@ -94,7 +106,12 @@ class CustomSnackBar {
     String message, {
     Duration duration = const Duration(seconds: 3),
   }) {
-    show(context, message: message, type: SnackBarType.info, duration: duration);
+    show(
+      context,
+      message: message,
+      type: SnackBarType.info,
+      duration: duration,
+    );
   }
 
   static _SnackBarStyle _resolveStyle(SnackBarType type) {
