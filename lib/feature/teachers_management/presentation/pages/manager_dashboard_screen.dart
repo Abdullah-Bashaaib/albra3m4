@@ -4,6 +4,8 @@ import 'package:albra3m4/core/utils/widgets/app_drawer.dart';
 import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
 import 'package:albra3m4/feature/attendance/presentation/pages/attendance_q_r_view.dart';
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:albra3m4/feature/student_management/presentation/cubit/student_cubit.dart';
+import 'package:albra3m4/feature/student_management/presentation/pages/students_list_screen.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/pages/teacher_attendance_screen.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/pages/teachers_list_screen.dart';
@@ -14,6 +16,7 @@ import 'package:albra3m4/feature/teachers_management/presentation/widgets/quick_
 import 'package:albra3m4/feature/teachers_management/presentation/widgets/welcome_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:albra3m4/injection.dart';
 
 /// صفحة داشبورد المديرة — تعرض الإحصائيات الرئيسية للروضة
 class ManagerDashboardScreen extends StatefulWidget {
@@ -73,6 +76,16 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
         break;
       case 'managerDashboard':
         // نحن هنا بالفعل — لا شيء
+        break;
+      case 'viewStudents':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => sl<StudentCubit>(),
+              child: const StudentsListScreen(),
+            ),
+          ),
+        );
         break;
       default:
         break;

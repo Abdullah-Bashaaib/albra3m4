@@ -49,10 +49,12 @@ class AdminDashboardDrawer extends StatelessWidget {
                     isSelected: selected == AdminSection.userManagement,
                     onTap: () => select(AdminSection.userManagement),
                   ),
-                  DrawerMenuItem(icon: Icons.qr_code,
-                      label: 'طباعة رمز الـ QR',
-                      isSelected: selected == AdminSection.printQR,
-                      onTap: () => select(AdminSection.printQR)),
+                  DrawerMenuItem(
+                    icon: Icons.qr_code,
+                    label: 'طباعة رمز الـ QR',
+                    isSelected: selected == AdminSection.printQR,
+                    onTap: () => select(AdminSection.printQR),
+                  ),
                   DrawerMenuItem(
                     icon: Icons.bar_chart_rounded,
                     label: 'إحصائيات الحضور',

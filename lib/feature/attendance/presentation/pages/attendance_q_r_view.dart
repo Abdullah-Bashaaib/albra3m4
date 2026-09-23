@@ -263,8 +263,8 @@ class _AttendanceQRViewState extends State<AttendanceQRView> {
 
   Widget _buildBody(BuildContext context, AttendanceState state) {
     _codeController.text = state.attendanceQR?.code ?? '';
-    _startTimeController.text = state.attendanceQR?.startTime.toString() ?? '';
-    _endTimeController.text = state.attendanceQR?.endTime.toString() ?? '';
+    _startTimeController.text = state.attendanceQR?.arrivalTime.toString() ?? '';
+    _endTimeController.text = state.attendanceQR?.departureTime.toString() ?? '';
     return AppBackground(
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(),

@@ -98,7 +98,7 @@ class AppDrawer extends StatelessWidget {
           _DrawerItem(
             key: 'attendanceOverview',
             icon: Icons.bar_chart_rounded,
-            label: 'إحصائيات الحضور',
+            label: 'إحصائيات التحضير',
             comingSoon: true,
           ),
           _DrawerItem(
@@ -135,7 +135,7 @@ class AppDrawer extends StatelessWidget {
           _DrawerItem(
             key: 'QRTeacher',
             icon: Icons.qr_code,
-            label: 'باركود الحضور',
+            label: 'باركود التحضير',
           ),
           _DrawerItem(
             key: 'teacherAttendance',
@@ -144,9 +144,8 @@ class AppDrawer extends StatelessWidget {
           ),
           _DrawerItem(
             key: 'viewStudents',
-            icon: Icons.info_outline_rounded,
-            label: 'عرض الطلاب',
-            comingSoon: true,
+            icon: Icons.child_care_rounded,
+            label: 'إدارة الطلاب',
           ),
           _DrawerItem(
             key: 'viewStudentsAttendance',
@@ -172,7 +171,7 @@ class AppDrawer extends StatelessWidget {
           _DrawerItem(
             key: 'teacherAttendanceScanning',
             icon: Icons.qr_code_scanner_rounded,
-            label: 'تسجيل الحضور',
+            label: 'تسجيل الحضور والإنصرافٍ',
           ),
           _DrawerItem(
             key: 'schedule',

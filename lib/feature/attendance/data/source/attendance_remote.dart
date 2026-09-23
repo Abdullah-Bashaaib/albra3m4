@@ -58,12 +58,22 @@ class AttendanceRemoteImp implements AttendanceRemote {
           '${attendance.date.year}-'
           '${attendance.date.month.toString().padLeft(2, '0')}-'
           '${attendance.date.day.toString().padLeft(2, '0')}';
+
+      // Check if it's departure, we don't want to overwrite timeOfArrival
+      final data = attendance.toJson();
+      if (attendance.timeOfArrival == '0' && attendance.departureTime != '0') {
+        data.remove('time_of_arrival');
+      } else if (attendance.departureTime == '0' &&
+          attendance.timeOfArrival != '0') {
+        data.remove('departure_time');
+      }
+
       await firestore
           .collection('teacherAttendance')
           .doc(date)
           .collection('teachers')
           .doc(attendance.userId.toString())
-          .set(attendance.toJson());
+          .set(data, SetOptions(merge: true));
     } catch (e) {
       throw ServerException(e.toString());
     }

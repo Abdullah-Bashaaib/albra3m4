@@ -65,9 +65,9 @@ class UsersCubit extends Cubit<UsersState> {
 
     // حماية: منع تعطيل حساب مسؤول النظام
     final targetUser = current.users.cast<UserEntity?>().firstWhere(
-          (u) => u?.uid == uid,
-          orElse: () => null,
-        );
+      (u) => u?.uid == uid,
+      orElse: () => null,
+    );
     if (targetUser == null || targetUser.role == UserRole.superAdmin) return;
 
     final newStatus = !targetUser.isActive;
@@ -103,9 +103,9 @@ class UsersCubit extends Cubit<UsersState> {
 
     // حماية: منع تغيير دور مسؤول النظام
     final targetUser = current.users.cast<UserEntity?>().firstWhere(
-          (u) => u?.uid == uid,
-          orElse: () => null,
-        );
+      (u) => u?.uid == uid,
+      orElse: () => null,
+    );
     if (targetUser == null || targetUser.role == UserRole.superAdmin) return;
 
     final previousUsers = current.users;
@@ -137,9 +137,9 @@ class UsersCubit extends Cubit<UsersState> {
 
     // حماية: منع حذف مسؤول النظام
     final targetUser = current.users.cast<UserEntity?>().firstWhere(
-          (u) => u?.uid == uid,
-          orElse: () => null,
-        );
+      (u) => u?.uid == uid,
+      orElse: () => null,
+    );
     if (targetUser == null || targetUser.role == UserRole.superAdmin) return;
 
     final previousUsers = current.users;

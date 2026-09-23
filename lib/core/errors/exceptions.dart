@@ -1,4 +1,3 @@
-
 import 'package:albra3m4/core/messages.dart';
 
 abstract class BaseException implements Exception {
@@ -13,7 +12,7 @@ class ServerException extends BaseException {
 
 class OfflineException extends BaseException {
   OfflineException([dynamic e])
-      : super(e?.toString() ?? 'No Internet Connection');
+    : super(e?.toString() ?? 'No Internet Connection');
 }
 
 class LocalException extends BaseException {
@@ -26,7 +25,7 @@ class NonUserException extends BaseException {
 
 class EmptyLocalDatabaseException extends BaseException {
   EmptyLocalDatabaseException([dynamic e])
-      : super(e?.toString() ?? 'Local database is empty');
+    : super(e?.toString() ?? 'Local database is empty');
 }
 
 class FirebaseException extends BaseException {

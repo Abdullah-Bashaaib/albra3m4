@@ -99,7 +99,7 @@ class _QrCodeEditorCardState extends State<QrCodeEditorCard> {
               children: [
                 Expanded(
                   child: CustomTextFormField(
-                    label: 'بداية الوقت',
+                    label: 'وقت الحضور',
                     controller: widget.startTimeController,
                     validator: Validators.global,
                   ),
@@ -107,7 +107,7 @@ class _QrCodeEditorCardState extends State<QrCodeEditorCard> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: CustomTextFormField(
-                    label: 'نهاية الوقت',
+                    label: 'وقت الإنصراف',
                     controller: widget.endTimeController,
                     validator: Validators.global,
                   ),

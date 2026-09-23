@@ -7,8 +7,8 @@ class QRModel extends QREntity {
     required super.schoolName,
     required super.code,
     required super.date,
-    required super.startTime,
-    required super.endTime,
+    required super.arrivalTime,
+    required super.departureTime,
     required super.createdBy,
   });
 
@@ -18,9 +18,9 @@ class QRModel extends QREntity {
       schoolId: json['school_id'],
       schoolName: json['school_name'],
       code: json['code'],
-      date: DateTime.tryParse(json['date']) ,
-      startTime: json['start_time'],
-      endTime: json['end_time'],
+      date: DateTime.tryParse(json['date']),
+      arrivalTime: json['arrival_time'],
+      departureTime: json['departure_time'],
       createdBy: json['created_by'],
     );
   }
@@ -32,8 +32,8 @@ class QRModel extends QREntity {
       'school_name': schoolName,
       'code': code,
       'date': date?.toIso8601String() ?? '',
-      'start_time': startTime,
-      'end_time': endTime,
+      'arrival_time': arrivalTime,
+      'departure_time': departureTime,
       'created_by': createdBy,
     };
   }
@@ -45,8 +45,8 @@ class QRModel extends QREntity {
       schoolName: qr.schoolName,
       code: qr.code,
       date: qr.date,
-      startTime: qr.startTime,
-      endTime: qr.endTime,
+      arrivalTime: qr.arrivalTime,
+      departureTime: qr.departureTime,
       createdBy: qr.createdBy,
     );
   }

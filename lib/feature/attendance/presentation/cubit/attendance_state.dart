@@ -12,6 +12,7 @@ class AttendanceState extends Equatable {
   final String schoolName;
   //تحضير المعلمات
   final bool attendanceDone;
+  final bool departureDone;
   final String teacherName;
   final String? currentAttendanceCode;
   final String? attendanceTStatus;
@@ -66,6 +67,7 @@ class AttendanceState extends Equatable {
     this.schoolId = '',
     this.schoolName = 'البراعم',
     this.attendanceDone = false,
+    this.departureDone = false,
     this.teacherName = 'Abdullah',
     this.currentAttendanceCode,
     this.attendanceTStatus,
@@ -85,6 +87,7 @@ class AttendanceState extends Equatable {
     schoolName,
     attendanceQR,
     attendanceDone,
+    departureDone,
     teacherName,
     currentAttendanceCode,
     attendanceTStatus,
@@ -104,6 +107,7 @@ class AttendanceState extends Equatable {
     String? schoolId,
     String? schoolName,
     bool? attendanceDone,
+    bool? departureDone,
     String? teacherName,
     String? currentAttendanceCode,
     String? attendanceTStatus,
@@ -122,6 +126,7 @@ class AttendanceState extends Equatable {
       schoolId: schoolId ?? this.schoolId,
       schoolName: schoolName ?? this.schoolName,
       attendanceDone: attendanceDone ?? this.attendanceDone,
+      departureDone: departureDone ?? this.departureDone,
       teacherName: teacherName ?? this.teacherName,
       currentAttendanceCode:
           currentAttendanceCode ?? this.currentAttendanceCode,

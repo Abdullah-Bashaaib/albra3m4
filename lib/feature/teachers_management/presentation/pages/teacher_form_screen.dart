@@ -1,5 +1,4 @@
 import 'package:albra3m4/core/constants/app_font.dart';
-import 'package:albra3m4/core/utils/validators/validators.dart';
 import 'package:albra3m4/core/utils/widgets/custom_text_form_field.dart';
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:flutter/material.dart';

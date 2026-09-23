@@ -17,6 +17,14 @@ class TeacherDashboardScreen extends StatefulWidget {
 }
 
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AttendanceCubit>().checkAttendanceDone();
+    });
+    super.initState();
+  }
+
   void _onDrawerItemSelected(String key) {
     switch (key) {
       case 'teacherAttendanceScanning':

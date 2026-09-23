@@ -89,7 +89,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<({UserModel user, bool isNewUser})> loginWithGoogle() async {
     log(
-        '----------> message: START loginWithGoogle method at remote data source');
+      '----------> message: START loginWithGoogle method at remote data source',
+    );
     try {
       // 1) فتح شاشة اختيار حساب Google
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -105,7 +106,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // 2) الحصول على tokens المصادقة من Google
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -113,7 +114,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       // 3) تسجيل الدخول إلى Firebase بواسطة الـ credential
-      final   userCredential = await firebaseAuth.signInWithCredential(
+      final userCredential = await firebaseAuth.signInWithCredential(
         credential,
       );
 

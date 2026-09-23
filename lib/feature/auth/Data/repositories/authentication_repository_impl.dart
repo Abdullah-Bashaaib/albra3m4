@@ -68,10 +68,12 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right((user: result.user, isNewUser: result.isNewUser));
     } on FirebaseAppException catch (e) {
       log(
-          'message:-----------------------------------[Here in Repository start]');
+        'message:-----------------------------------[Here in Repository start]',
+      );
       log('message: error is ${e.message}');
       log(
-          'message:-----------------------------------[Here in Repository end]');
+        'message:-----------------------------------[Here in Repository end]',
+      );
       return Left(_mapFirebaseExceptionToFailure(e));
     } catch (e, s) {
       log('Error in loginWithGoogle: $e', stackTrace: s);

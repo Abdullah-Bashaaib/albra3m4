@@ -9,7 +9,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._();
 
   static const String _databaseName = 'app_database.db';
-  static const int _databaseVersion = 5;
+  static const int _databaseVersion = 6;
 
   Database? _database;
 
@@ -67,14 +67,25 @@ class DatabaseHelper {
     FOREIGN KEY (user_id) REFERENCES users(uid)
   )
 ''');
+    await db.execute('''
+      CREATE TABLE students (
+        id TEXT PRIMARY KEY,
+        fullName TEXT NOT NULL,
+        gender INTEGER NOT NULL DEFAULT 0,
+        birthDate TEXT NOT NULL,
+        classroom INTEGER NOT NULL DEFAULT 0,
+        guardianPhone TEXT,
+        notes TEXT,
+        grades TEXT NOT NULL DEFAULT '[]',
+        createdAt TEXT NOT NULL
+      )
+    ''');
     print('================= database Created =====================');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 5) {
-      await db.execute('''
-        DROP TABLE teachers;
-      ''');
+      await db.execute('DROP TABLE teachers;');
       await db.execute('''
   CREATE TABLE teachers (
     id TEXT PRIMARY KEY,
@@ -87,10 +98,24 @@ class DatabaseHelper {
     social_status TEXT NOT NULL,
     children_count INTEGER NOT NULL DEFAULT 0,
     home_phone TEXT NOT NULL,
-
     FOREIGN KEY (user_id) REFERENCES users(uid)
   )
 ''');
+    }
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS students (
+          id TEXT PRIMARY KEY,
+          fullName TEXT NOT NULL,
+          gender INTEGER NOT NULL DEFAULT 0,
+          birthDate TEXT NOT NULL,
+          classroom INTEGER NOT NULL DEFAULT 0,
+          guardianPhone TEXT,
+          notes TEXT,
+          grades TEXT NOT NULL DEFAULT '[]',
+          createdAt TEXT NOT NULL
+        )
+      ''');
     }
     log('================== database Upgraded ====================');
   }
