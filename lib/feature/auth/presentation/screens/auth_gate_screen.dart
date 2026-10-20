@@ -1,0 +1,73 @@
+import 'dart:developer';
+
+import 'package:albra3m4/core/utils/widgets/app_background.dart';
+import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/routing/app_routes.dart';
+import '../../../../core/routing/role_route_mapper.dart';
+
+/// نقطة الدخول الوحيدة عند تشغيل التطبيق.
+///
+/// مسؤوليتها الوحيدة والحصرية: التحقق من حالة الجلسة المحفوظة،
+/// ثم توجيه المستخدم عبر go_router للمسار الصحيح — الـ Dashboard
+/// المناسب لدوره (عبر role_route_mapper.dart) أو شاشة الدخول.
+///
+class AuthGateScreen extends StatelessWidget {
+  const AuthGateScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    log(
+      '-----------------[message]: Here AuthGateScreen Build [message]---------------',
+    );
+    return BlocListener<LoginCubit, LoginState>(
+      listener: _handleNavigation,
+      child: const Scaffold(
+        body: AppBackground(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('جارٍ التحقق من حالة تسجيل الدخول...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleNavigation(BuildContext context, LoginState state) {
+    // لسه بيتحقق من الجلسة المحفوظة — يبقى المستخدم على شاشة التحميل
+    log(
+      '--------------------[message]لسه بيتحقق من الجلسة المحفوظة — يبقى المستخدم على شاشة التحميل [message]------------------',
+    );
+    if (state is AuthCheckingSession || state is AuthInitial) {
+      return;
+    }
+
+    if (state is AuthAuthenticated) {
+      context.go(state.user.role.dashboardRoute, extra: state.user);
+      return;
+    }
+
+    if (state is LoginSuccess) {
+      context.go(state.user.role.dashboardRoute, extra: state.user);
+      return;
+    }
+
+    if (state is LoginGoogleProfileIncomplete) {
+      context.go(AppRoutes.completeGoogleProfile, extra: state.user);
+      return;
+    }
+
+    // AuthUnauthenticated / LoginFailure / أي حالة غير متوقعة أخرى
+    context.go(AppRoutes.login);
+  }
+}

@@ -1,6 +1,22 @@
+import 'package:albra3m4/core/constants/app_theme.dart';
+import 'package:albra3m4/core/routing/app_router.dart';
+import 'package:albra3m4/core/utils/observers/app_bloc_observer.dart';
+import 'package:albra3m4/feature/attendance/presentation/cubit/attendance_cubit.dart';
+import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart';
+import 'package:albra3m4/injection.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'feature/auth/presentation/manger/login_cubit.dart';
+import 'feature/users/presentation/manager/users_cubit.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Injection.init();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Bloc.observer = AppBlocObserver();
   runApp(const MainApp());
 }
 
@@ -9,11 +25,28 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<LoginCubit>(
+          create: (_) => sl<LoginCubit>()..checkAuthStatus(),
         ),
+        BlocProvider<AttendanceCubit>(create: (_) => sl<AttendanceCubit>()),
+        BlocProvider<TeacherCubit>(create: (_) => sl<TeacherCubit>()),
+        BlocProvider<UsersCubit>(create: (_) => sl<UsersCubit>()),
+        BlocProvider<AdminDashboardCubit>(
+          create: (_) => sl<AdminDashboardCubit>(),
+        ),
+      ],
+      child: MaterialApp.router(
+        routerConfig: AppRouter.router,
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        builder: (context, child) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }

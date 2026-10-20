@@ -1,0 +1,101 @@
+import 'dart:developer';
+
+import 'package:albra3m4/core/errors/exceptions.dart';
+import 'package:albra3m4/feature/auth/Data/models/user_model.dart';
+import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide FirebaseException;
+
+abstract class UsersRemoteDataSource {
+  Future<List<UserModel>> getAllUsers();
+
+  Future<UserModel> getUserById(String id);
+
+  Future<UserModel> createUser(UserModel user);
+
+  Future<UserModel> updateUser(UserModel user);
+
+  Future<void> deleteUser(String id);
+
+  Future<void> updateUserRole(String uid, UserRole role);
+
+  Future<void> updateUserStatus(String uid, bool isActive);
+}
+
+class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
+  final _usersCollection = FirebaseFirestore.instance.collection('users');
+
+  UsersRemoteDataSourceImpl();
+
+  @override
+  Future<List<UserModel>> getAllUsers() async {
+    log(
+      '------------------ [message] getAllUsers start at DataSource [message]----------------',
+    );
+    try {
+      final querySnapshot = await _usersCollection.get();
+      final List<UserModel> users = querySnapshot.docs.map((doc) {
+        return UserModel.fromFirestore(doc.data());
+      }).toList();
+      log(
+        '------------------ [message] users is $users [message]----------------',
+      );
+      return users;
+    } catch (e) {
+      log('------------------ [message] error is $e [message]----------------');
+      throw FirebaseException(e);
+    }
+  }
+
+  @override
+  Future<UserModel> createUser(UserModel user) {
+    // TODO: implement createUser
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteUser(String id) async {
+    try {
+      await _usersCollection.doc(id).delete();
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
+  }
+
+  @override
+  Future<UserModel> getUserById(String id) {
+    // TODO: implement getUserById
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<UserModel> updateUser(UserModel user) async {
+    try {
+      await _usersCollection.doc(user.uid).update({
+        'full_name': user.fullName,
+        'phone': user.phone,
+        'role': user.role.name,
+      });
+      return user;
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateUserRole(String uid, UserRole role) async {
+    try {
+      await _usersCollection.doc(uid).update({'role': role.name});
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateUserStatus(String uid, bool isActive) async {
+    try {
+      await _usersCollection.doc(uid).update({'is_active': isActive});
+    } catch (e) {
+      throw FirebaseException(e.toString());
+    }
+  }
+}
