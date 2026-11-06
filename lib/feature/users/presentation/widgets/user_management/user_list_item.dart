@@ -10,6 +10,7 @@ class UserListItem extends StatelessWidget {
   final ValueChanged<UserRole>? onRoleChange;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onEditPermissions;
 
   const UserListItem({
     super.key,
@@ -18,6 +19,7 @@ class UserListItem extends StatelessWidget {
     this.onRoleChange,
     this.onDelete,
     this.onEdit,
+    this.onEditPermissions,
   });
 
   Color get _roleColor => switch (user.role) {
@@ -138,6 +140,10 @@ class UserListItem extends StatelessWidget {
                       onEdit?.call();
                       return;
                     }
+                    if (value == 'permissions') {
+                      onEditPermissions?.call();
+                      return;
+                    }
                     if (value == 'delete') {
                       onDelete?.call();
                       return;
@@ -168,6 +174,18 @@ class UserListItem extends StatelessWidget {
                         ],
                       ),
                     ),
+                    if (user.role == UserRole.teacher && onEditPermissions != null)
+                      const PopupMenuItem(
+                        value: 'permissions',
+                        child: Row(
+                          children: [
+                            Icon(Icons.admin_panel_settings_outlined, size: 18),
+                            SizedBox(width: 8),
+                            Text('التكليفات الإدارية',
+                                style: TextStyle(fontFamily: AppFont.primary)),
+                          ],
+                        ),
+                      ),
                     const PopupMenuDivider(),
                     const PopupMenuItem(
                       value: 'manager',

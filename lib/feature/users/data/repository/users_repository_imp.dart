@@ -2,6 +2,7 @@ import 'package:albra3m4/core/errors/failure.dart';
 import 'package:albra3m4/feature/auth/Data/failures/firebase_failure.dart'
     hide NetworkFailure;
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:albra3m4/feature/auth/domain/entities/app_permission.dart';
 import 'package:albra3m4/feature/users/domain/repo/users_reopsitory.dart';
 import 'package:dartz/dartz.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -75,12 +76,12 @@ class UsersRepositoryImp implements UsersRepository {
         final userModel = UserModel.fromEntity(user);
 
         // 1. التعديل في Firebase
-        await _remoteDataSource.updateUser(userModel);
+        final savedUser = await _remoteDataSource.updateUser(userModel);
 
         // 2. التعديل في Sqflite محلياً
-        await _localDataSource.updateUser(userModel);
+        await _localDataSource.updateUser(savedUser);
 
-        return Right(user);
+        return Right(savedUser);
       }
 
       return const Left(NetworkFailure('No internet connection'));
@@ -106,6 +107,29 @@ class UsersRepositoryImp implements UsersRepository {
       }
 
       return const Left(NetworkFailure('No internet connection'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> updateTeacherPermissions(
+    String uid, List<AppPermission> permissions,
+  ) async {
+    if (!await _connectionChecker.hasConnection) {
+      return const Left(NetworkFailure('يلزم الاتصال بالإنترنت لتعديل صلاحيات المعلمة.'));
+    }
+    try {
+      final updated = await _remoteDataSource.updateTeacherPermissions(
+        uid, permissions,
+      );
+      // Server write is authoritative; local cache failure is non-fatal.
+      try {
+        await _localDataSource.updateTeacherPermissions(uid, updated.permissions);
+      } catch (_) {
+        // A subsequent sync will refresh the cached record.
+      }
+      return Right(updated);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

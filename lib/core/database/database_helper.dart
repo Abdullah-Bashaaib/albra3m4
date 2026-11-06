@@ -9,7 +9,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._();
 
   static const String _databaseName = 'app_database.db';
-  static const int _databaseVersion = 6;
+  static const int _databaseVersion = 7;
 
   Database? _database;
 
@@ -45,6 +45,7 @@ class DatabaseHelper {
         email TEXT NOT NULL,
         phone TEXT,
         role TEXT NOT NULL,
+        permissions TEXT NOT NULL DEFAULT '[]',
         is_verified INTEGER NOT NULL DEFAULT 0,
         is_active INTEGER NOT NULL DEFAULT 1,
         created_at TEXT NOT NULL
@@ -116,6 +117,9 @@ class DatabaseHelper {
           createdAt TEXT NOT NULL
         )
       ''');
+    }
+    if (oldVersion < 7) {
+      await db.execute("ALTER TABLE users ADD COLUMN permissions TEXT NOT NULL DEFAULT '[]'");
     }
     log('================== database Upgraded ====================');
   }

@@ -2,6 +2,7 @@ import 'package:albra3m4/core/database/database_helper.dart';
 import 'package:albra3m4/core/errors/exceptions.dart';
 import 'package:albra3m4/feature/auth/Data/models/user_model.dart';
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:albra3m4/feature/auth/domain/entities/app_permission.dart';
 
 abstract class UsersLocalDataSource {
   Future<void> updateUserRole(String uid, UserRole role);
@@ -11,6 +12,8 @@ abstract class UsersLocalDataSource {
   Future<void> updateUser(UserModel user);
 
   Future<void> deleteUser(String uid);
+
+  Future<void> updateTeacherPermissions(String uid, List<AppPermission> permissions);
 }
 
 class UsersLocalDataSourceImpl implements UsersLocalDataSource {
@@ -24,7 +27,7 @@ class UsersLocalDataSourceImpl implements UsersLocalDataSource {
       final db = await databaseHelper.database;
       await db.update(
         'users',
-        {'role': role.name},
+        {'role': role.name, 'permissions': '[]'},
         where: 'uid = ?',
         whereArgs: [uid],
       );
@@ -58,9 +61,27 @@ class UsersLocalDataSourceImpl implements UsersLocalDataSource {
           'full_name': user.fullName,
           'phone': user.phone,
           'role': user.role.name,
+          'permissions': AppPermissionCodec.toJson(user.permissions),
         },
         where: 'uid = ?',
         whereArgs: [user.uid],
+      );
+    } catch (e) {
+      throw LocalException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateTeacherPermissions(
+    String uid, List<AppPermission> permissions,
+  ) async {
+    try {
+      final db = await databaseHelper.database;
+      await db.update(
+        'users',
+        {'permissions': AppPermissionCodec.toJson(permissions)},
+        where: 'uid = ?',
+        whereArgs: [uid],
       );
     } catch (e) {
       throw LocalException(e.toString());

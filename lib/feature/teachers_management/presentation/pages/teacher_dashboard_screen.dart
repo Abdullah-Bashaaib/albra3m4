@@ -6,6 +6,8 @@ import 'package:albra3m4/feature/attendance/presentation/pages/teacher_scanning_
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/screens/internal_department_screen.dart';
 
 /// داشبورد المعلمة — تعرض حالة حضورها اليوم + ملخص معلوماتها
 class TeacherDashboardScreen extends StatefulWidget {
@@ -51,6 +53,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         // نحن هنا بالفعل — لا شيء
         break;
       default:
+        final permission = InternalDepartmentKeys.fromKey(key);
+        if (permission != null &&
+            (context.read<LoginCubit>().user?.hasPermission(permission) ?? false)) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => InternalDepartmentScreen(permission: permission),
+          ));
+        }
         break;
     }
   }
@@ -59,11 +68,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FF),
-      drawer: AppDrawer(
-        user: widget.user,
+      drawer: BlocBuilder<LoginCubit, LoginState>(
+        builder: (context, _) => AppDrawer(
+          user: context.read<LoginCubit>().user ?? widget.user,
         onLogout: () {},
         onItemSelected: _onDrawerItemSelected,
-        selectedItemKey: 'teacherDashboard',
+          selectedItemKey: 'teacherDashboard',
+        ),
       ),
       body: AppBackground(
         child: BlocBuilder<AttendanceCubit, AttendanceState>(

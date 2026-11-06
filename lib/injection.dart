@@ -23,6 +23,8 @@ import 'package:albra3m4/feature/teachers_management/domain/usecases/sync_teache
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/teacher_permissions_cubit.dart';
+import 'package:albra3m4/feature/users/domain/use_cases/update_teacher_permissions_use_case.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -39,6 +41,7 @@ import 'feature/auth/Data/repositories/authentication_repository_impl.dart';
 import 'feature/auth/domain/repositories/authentication_repository.dart';
 import 'feature/auth/domain/usecases/get_cached_user.dart';
 import 'feature/auth/domain/usecases/get_current_user.dart';
+import 'feature/auth/domain/usecases/watch_current_user_use_case.dart';
 import 'feature/auth/domain/usecases/google_login_use_case.dart';
 import 'feature/auth/domain/usecases/login_use_case.dart';
 import 'feature/auth/domain/usecases/register_user_usecase.dart';
@@ -155,6 +158,9 @@ class Injection {
     sl.registerLazySingleton<GetCurrentUserUseCase>(
       () => GetCurrentUserUseCase(sl<AuthRepository>()),
     );
+    sl.registerLazySingleton<WatchCurrentUserUseCase>(
+      () => WatchCurrentUserUseCase(sl<AuthRepository>()),
+    );
 
     sl.registerLazySingleton<GoogleLoginUseCase>(
       () => GoogleLoginUseCase(sl<AuthRepository>()),
@@ -178,6 +184,7 @@ class Injection {
         sl<GetCurrentUserUseCase>(),
         sl<GoogleLoginUseCase>(),
         sl<CompleteGoogleProfileUseCase>(),
+        sl<WatchCurrentUserUseCase>(),
       ),
     );
 
@@ -307,6 +314,12 @@ class Injection {
     );
     sl.registerLazySingleton<UpdateUserUseCase>(
       () => UpdateUserUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerLazySingleton<UpdateTeacherPermissionsUseCase>(
+      () => UpdateTeacherPermissionsUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerFactory<TeacherPermissionsCubit>(
+      () => TeacherPermissionsCubit(sl<UpdateTeacherPermissionsUseCase>()),
     );
     //cubit
     sl.registerLazySingleton<UsersCubit>(

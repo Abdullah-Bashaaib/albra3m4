@@ -12,6 +12,7 @@ import '../../../../../core/constants/app_font.dart';
 import '../../manager/users_state.dart';
 import 'edit_user_dialog.dart';
 import 'user_list_item.dart';
+import '../teacher_permissions_dialog.dart';
 
 class UserManagementView extends StatefulWidget {
   const UserManagementView({super.key});
@@ -138,6 +139,19 @@ class _LoadedContent extends StatelessWidget {
                               user.uid,
                               user.fullName,
                             ),
+                      onEditPermissions: user.role == UserRole.teacher
+                          ? () async {
+                              final updated = await TeacherPermissionsDialog.show(
+                                context, teacher: user,
+                              );
+                              if (updated != null && context.mounted) {
+                                cubit.replaceUser(updated);
+                                CustomSnackBar.showSuccess(
+                                  context, 'تم تحديث تكليفات ${updated.fullName}',
+                                );
+                              }
+                            }
+                          : null,
                       onEdit: isSuperAdmin
                           ? null
                           : () => EditUserDialog.show(

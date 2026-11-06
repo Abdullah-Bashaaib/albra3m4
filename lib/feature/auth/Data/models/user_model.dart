@@ -1,5 +1,6 @@
 import 'package:albra3m4/feature/teachers_management/data/models/teacher_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../domain/entities/app_permission.dart';
 
 import 'package:albra3m4/feature/teachers_management/domain/entities/teacher_entity.dart';
 
@@ -17,6 +18,7 @@ class UserModel extends UserEntity {
     required super.isActive,
     required super.createdAt,
     super.tDetails,
+    super.permissions,
   });
 
   factory UserModel.fromEntity(UserEntity entity) {
@@ -31,6 +33,7 @@ class UserModel extends UserEntity {
       isActive: entity.isActive,
       createdAt: entity.createdAt,
       tDetails: entity.tDetails,
+      permissions: entity.permissions,
     );
   }
 
@@ -46,6 +49,7 @@ class UserModel extends UserEntity {
       'email': email,
       'phone': phone,
       'role': role.name,
+      'permissions': permissions.map((p) => p.name).toList(),
       'is_verified': isVerified,
       'is_active': isActive,
       'created_at': Timestamp.fromDate(createdAt),
@@ -63,6 +67,7 @@ class UserModel extends UserEntity {
         (role) => role.name == map['role'],
         orElse: () => UserRole.parent,
       ),
+      permissions: AppPermissionCodec.fromList(map['permissions']),
       isVerified: map['is_verified'] as bool? ?? false,
       isActive: map['is_active'] as bool? ?? true,
       createdAt: _parseFirestoreDate(map['created_at']),
@@ -81,6 +86,7 @@ class UserModel extends UserEntity {
       'email': email,
       'phone': phone,
       'role': role.name,
+      'permissions': AppPermissionCodec.toJson(permissions),
       'is_verified': isVerified ? 1 : 0,
       'is_active': isActive ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
@@ -117,6 +123,7 @@ class UserModel extends UserEntity {
         (role) => role.name == map['role'],
         orElse: () => UserRole.parent,
       ),
+      permissions: AppPermissionCodec.fromJson(map['permissions']),
       isVerified: map['is_verified'] == 1,
       isActive: map['is_active'] == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
@@ -139,6 +146,7 @@ class UserModel extends UserEntity {
     bool? isActive,
     DateTime? createdAt,
     TeacherEntity? tDetails,
+    List<AppPermission>? permissions,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -151,6 +159,7 @@ class UserModel extends UserEntity {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       tDetails: tDetails ?? this.tDetails,
+      permissions: permissions ?? this.permissions,
     );
   }
 
