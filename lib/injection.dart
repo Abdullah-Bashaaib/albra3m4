@@ -41,6 +41,7 @@ import 'feature/auth/Data/repositories/authentication_repository_impl.dart';
 import 'feature/auth/domain/repositories/authentication_repository.dart';
 import 'feature/auth/domain/usecases/get_cached_user.dart';
 import 'feature/auth/domain/usecases/get_current_user.dart';
+import 'feature/auth/domain/usecases/watch_current_user_use_case.dart';
 import 'feature/auth/domain/usecases/google_login_use_case.dart';
 import 'feature/auth/domain/usecases/login_use_case.dart';
 import 'feature/auth/domain/usecases/register_user_usecase.dart';
@@ -157,6 +158,9 @@ class Injection {
     sl.registerLazySingleton<GetCurrentUserUseCase>(
       () => GetCurrentUserUseCase(sl<AuthRepository>()),
     );
+    sl.registerLazySingleton<WatchCurrentUserUseCase>(
+      () => WatchCurrentUserUseCase(sl<AuthRepository>()),
+    );
 
     sl.registerLazySingleton<GoogleLoginUseCase>(
       () => GoogleLoginUseCase(sl<AuthRepository>()),
@@ -180,6 +184,7 @@ class Injection {
         sl<GetCurrentUserUseCase>(),
         sl<GoogleLoginUseCase>(),
         sl<CompleteGoogleProfileUseCase>(),
+        sl<WatchCurrentUserUseCase>(),
       ),
     );
 

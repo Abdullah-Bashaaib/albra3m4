@@ -20,6 +20,8 @@ abstract class AuthRemoteDataSource {
 
   Future<UserModel> getUserFromFirestore({required String uid});
 
+  Stream<UserModel?> watchUser(String uid);
+
   Future<void> createUserInFirestore({required UserModel user});
 
   Future<void> updateUserInFirestore({required UserModel user});

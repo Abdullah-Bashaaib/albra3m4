@@ -318,6 +318,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Stream<UserModel?> watchUser(String uid) {
+    return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
+      final data = snapshot.data();
+      return data == null ? null : UserModel.fromFirestore(data);
+    });
+  }
+
+  @override
   Future<UserModel> getUserFromFirestore({required String uid}) async {
     try {
       final document = await firestore.collection('users').doc(uid).get();

@@ -265,6 +265,25 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Stream current Firestore permissions into the existing local cache.
+  /// When offline, the UI may temporarily show old values, but remote security
+  /// rules must reject revoked privileges.
+  @override
+  Stream<UserEntity?> watchCurrentUser(String uid) async* {
+    await for (final latest in remoteDataSource.watchUser(uid)) {
+      if (latest == null) {
+        yield null;
+        continue;
+      }
+      try {
+        await localDataSource.cacheUser(latest);
+      } catch (_) {
+        // A local cache write must not stop live authorization updates.
+      }
+      yield latest;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Logout
   // ---------------------------------------------------------------------------
