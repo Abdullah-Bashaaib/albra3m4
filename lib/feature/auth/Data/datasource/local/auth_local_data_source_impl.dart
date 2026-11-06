@@ -50,11 +50,23 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<void> cacheUser(UserModel user) async {
-    await database.insert(
-      usersTable,
-      user.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    // UPDATE before INSERT avoids SQLite REPLACE deleting the parent row
+    // of an existing teacher record when a live permissions snapshot arrives.
+    await database.transaction((txn) async {
+      final updated = await txn.update(
+        usersTable,
+        user.toMap(),
+        where: 'uid = ?',
+        whereArgs: [user.uid],
+      );
+      if (updated == 0) {
+        await txn.insert(
+          usersTable,
+          user.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.abort,
+        );
+      }
+    });
   }
 
   @override
