@@ -164,6 +164,14 @@ class UsersCubit extends Cubit<UsersState> {
     );
   }
 
+  void replaceUser(UserEntity updated) {
+    final current = state;
+    if (current is! UsersLoaded) return;
+    emit(current.copyWith(
+      users: current.users.map((u) => u.uid == updated.uid ? updated : u).toList(),
+    ));
+  }
+
   Future<void> updateUser(UserEntity updatedUser) async {
     final current = state;
     if (current is! UsersLoaded) return;
