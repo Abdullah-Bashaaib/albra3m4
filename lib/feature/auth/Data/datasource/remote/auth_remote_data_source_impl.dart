@@ -345,6 +345,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': user.email,
         'phone': user.phone,
         'role': user.role.name,
+        'permissions': user.permissions.map((p) => p.name).toList(),
         'is_verified': user.isVerified,
         'is_active': user.isActive,
         'school_id': user.schoolId,

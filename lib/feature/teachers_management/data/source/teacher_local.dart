@@ -104,6 +104,7 @@ class TeacherLocalImp implements TeacherLocal {
         u.email,
         u.phone,
         u.role,
+        u.permissions,
         u.is_verified,
         u.is_active,
         u.created_at,
