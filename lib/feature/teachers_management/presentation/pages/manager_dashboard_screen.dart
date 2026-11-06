@@ -16,6 +16,8 @@ import 'package:albra3m4/feature/teachers_management/presentation/widgets/quick_
 import 'package:albra3m4/feature/teachers_management/presentation/widgets/welcome_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/screens/internal_department_screen.dart';
 import 'package:albra3m4/injection.dart';
 
 /// صفحة داشبورد المديرة — تعرض الإحصائيات الرئيسية للروضة
@@ -88,6 +90,13 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
         );
         break;
       default:
+        final permission = InternalDepartmentKeys.fromKey(key);
+        if (permission != null &&
+            (context.read<LoginCubit>().user?.hasPermission(permission) ?? false)) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => InternalDepartmentScreen(permission: permission),
+          ));
+        }
         break;
     }
   }
@@ -96,11 +105,13 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FF),
-      drawer: AppDrawer(
-        user: widget.user,
+      drawer: BlocBuilder<LoginCubit, LoginState>(
+        builder: (context, _) => AppDrawer(
+          user: context.read<LoginCubit>().user ?? widget.user,
         onLogout: () {},
         onItemSelected: _onDrawerItemSelected,
-        selectedItemKey: 'managerDashboard',
+          selectedItemKey: 'managerDashboard',
+        ),
       ),
       body: AppBackground(
         child: BlocBuilder<TeacherCubit, TeacherState>(

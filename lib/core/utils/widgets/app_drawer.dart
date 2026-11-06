@@ -1,8 +1,10 @@
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:albra3m4/feature/auth/domain/entities/app_permission.dart';
 import 'package:flutter/material.dart';
 
 import 'app_drawer_header.dart';
 import 'app_drawer_menu_item.dart';
+import '../../../feature/users/presentation/screens/internal_department_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final UserEntity user;
@@ -24,7 +26,7 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = _itemsForRole(user.role);
+    final items = _itemsForUser(user);
 
     return Drawer(
       backgroundColor: Colors.white,
@@ -81,8 +83,8 @@ class AppDrawer extends StatelessWidget {
   }
 
   /// يبني قائمة العناصر حسب دور المستخدم
-  List<_DrawerItem> _itemsForRole(UserRole role) {
-    switch (role) {
+  List<_DrawerItem> _itemsForUser(UserEntity user) {
+    switch (user.role) {
       case UserRole.superAdmin:
         return [
           _DrawerItem(
@@ -118,6 +120,7 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.info_outline_rounded,
             label: 'عن التطبيق',
           ),
+          ..._departmentItems(user),
         ];
 
       case UserRole.manager:
@@ -159,6 +162,7 @@ class AppDrawer extends StatelessWidget {
             label: 'عن التطبيق',
             comingSoon: true,
           ),
+          ..._departmentItems(user),
         ];
 
       case UserRole.teacher:
@@ -185,6 +189,7 @@ class AppDrawer extends StatelessWidget {
             label: 'عن التطبيق',
             comingSoon: true,
           ),
+          ..._departmentItems(user),
         ];
 
       case UserRole.parent:
@@ -209,6 +214,21 @@ class AppDrawer extends StatelessWidget {
           ),
         ];
     }
+  }
+  List<_DrawerItem> _departmentItems(UserEntity user) {
+    return AppPermission.values.where(user.hasPermission).map((permission) {
+      final icon = switch (permission) {
+        AppPermission.manageMedia => Icons.campaign_outlined,
+        AppPermission.manageTechnical => Icons.fact_check_outlined,
+        AppPermission.manageFinance => Icons.account_balance_wallet_outlined,
+        AppPermission.manageActivities => Icons.event_available_outlined,
+      };
+      return _DrawerItem(
+        key: InternalDepartmentKeys.forPermission(permission),
+        icon: icon,
+        label: permission.arabicLabel,
+      );
+    }).toList();
   }
 }
 
