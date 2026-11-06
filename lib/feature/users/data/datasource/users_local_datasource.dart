@@ -27,7 +27,7 @@ class UsersLocalDataSourceImpl implements UsersLocalDataSource {
       final db = await databaseHelper.database;
       await db.update(
         'users',
-        {'role': role.name},
+        {'role': role.name, 'permissions': '[]'},
         where: 'uid = ?',
         whereArgs: [uid],
       );
@@ -61,6 +61,7 @@ class UsersLocalDataSourceImpl implements UsersLocalDataSource {
           'full_name': user.fullName,
           'phone': user.phone,
           'role': user.role.name,
+          'permissions': AppPermissionCodec.toJson(user.permissions),
         },
         where: 'uid = ?',
         whereArgs: [user.uid],

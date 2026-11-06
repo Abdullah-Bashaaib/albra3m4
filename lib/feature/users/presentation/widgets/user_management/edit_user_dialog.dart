@@ -70,6 +70,9 @@ class _EditUserDialogState extends State<EditUserDialog> {
       fullName: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
       role: _selectedRole,
+      permissions: _selectedRole == widget.user.role
+          ? widget.user.permissions
+          : const [],
     );
 
     widget.onSave(updatedUser);

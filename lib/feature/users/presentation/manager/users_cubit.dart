@@ -111,7 +111,7 @@ class UsersCubit extends Cubit<UsersState> {
     final previousUsers = current.users;
     final updated = current.users.map((u) {
       if (u.uid != uid) return u;
-      return u.copyWith(role: newRole);
+      return u.copyWith(role: newRole, permissions: const []);
     }).toList();
 
     emit(current.copyWith(users: updated));
@@ -194,7 +194,8 @@ class UsersCubit extends Cubit<UsersState> {
         emit(current.copyWith(users: previousUsers));
         emit(UsersError(message: error.message));
       },
-      (_) {
+      (saved) {
+        replaceUser(saved);
         log(
           '---------------- [message] : user updated successfully [message]----------------',
         );

@@ -76,12 +76,12 @@ class UsersRepositoryImp implements UsersRepository {
         final userModel = UserModel.fromEntity(user);
 
         // 1. التعديل في Firebase
-        await _remoteDataSource.updateUser(userModel);
+        final savedUser = await _remoteDataSource.updateUser(userModel);
 
         // 2. التعديل في Sqflite محلياً
-        await _localDataSource.updateUser(userModel);
+        await _localDataSource.updateUser(savedUser);
 
-        return Right(user);
+        return Right(savedUser);
       }
 
       return const Left(NetworkFailure('No internet connection'));

@@ -74,12 +74,26 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   @override
   Future<UserModel> updateUser(UserModel user) async {
     try {
-      await _usersCollection.doc(user.uid).update({
-        'full_name': user.fullName,
-        'phone': user.phone,
-        'role': user.role.name,
+      return FirebaseFirestore.instance.runTransaction<UserModel>((transaction) async {
+        final ref = _usersCollection.doc(user.uid);
+        final snapshot = await transaction.get(ref);
+        if (!snapshot.exists || snapshot.data() == null) {
+          throw StateError('المستخدم غير موجود.');
+        }
+        final oldRole = snapshot.data()!['role'] as String?;
+        final roleChanged = oldRole != user.role.name;
+        transaction.update(ref, {
+          'full_name': user.fullName,
+          'phone': user.phone,
+          'role': user.role.name,
+          if (roleChanged) 'permissions': <String>[],
+        });
+        return user.copyWith(
+          permissions: roleChanged
+              ? const []
+              : UserModel.fromFirestore(snapshot.data()!).permissions,
+        );
       });
-      return user;
     } catch (e) {
       throw FirebaseException(e.toString());
     }
@@ -88,7 +102,7 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
   @override
   Future<void> updateUserRole(String uid, UserRole role) async {
     try {
-      await _usersCollection.doc(uid).update({'role': role.name});
+      await _usersCollection.doc(uid).update({'role': role.name, 'permissions': <String>[]});
     } catch (e) {
       throw FirebaseException(e.toString());
     }
