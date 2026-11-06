@@ -46,7 +46,9 @@ class TeacherPermissionsCubit extends Cubit<TeacherPermissionsState> {
     final result = await _update(teacher.uid, permissions);
     result.fold(
       (failure) => emit(TeacherPermissionsError(failure.message)),
-      (updated) => emit(TeacherPermissionsSaved(updated)),
+      (updated) => emit(TeacherPermissionsSaved(
+        updated.copyWith(tDetails: teacher.tDetails),
+      )),
     );
   }
 }
