@@ -359,10 +359,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> updateUserInFirestore({required UserModel user}) async {
     try {
-      await firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(user.toFirestore(), SetOptions(merge: true));
+      // Completing the Google profile must never rewrite permissions/status.
+      if (user.role != UserRole.teacher && user.role != UserRole.parent) {
+        throw StateError('الدور المطلوب غير مسموح به للتسجيل الذاتي.');
+      }
+      await firestore.collection('users').doc(user.uid).update({
+        'full_name': user.fullName,
+        'phone': user.phone,
+        'role': user.role.name,
+      });
     } on FirebaseException catch (e) {
       throw FirebaseExceptionMapper.mapFirestoreException(e);
     }

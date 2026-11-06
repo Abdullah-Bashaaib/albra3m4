@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../auth/domain/entities/user.dart';
+import '../../../auth/domain/entities/app_permission.dart';
 
 abstract class UsersRepository {
   Future<Either<Failure, List<UserEntity>>> getAllUsers();
@@ -17,4 +18,8 @@ abstract class UsersRepository {
   Future<Either<Failure, Unit>> changeUserRole(String uid, UserRole newRole);
 
   Future<Either<Failure, Unit>> toggleUserStatus(String uid, bool isActive);
+
+  Future<Either<Failure, UserEntity>> updateTeacherPermissions(
+    String uid, List<AppPermission> permissions,
+  );
 }

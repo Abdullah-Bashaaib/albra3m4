@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:albra3m4/core/errors/exceptions.dart';
 import 'package:albra3m4/feature/auth/Data/models/user_model.dart';
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:albra3m4/feature/auth/domain/entities/app_permission.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide FirebaseException;
 
 abstract class UsersRemoteDataSource {
@@ -19,6 +21,8 @@ abstract class UsersRemoteDataSource {
   Future<void> updateUserRole(String uid, UserRole role);
 
   Future<void> updateUserStatus(String uid, bool isActive);
+
+  Future<UserModel> updateTeacherPermissions(String uid, List<AppPermission> permissions);
 }
 
 class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
@@ -88,6 +92,49 @@ class UsersRemoteDataSourceImpl implements UsersRemoteDataSource {
     } catch (e) {
       throw FirebaseException(e.toString());
     }
+  }
+
+  @override
+  Future<UserModel> updateTeacherPermissions(
+    String uid,
+    List<AppPermission> permissions,
+  ) async {
+    final actorUid = FirebaseAuth.instance.currentUser?.uid;
+    if (actorUid == null) {
+      throw StateError('يجب تسجيل الدخول لتعديل الصلاحيات.');
+    }
+
+    // Never trust a cached role for authorization. Server rules are mandatory.
+    final firestore = FirebaseFirestore.instance;
+    return firestore.runTransaction<UserModel>((transaction) async {
+      final actorSnapshot = await transaction.get(_usersCollection.doc(actorUid));
+      final targetSnapshot = await transaction.get(_usersCollection.doc(uid));
+
+      if (!actorSnapshot.exists || !targetSnapshot.exists) {
+        throw StateError('تعذر العثور على حساب المعلمة أو المسؤول.');
+      }
+      final actor = UserModel.fromFirestore(actorSnapshot.data()!);
+      final target = UserModel.fromFirestore(targetSnapshot.data()!);
+      if (!actor.isActive ||
+          (actor.role != UserRole.superAdmin && actor.role != UserRole.manager)) {
+        throw StateError('ليس لديك صلاحية تكليف المعلمات.');
+      }
+      if (target.role != UserRole.teacher) {
+        throw StateError('يمكن منح التكليفات الإدارية للمعلمات فقط.');
+      }
+      if (actor.role == UserRole.manager &&
+          (actor.schoolId == null ||
+              actor.schoolId!.isEmpty ||
+              actor.schoolId != target.schoolId)) {
+        throw StateError('يمكن للمديرة إدارة معلمات روضتها فقط.');
+      }
+
+      final distinct = permissions.toSet().toList();
+      transaction.update(_usersCollection.doc(uid), {
+        'permissions': distinct.map((permission) => permission.name).toList(),
+      });
+      return UserModel.fromEntity(target.copyWith(permissions: distinct));
+    });
   }
 
   @override

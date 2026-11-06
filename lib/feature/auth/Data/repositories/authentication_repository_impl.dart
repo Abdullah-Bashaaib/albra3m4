@@ -93,6 +93,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
   }) async {
     try {
+      if (role != UserRole.teacher && role != UserRole.parent) {
+        return const Left(AuthFailure('التسجيل الذاتي متاح للمعلمات وأولياء الأمور فقط.'));
+      }
       final updatedModel = UserModel.fromEntity(
         currentUser,
       ).copyWith(role: role, phone: phone, fullName: fullName);

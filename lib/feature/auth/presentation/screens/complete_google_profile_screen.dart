@@ -39,7 +39,6 @@ class _CompleteGoogleProfileScreenState
   bool _roleTouched = false;
 
   static const Map<UserRole, String> _availableRoles = {
-    UserRole.manager: 'مديرة',
     UserRole.teacher: 'معلمة',
     UserRole.parent: 'ولي أمر',
   };

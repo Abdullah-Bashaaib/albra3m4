@@ -23,6 +23,8 @@ import 'package:albra3m4/feature/teachers_management/domain/usecases/sync_teache
 import 'package:albra3m4/feature/teachers_management/presentation/cubit/teacher_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/admin_dashboard_cubit.dart';
 import 'package:albra3m4/feature/users/presentation/manager/users_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/manager/teacher_permissions_cubit.dart';
+import 'package:albra3m4/feature/users/domain/use_cases/update_teacher_permissions_use_case.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -307,6 +309,12 @@ class Injection {
     );
     sl.registerLazySingleton<UpdateUserUseCase>(
       () => UpdateUserUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerLazySingleton<UpdateTeacherPermissionsUseCase>(
+      () => UpdateTeacherPermissionsUseCase(sl<UsersRepositoryImp>()),
+    );
+    sl.registerFactory<TeacherPermissionsCubit>(
+      () => TeacherPermissionsCubit(sl<UpdateTeacherPermissionsUseCase>()),
     );
     //cubit
     sl.registerLazySingleton<UsersCubit>(
