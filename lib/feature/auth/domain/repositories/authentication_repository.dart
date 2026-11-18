@@ -36,5 +36,7 @@ abstract class AuthRepository {
 
   Future<Either<Failure, UserEntity>> getCachedUser();
 
+  Stream<UserEntity?> watchCurrentUser(String uid);
+
   Future<Either<Failure, Unit>> logout();
 }

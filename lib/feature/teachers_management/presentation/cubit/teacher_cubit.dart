@@ -37,6 +37,15 @@ class TeacherCubit extends Cubit<TeacherState> {
     );
   }
 
+  void replaceTeacher(UserEntity updated) {
+    emit(state.copyWith(
+      teachers: state.teachers.map((teacher) =>
+          teacher.uid == updated.uid ? updated : teacher).toList(),
+      resultSearch: state.resultSearch.map((teacher) =>
+          teacher.uid == updated.uid ? updated : teacher).toList(),
+    ));
+  }
+
   void search(String value) {
     final query = value.trim();
 

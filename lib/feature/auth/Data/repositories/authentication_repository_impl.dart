@@ -93,6 +93,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
   }) async {
     try {
+      if (role != UserRole.teacher && role != UserRole.parent) {
+        return const Left(AuthFailure('التسجيل الذاتي متاح للمعلمات وأولياء الأمور فقط.'));
+      }
       final updatedModel = UserModel.fromEntity(
         currentUser,
       ).copyWith(role: role, phone: phone, fullName: fullName);
@@ -259,6 +262,25 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(userModel);
     } catch (_) {
       return const Left(FirebaseUnknownFailure());
+    }
+  }
+
+  /// Stream current Firestore permissions into the existing local cache.
+  /// When offline, the UI may temporarily show old values, but remote security
+  /// rules must reject revoked privileges.
+  @override
+  Stream<UserEntity?> watchCurrentUser(String uid) async* {
+    await for (final latest in remoteDataSource.watchUser(uid)) {
+      if (latest == null) {
+        yield null;
+        continue;
+      }
+      try {
+        await localDataSource.cacheUser(latest);
+      } catch (_) {
+        // A local cache write must not stop live authorization updates.
+      }
+      yield latest;
     }
   }
 

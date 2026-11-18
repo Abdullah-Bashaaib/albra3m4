@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/screens/internal_department_screen.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -55,6 +57,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         break;
       case 'aboutApp':
         _showAboutAppDialog();
+        break;
+      default:
+        final permission = InternalDepartmentKeys.fromKey(key);
+        if (permission != null &&
+            (context.read<LoginCubit>().user?.hasPermission(permission) ?? false)) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => InternalDepartmentScreen(permission: permission),
+          ));
+        }
         break;
     }
   }
@@ -234,11 +245,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4FF),
-      drawer: AppDrawer(
-        user: widget.user,
+      drawer: BlocBuilder<LoginCubit, LoginState>(
+        builder: (context, _) => AppDrawer(
+          user: context.read<LoginCubit>().user ?? widget.user,
         onLogout: () => _handleLogout(context),
         selectedItemKey: 'adminDashboard',
         onItemSelected: _onDrawerItemSelected,
+        ),
       ),
       body: AppBackground(
         child: RefreshIndicator(

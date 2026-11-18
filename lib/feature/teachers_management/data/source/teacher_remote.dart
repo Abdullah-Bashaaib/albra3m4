@@ -22,7 +22,12 @@ class TeacherRemoteImp implements TeacherRemote {
 
         final teacherRef = firestore.collection('teachers').doc(user.uid);
 
-        transaction.set(userRef, user.toFirestore(), SetOptions(merge: true));
+        // Keep authorization fields server-owned: editing a teacher profile
+        // must never overwrite role, permissions, verification or status.
+        transaction.update(userRef, {
+          'full_name': user.fullName,
+          'phone': user.phone,
+        });
 
         transaction.set(teacherRef, teacher.toMap(), SetOptions(merge: true));
       });
@@ -78,6 +83,7 @@ class TeacherRemoteImp implements TeacherRemote {
           email: user.email,
           phone: user.phone,
           role: user.role,
+          permissions: user.permissions,
           isVerified: user.isVerified,
           isActive: user.isActive,
           createdAt: user.createdAt,

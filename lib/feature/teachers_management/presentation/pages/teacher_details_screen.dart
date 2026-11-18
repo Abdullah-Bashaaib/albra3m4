@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:albra3m4/core/constants/app_colors.dart';
 import 'package:albra3m4/feature/auth/domain/entities/user.dart';
+import 'package:albra3m4/feature/auth/domain/entities/app_permission.dart';
 import 'package:albra3m4/feature/teachers_management/domain/entities/teacher_entity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:albra3m4/feature/auth/presentation/manger/login_cubit.dart';
+import 'package:albra3m4/feature/users/presentation/widgets/teacher_permissions_dialog.dart';
 
 import '../widgets/teacher_avatar.dart';
 import '../widgets/status_pill.dart';
@@ -50,6 +53,23 @@ class _TeacherDetailsScreenState extends State<TeacherDetailsScreen> {
       _teacher = result;
       _changed = true;
     });
+  }
+
+  Future<void> _editPermissions() async {
+    final actor = context.read<LoginCubit>().user;
+    if (actor == null ||
+        !actor.isActive ||
+        (actor.role != UserRole.manager && actor.role != UserRole.superAdmin)) {
+      CustomSnackBar.showError(context, 'لا تملكين صلاحية إدارة التكليفات.');
+      return;
+    }
+    final updated = await TeacherPermissionsDialog.show(
+      context, teacher: _teacher,
+    );
+    if (!mounted || updated == null) return;
+    context.read<TeacherCubit>().replaceTeacher(updated);
+    setState(() => _teacher = updated);
+    // Already saved to the server; never re-save the whole user profile.
   }
 
   Future<void> _delete() async {
@@ -252,6 +272,28 @@ class _TeacherDetailsScreenState extends State<TeacherDetailsScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                TeacherInfoCard(
+                  children: [
+                    TeacherInfoRow(
+                      icon: Icons.admin_panel_settings_outlined,
+                      label: 'التكليفات الإدارية',
+                      value: _teacher.permissions.isEmpty
+                          ? 'لا توجد صلاحيات إضافية'
+                          : _teacher.permissions.map((p) => p.arabicLabel).join('، '),
+                      last: true,
+                    ),
+                  ],
+                ),
+                if (context.read<LoginCubit>().user?.role == UserRole.manager ||
+                    context.read<LoginCubit>().user?.role == UserRole.superAdmin) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _editPermissions,
+                    icon: const Icon(Icons.manage_accounts_outlined),
+                    label: const Text('إدارة صلاحيات المعلمة'),
+                  ),
+                ],
               ],
             ),
           ),

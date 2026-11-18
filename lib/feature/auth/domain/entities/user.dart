@@ -1,4 +1,5 @@
 import 'package:albra3m4/feature/auth/Data/models/user_model.dart';
+import 'app_permission.dart';
 import 'package:albra3m4/feature/teachers_management/domain/entities/teacher_entity.dart';
 
 class UserEntity {
@@ -12,6 +13,7 @@ class UserEntity {
   final bool isActive;
   final DateTime createdAt;
   final TeacherEntity? tDetails;
+  final List<AppPermission> permissions;
 
   const UserEntity({
     required this.uid,
@@ -24,6 +26,7 @@ class UserEntity {
     required this.isActive,
     required this.createdAt,
     this.tDetails,
+    this.permissions = const [],
   });
 
   factory UserEntity.fromModel(UserModel m) {
@@ -38,7 +41,15 @@ class UserEntity {
       isActive: m.isActive,
       createdAt: m.createdAt,
       tDetails: m.tDetails,
+      permissions: m.permissions,
     );
+  }
+
+  /// Permissions are extra administrative duties, never a replacement for a role.
+  bool hasPermission(AppPermission permission) {
+    if (!isActive) return false;
+    if (role == UserRole.superAdmin || role == UserRole.manager) return true;
+    return role == UserRole.teacher && permissions.contains(permission);
   }
 
   UserEntity copyWith({
@@ -52,6 +63,7 @@ class UserEntity {
     bool? isActive,
     DateTime? createdAt,
     TeacherEntity? tDetails,
+    List<AppPermission>? permissions,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
@@ -64,6 +76,7 @@ class UserEntity {
       isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       tDetails: tDetails ?? this.tDetails,
+      permissions: permissions ?? this.permissions,
     );
   }
 }

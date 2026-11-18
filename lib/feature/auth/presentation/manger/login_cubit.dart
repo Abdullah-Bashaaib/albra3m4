@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -7,6 +8,7 @@ import '../../domain/entities/user.dart';
 import '../../domain/usecases/complete_google_profile_use_case.dart';
 import '../../domain/usecases/get_cached_user.dart';
 import '../../domain/usecases/get_current_user.dart';
+import '../../domain/usecases/watch_current_user_use_case.dart';
 import '../../domain/usecases/google_login_use_case.dart';
 import '../../domain/usecases/login_use_case.dart';
 import '../../domain/usecases/register_user_usecase.dart';
@@ -25,6 +27,7 @@ class LoginCubit extends Cubit<LoginState> {
     this._getCurrentUserUseCase,
     this._googleLoginUseCase,
     this._completeGoogleProfileUseCase,
+    this._watchCurrentUserUseCase,
   ) : super(AuthInitial());
   final LoginUseCase _loginUseCase;
   final RegisterUserUseCase _registerUserUseCase;
@@ -34,6 +37,8 @@ class LoginCubit extends Cubit<LoginState> {
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final GoogleLoginUseCase _googleLoginUseCase;
   final CompleteGoogleProfileUseCase _completeGoogleProfileUseCase;
+  final WatchCurrentUserUseCase _watchCurrentUserUseCase;
+  StreamSubscription<UserEntity?>? _userUpdates;
 
   // Global variables
   UserEntity? user;
@@ -55,6 +60,7 @@ class LoginCubit extends Cubit<LoginState> {
       (userEntity) {
         user = userEntity;
         emit(AuthAuthenticated(userEntity));
+        _observeCurrentUser(userEntity);
       },
     );
   }
@@ -69,6 +75,7 @@ class LoginCubit extends Cubit<LoginState> {
       (userLogged) {
         user = userLogged;
         emit(LoginSuccess(user!));
+        _observeCurrentUser(userLogged);
       },
     );
   }
@@ -84,6 +91,7 @@ class LoginCubit extends Cubit<LoginState> {
         emit(LoginGoogleProfileIncomplete(data.user));
       } else {
         emit(LoginSuccess(user!));
+        _observeCurrentUser(user!);
       }
     });
   }
@@ -107,12 +115,46 @@ class LoginCubit extends Cubit<LoginState> {
       user = userLogged;
       if (user!.isActive) {
         emit(LoginSuccess(user!));
+        _observeCurrentUser(userLogged);
       } else {
         emit(AuthUnauthenticated());
       }
 
       // emit(LoginFailure('تواصل مع الإدارة لتنشيط الحساب'));
     });
+  }
+
+  void _observeCurrentUser(UserEntity current) {
+    _userUpdates?.cancel();
+    _userUpdates = _watchCurrentUserUseCase(current.uid).listen((latest) {
+      if (isClosed) return;
+      if (latest == null || !latest.isActive || !latest.isVerified) {
+        user = null;
+        emit(const AuthUnauthenticated());
+        return;
+      }
+      final previous = user;
+      user = latest;
+      if (previous != null &&
+          previous.role == latest.role &&
+          previous.isActive == latest.isActive &&
+          previous.isVerified == latest.isVerified &&
+          previous.schoolId == latest.schoolId &&
+          previous.permissions.length == latest.permissions.length &&
+          previous.permissions.every(latest.permissions.contains)) {
+        return;
+      }
+      emit(AuthAuthenticated(latest));
+    }, onError: (Object error, StackTrace stack) {
+      // A temporary network outage must not sign the user out.
+      log('Live user snapshot unavailable: $error', stackTrace: stack);
+    });
+  }
+
+  @override
+  Future<void> close() async {
+    await _userUpdates?.cancel();
+    await super.close();
   }
 
   Future<void> register({

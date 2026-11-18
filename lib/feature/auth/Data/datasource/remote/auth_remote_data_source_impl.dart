@@ -318,6 +318,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Stream<UserModel?> watchUser(String uid) {
+    return firestore.collection('users').doc(uid).snapshots().map((snapshot) {
+      final data = snapshot.data();
+      return data == null ? null : UserModel.fromFirestore(data);
+    });
+  }
+
+  @override
   Future<UserModel> getUserFromFirestore({required String uid}) async {
     try {
       final document = await firestore.collection('users').doc(uid).get();
@@ -345,6 +353,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': user.email,
         'phone': user.phone,
         'role': user.role.name,
+        'permissions': user.permissions.map((p) => p.name).toList(),
         'is_verified': user.isVerified,
         'is_active': user.isActive,
         'school_id': user.schoolId,
@@ -358,10 +367,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> updateUserInFirestore({required UserModel user}) async {
     try {
-      await firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(user.toFirestore(), SetOptions(merge: true));
+      // Completing the Google profile must never rewrite permissions/status.
+      if (user.role != UserRole.teacher && user.role != UserRole.parent) {
+        throw StateError('الدور المطلوب غير مسموح به للتسجيل الذاتي.');
+      }
+      await firestore.collection('users').doc(user.uid).update({
+        'full_name': user.fullName,
+        'phone': user.phone,
+        'role': user.role.name,
+      });
     } on FirebaseException catch (e) {
       throw FirebaseExceptionMapper.mapFirestoreException(e);
     }
